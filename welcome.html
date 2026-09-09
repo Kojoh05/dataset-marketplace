@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>KOJOH — Datasets built from real business problems</title>
+<script>
+// Logged-in visitors never see this page — bounce straight to the app.
+(function(){
+  try{
+    var hasSession = !!localStorage.getItem('sb-nkohbeiwdrdgqxwzjlfi-auth-token');
+    if(hasSession){ window.location.replace('index.html'); }
+  }catch(e){}
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="welcome.css">
+</head>
+<body data-theme="light">
+
+  <header class="w-header">
+    <span class="w-brand">KOJOH</span>
+    <div class="w-header-actions">
+      <a href="auth.html" class="w-link">Log in</a>
+      <a href="auth.html?tab=signup" class="w-cta-small">Sign up</a>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="w-hero">
+      <h1>Datasets built from real business problems, not random CSVs.</h1>
+      <p class="w-hero-sub">KOJOH is a dataset marketplace for people building a data career. Every dataset starts as an actual problem pulled from Logistics, Sales, Service, Product, E-commerce, or HR — with its own schema, its own story, and a challenge worth solving.</p>
+      <div class="w-hero-actions">
+        <a href="auth.html?tab=signup" class="w-cta">Create your account</a>
+        <a href="#" id="browseGuestLink" class="w-cta-outline">Browse datasets without an account</a>
+      </div>
+    </section>
+
+    <!-- WHAT KOJOH DOES -->
+    <section class="w-section">
+      <h2 class="w-section-title">What KOJOH does</h2>
+      <div class="w-grid w-grid-4">
+        <div class="w-feature">
+          <div class="w-feature-icon">📁</div>
+          <h3>Real, independent datasets</h3>
+          <p>Every dataset keeps its own schema instead of being forced into one generic table — because real business data never looks the same twice.</p>
+        </div>
+        <div class="w-feature">
+          <div class="w-feature-icon">🧭</div>
+          <h3>Organized by job track</h3>
+          <p>Browse by the role you're building toward, not just a keyword search. Each folder is a career path, not a category label.</p>
+        </div>
+        <div class="w-feature">
+          <div class="w-feature-icon">🎯</div>
+          <h3>A challenge, not just a file</h3>
+          <p>Each dataset comes with the business context behind it — what question it's meant to answer — so your portfolio shows judgment, not just SQL.</p>
+        </div>
+        <div class="w-feature">
+          <div class="w-feature-icon">🔎</div>
+          <h3>Search that understands the job</h3>
+          <p>Type a role, a tool, or a domain and get matches — powered by an ontology of job titles, skills, and synonyms, not a black-box AI.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHO WE TARGET -->
+    <section class="w-section w-section-alt">
+      <h2 class="w-section-title">Built for four job tracks</h2>
+      <p class="w-section-sub">Pick the track you're aiming for at signup — it's how your recommendations get tailored.</p>
+      <div class="w-grid w-grid-4">
+        <div class="w-track" style="--track-bg:var(--folder-analyst); --track-text:var(--folder-analyst-text);">
+          <h3>Data Analyst</h3>
+          <p>Fraud detection, churn, quotation drop-off — the highest-demand track for job-seekers.</p>
+        </div>
+        <div class="w-track" style="--track-bg:var(--folder-engineer); --track-text:var(--folder-engineer-text);">
+          <h3>Data Engineer</h3>
+          <p>Messy multi-source ETL, slowly-changing dimensions, and broken referential integrity to untangle.</p>
+        </div>
+        <div class="w-track" style="--track-bg:var(--folder-product); --track-text:var(--folder-product-text);">
+          <h3>Product Analyst</h3>
+          <p>Ambiguous A/B results, drop-off funnels, and feature-adoption questions with no clean answer.</p>
+        </div>
+        <div class="w-track" style="--track-bg:var(--folder-qa); --track-text:var(--folder-qa-text);">
+          <h3>Quality Analyst</h3>
+          <p>Inconsistent defect logs and process data that needs structure before it can be trusted.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- NEW & UPCOMING -->
+    <section class="w-section">
+      <h2 class="w-section-title">New &amp; upcoming</h2>
+      <div class="w-grid w-grid-3">
+        <div class="w-news">
+          <span class="w-news-tag">Just launched</span>
+          <h3>Accounts &amp; job-track profiles</h3>
+          <p>Sign up, pick the professions you're targeting, and get a profile that carries into your recommendations.</p>
+        </div>
+        <div class="w-news">
+          <span class="w-news-tag">In progress</span>
+          <h3>Ontology-powered search</h3>
+          <p>Search by role, tool, or domain and get ranked, relevant datasets — no AI black box, just a transparent semantic layer.</p>
+        </div>
+        <div class="w-news">
+          <span class="w-news-tag">Coming soon</span>
+          <h3>More datasets, every week</h3>
+          <p>New job-track datasets are added regularly as the catalog grows beyond the first release.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FINAL CTA -->
+    <section class="w-final-cta">
+      <h2>Start building a portfolio that looks like real work.</h2>
+      <div class="w-hero-actions">
+        <a href="auth.html?tab=signup" class="w-cta">Create your account</a>
+        <a href="auth.html" class="w-cta-outline">Log in</a>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="w-footer">
+    <span>© <span id="wYear"></span> KOJOH</span>
+  </footer>
+
+  <script>
+    document.getElementById('wYear').textContent = new Date().getFullYear();
+    document.getElementById('browseGuestLink').addEventListener('click', function(e){
+      e.preventDefault();
+      try{ sessionStorage.setItem('kojoh_skip_welcome', '1'); }catch(err){}
+      window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>

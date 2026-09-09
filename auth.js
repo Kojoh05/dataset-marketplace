@@ -45,6 +45,43 @@ function populateCountries(defaultCountry){
 }
 populateCountries('India');
 
+// ---------- URL params: ?tab=signup (from links elsewhere on the site),
+// ?google=1 (the page Supabase redirects back to after Google OAuth) ----------
+(function handleUrlParams(){
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('tab') === 'signup') {
+    switchTab('signup');
+  }
+  if (params.get('google') === '1' && LIVE) {
+    SUPA.auth.getSession().then(function(res){
+      var session = res.data && res.data.session;
+      if (!session || !session.user) {
+        document.getElementById('signupError').textContent = 'Google sign-in didn\'t complete — please try again.';
+        return;
+      }
+      switchTab('signup');
+      var user = session.user;
+      var meta = user.user_metadata || {};
+      googleMode = true;
+      googleProfile = {
+        email: user.email,
+        firstName: meta.given_name || (meta.full_name ? meta.full_name.split(' ')[0] : '') || '',
+        lastName: meta.family_name || (meta.full_name ? meta.full_name.split(' ').slice(1).join(' ') : '') || ''
+      };
+      document.getElementById('googleConfirmText').textContent = 'Continuing as ' + googleProfile.email;
+      document.getElementById('googleConfirmChip').hidden = false;
+      document.getElementById('googleSignupBtn').hidden = true;
+      document.getElementById('signupDivider').hidden = true;
+      document.getElementById('stepEmail').hidden = true;
+      emailValid = true;
+      if (googleProfile.firstName) document.getElementById('suFirstName').value = googleProfile.firstName;
+      if (googleProfile.lastName) document.getElementById('suLastName').value = googleProfile.lastName;
+      reveal('stepUsername');
+      document.getElementById('passwordLabel').textContent = 'Create a password for KOJOH (used alongside Google sign-in)';
+    });
+  }
+})();
+
 (function detectCountry(){
   var controller = new AbortController();
   var timeout = setTimeout(function(){ controller.abort(); }, 3000);
@@ -231,10 +268,27 @@ function handleSignup(){
     return;
   }
 
-  SUPA.auth.signUp({ email: payload.email, password: payload.password })
-    .then(function(res){
-      if (res.error) { errEl.textContent = res.error.message; return; }
-      var userId = res.data.user.id;
+  // Google signups already have a Supabase session from the OAuth redirect
+  // (Google accounts are created + signed in immediately, unlike email
+  // signup). Email signups need to create the account here.
+  var accountStep = googleMode
+    ? SUPA.auth.getUser().then(function(userRes){
+        if (userRes.error || !userRes.data.user) { errEl.textContent = 'Your Google session expired — please try again.'; return Promise.reject(); }
+        var userId = userRes.data.user.id;
+        // Set a KOJOH-only fallback password (never the user's real Google password).
+        return SUPA.auth.updateUser({ password: payload.password }).then(function(){
+          return { userId: userId };
+        });
+      })
+    : SUPA.auth.signUp({ email: payload.email, password: payload.password })
+        .then(function(res){
+          if (res.error) { errEl.textContent = res.error.message; return Promise.reject(); }
+          return { userId: res.data.user.id };
+        });
+
+  accountStep
+    .then(function(acct){
+      var userId = acct.userId;
       return SUPA.from('profiles').insert({
         id: userId,
         username: payload.username,
@@ -246,7 +300,7 @@ function handleSignup(){
         country: payload.country,
         auth_provider: payload.provider
       }).then(function(profileRes){
-        if (profileRes.error) { errEl.textContent = profileRes.error.message; return; }
+        if (profileRes.error) { errEl.textContent = profileRes.error.message; return Promise.reject(); }
         return SUPA.from('job_titles').select('id, name').in('name', payload.professions)
           .then(function(jtRes){
             if (jtRes.error || !jtRes.data || jtRes.data.length === 0) return;
@@ -254,11 +308,18 @@ function handleSignup(){
             return SUPA.from('profile_job_titles').insert(rows);
           });
       }).then(function(){
+        if (googleMode) {
+          // Already verified + signed in via Google — go straight into the app.
+          try{ sessionStorage.setItem('kojoh_skip_welcome', '1'); }catch(e){}
+          window.location.href = 'index.html';
+          return;
+        }
         var note = document.getElementById('backendNote');
         note.hidden = false;
         note.textContent = 'Account created! Check your email to verify before logging in.';
       });
-    });
+    })
+    .catch(function(){ /* error already shown above */ });
 }
 
 // ---------- Submit: log in ----------
@@ -282,6 +343,7 @@ function handleLogin(){
   var loginWithEmail = function(email){
     SUPA.auth.signInWithPassword({ email: email, password: password }).then(function(res){
       if (res.error) { errEl.textContent = res.error.message; return; }
+      try{ sessionStorage.setItem('kojoh_skip_welcome', '1'); }catch(e){}
       window.location.href = 'index.html';
     });
   };

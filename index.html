@@ -4,6 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>KOJOH — Dataset Marketplace</title>
+<script>
+// First-time / logged-out visitors land on the welcome page first.
+(function(){
+  try{
+    var hasSession = !!localStorage.getItem('sb-nkohbeiwdrdgqxwzjlfi-auth-token');
+    var skip = sessionStorage.getItem('kojoh_skip_welcome');
+    if(!hasSession && !skip){
+      window.location.replace('welcome.html');
+    }
+  }catch(e){}
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">

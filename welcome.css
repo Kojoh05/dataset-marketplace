@@ -1,0 +1,118 @@
+/* === WELCOME / LANDING PAGE === */
+
+body{overflow-x:hidden;}
+
+.w-header{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:1.5rem 2rem;
+  max-width:72rem; margin:0 auto;
+}
+.w-brand{
+  font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:1.0625rem;
+  color:var(--text);
+}
+.w-header-actions{display:flex; align-items:center; gap:1rem;}
+.w-link{font-size:0.875rem; font-weight:600; color:var(--text); text-decoration:none;}
+.w-link:hover{text-decoration:underline;}
+.w-cta-small{
+  font-size:0.8125rem; font-weight:700; color:var(--bg); background:var(--text);
+  padding:0.5rem 1rem; border-radius:999px; text-decoration:none;
+}
+
+.w-hero{
+  max-width:44rem; margin:2.5rem auto 4rem; padding:0 1.5rem; text-align:center;
+}
+.w-hero h1{
+  font-family:'Space Grotesk', sans-serif; font-weight:700;
+  font-size:clamp(1.9rem, 4.2vw, 2.9rem); line-height:1.15; letter-spacing:-0.01em;
+  margin-bottom:1.1rem;
+}
+.w-hero-sub{
+  font-size:1.0625rem; line-height:1.6; color:var(--muted);
+  max-width:38rem; margin:0 auto 2rem;
+}
+.w-hero-actions{
+  display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:0.85rem;
+}
+.w-cta{
+  font-family:inherit; font-size:0.9375rem; font-weight:700; text-decoration:none; cursor:pointer;
+  padding:0.8rem 1.6rem; border-radius:999px; border:none;
+  background:var(--text); color:var(--bg);
+  transition:opacity 0.15s ease;
+}
+.w-cta:hover{opacity:0.85;}
+.w-cta-outline{
+  font-family:inherit; font-size:0.9375rem; font-weight:700; text-decoration:none; cursor:pointer;
+  padding:0.8rem 1.6rem; border-radius:999px; border:1px solid var(--line);
+  background:transparent; color:var(--text);
+  transition:background 0.15s ease;
+}
+.w-cta-outline:hover{background:var(--card);}
+
+.w-section{
+  max-width:72rem; margin:0 auto; padding:3.5rem 1.5rem;
+}
+.w-section-alt{
+  background:var(--card); border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+  max-width:none; padding-left:1.5rem; padding-right:1.5rem;
+}
+.w-section-alt > *{max-width:72rem; margin-left:auto; margin-right:auto;}
+.w-section-title{
+  font-family:'Space Grotesk', sans-serif; font-weight:700;
+  font-size:clamp(1.4rem, 2.6vw, 1.8rem); text-align:center; margin-bottom:0.6rem;
+}
+.w-section-sub{
+  text-align:center; color:var(--muted); font-size:0.9375rem; margin-bottom:2.25rem;
+}
+
+.w-grid{display:grid; gap:1.25rem; margin-top:2rem;}
+.w-grid-4{grid-template-columns:repeat(4, 1fr);}
+.w-grid-3{grid-template-columns:repeat(3, 1fr);}
+
+.w-feature{
+  background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+  padding:1.5rem;
+}
+.w-feature-icon{font-size:1.5rem; margin-bottom:0.75rem;}
+.w-feature h3{font-size:1rem; font-weight:700; margin-bottom:0.5rem;}
+.w-feature p{font-size:0.875rem; line-height:1.55; color:var(--muted);}
+
+.w-track{
+  background:var(--track-bg); color:var(--track-text);
+  border-radius:var(--radius); padding:1.5rem;
+}
+.w-track h3{font-size:1.0625rem; font-weight:700; margin-bottom:0.5rem;}
+.w-track p{font-size:0.875rem; line-height:1.55; opacity:0.9;}
+
+.w-news{
+  background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+  padding:1.5rem;
+}
+.w-news-tag{
+  display:inline-block; font-size:0.6875rem; font-weight:700; letter-spacing:0.03em; text-transform:uppercase;
+  color:var(--text); background:var(--accent); padding:0.25rem 0.6rem; border-radius:999px;
+  margin-bottom:0.85rem;
+}
+.w-news h3{font-size:1rem; font-weight:700; margin-bottom:0.5rem;}
+.w-news p{font-size:0.875rem; line-height:1.55; color:var(--muted);}
+
+.w-final-cta{
+  max-width:44rem; margin:1rem auto 4rem; padding:3rem 1.5rem; text-align:center;
+}
+.w-final-cta h2{
+  font-family:'Space Grotesk', sans-serif; font-weight:700;
+  font-size:clamp(1.3rem, 2.6vw, 1.75rem); margin-bottom:1.5rem;
+}
+
+.w-footer{
+  text-align:center; padding:2rem 1.5rem 3rem; color:var(--muted); font-size:0.8125rem;
+}
+
+@media (max-width: 860px){
+  .w-grid-4{grid-template-columns:repeat(2, 1fr);}
+  .w-grid-3{grid-template-columns:1fr;}
+}
+@media (max-width: 520px){
+  .w-grid-4{grid-template-columns:1fr;}
+  .w-header{padding:1.25rem 1.25rem;}
+}
