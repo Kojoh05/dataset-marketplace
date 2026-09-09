@@ -35,11 +35,11 @@
     </div>
     <div class="topnav-profile" style="display:flex;align-items:center;gap:0.75rem;">
       <div class="profile-trigger" onclick="openPanel()">
-        <div class="avatar">YC</div>
-        <div class="name">Yash</div>
+        <div class="avatar" id="navAvatar">YC</div>
+        <div class="name" id="navName">Yash</div>
       </div>
       <div class="avatar-only" onclick="openPanel()">
-        <div class="avatar">YC</div>
+        <div class="avatar" id="navAvatarMobile">YC</div>
       </div>
     </div>
   </div>
@@ -228,7 +228,7 @@
   <div class="panel">
     <button class="panel-close" onclick="closePanel()">&times;</button>
     <div class="panel-profile">
-      <div class="panel-avatar">YC</div>
+      <div class="panel-avatar" id="panelAvatar">YC</div>
       <div class="name-edit-row">
         <input class="panel-name" id="nameField" value="Yash Chauhan" disabled>
         <button class="edit-icon" onclick="toggleNameEdit()" id="nameEditBtn" title="Edit name">
@@ -240,9 +240,9 @@
     <div class="panel-row">
       <div>
         <div class="panel-label">Email</div>
-        <div class="panel-value">yash@example.com</div>
+        <div class="panel-value" id="panelEmail">yash@example.com</div>
       </div>
-      <button class="panel-btn">Change</button>
+      <button class="panel-btn" id="panelAuthBtn" onclick="handlePanelAuthBtn()">Change</button>
     </div>
 
     <div class="settings-heading">Settings</div>
@@ -263,6 +263,14 @@
     </div>
 
     <div style="flex:1;"></div>
+
+    <div class="panel-logout-wrap" id="panelLogoutWrap" hidden>
+      <button class="panel-logout-btn" id="panelLogoutBtn" onclick="handleLogout()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Log out
+      </button>
+    </div>
+
     <div class="panel-install-wrap">
       <button class="panel-install-btn" id="panelInstallBtn" onclick="triggerInstall()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -272,6 +280,9 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="supabase-config.js"></script>
+<script src="profile.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

@@ -247,9 +247,13 @@ function handleSignup(){
         auth_provider: payload.provider
       }).then(function(profileRes){
         if (profileRes.error) { errEl.textContent = profileRes.error.message; return; }
-        var rows = payload.professions.map(function(p){ return { profile_id: userId, profession_name: p }; });
-        // profession names -> job_title_id lookup happens server-side in a
-        // real deployment; left as a follow-up once job_titles are seeded.
+        return SUPA.from('job_titles').select('id, name').in('name', payload.professions)
+          .then(function(jtRes){
+            if (jtRes.error || !jtRes.data || jtRes.data.length === 0) return;
+            var rows = jtRes.data.map(function(jt){ return { profile_id: userId, job_title_id: jt.id }; });
+            return SUPA.from('profile_job_titles').insert(rows);
+          });
+      }).then(function(){
         var note = document.getElementById('backendNote');
         note.hidden = false;
         note.textContent = 'Account created! Check your email to verify before logging in.';
