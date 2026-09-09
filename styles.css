@@ -381,7 +381,7 @@ h2.section-title{font-size:1.5rem; margin-bottom:0.375rem;}
   z-index:101;
 }
 .overlay.open .panel{transform:translateX(0);}
-.panel-close{float:right; cursor:pointer; color:var(--muted); font-size:20px; line-height:1; background:none; border:none;}
+.panel-close{align-self:flex-end; cursor:pointer; color:var(--muted); font-size:20px; line-height:1; background:none; border:none; padding:0 4px;}
 .panel-profile{display:flex; flex-direction:column; align-items:center; gap:10px; margin:20px 0 32px;}
 .panel-avatar{width:64px; height:64px; border-radius:50%; background:var(--folder-product); display:flex; align-items:center; justify-content:center; font-weight:600; font-size:22px; color:var(--folder-product-text);}
 

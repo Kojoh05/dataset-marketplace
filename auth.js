@@ -280,14 +280,44 @@ function handleSignup(){
           return { userId: userId };
         });
       })
-    : SUPA.auth.signUp({ email: payload.email, password: payload.password })
+    : SUPA.auth.signUp({
+        email: payload.email,
+        password: payload.password,
+        options: {
+          // Stash profile fields on the user's own metadata so profile.js can
+          // materialize the profiles row on their first successful login —
+          // needed because signUp() with email-confirmation enabled returns
+          // no session, so RLS-protected profiles.insert cannot run yet.
+          data: {
+            kojoh_pending_profile: {
+              username: payload.username,
+              first_name: payload.firstName,
+              middle_name: payload.middleName || null,
+              last_name: payload.lastName,
+              gender: payload.gender,
+              country: payload.country,
+              auth_provider: payload.provider,
+              professions: payload.professions
+            }
+          }
+        }
+      })
         .then(function(res){
           if (res.error) { errEl.textContent = res.error.message; return Promise.reject(); }
-          return { userId: res.data.user.id };
+          return { userId: res.data.user.id, hasSession: !!res.data.session };
         });
 
   accountStep
     .then(function(acct){
+      // Google mode has a session, so we can write the profile row now.
+      // Email mode with email-confirmation ON has NO session yet — the
+      // profile row will be created by profile.js on first login.
+      if (!acct.hasSession && !googleMode) {
+        var note = document.getElementById('backendNote');
+        note.hidden = false;
+        note.textContent = 'Account created! Check your email to verify — your profile finishes setting up automatically when you log in.';
+        return;
+      }
       var userId = acct.userId;
       return SUPA.from('profiles').insert({
         id: userId,
@@ -309,14 +339,9 @@ function handleSignup(){
           });
       }).then(function(){
         if (googleMode) {
-          // Already verified + signed in via Google — go straight into the app.
           try{ sessionStorage.setItem('kojoh_skip_welcome', '1'); }catch(e){}
           window.location.href = 'index.html';
-          return;
         }
-        var note = document.getElementById('backendNote');
-        note.hidden = false;
-        note.textContent = 'Account created! Check your email to verify before logging in.';
       });
     })
     .catch(function(){ /* error already shown above */ });
