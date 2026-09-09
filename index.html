@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>KOJOH — Dataset Marketplace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="theme-color" content="#141317">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="KOJOH">
+</head>
+<body data-theme="light">
+
+<div class="main">
+  <!-- NAV -->
+  <div class="topnav-wrap">
+    <div style="display:flex;align-items:center;gap:0.75rem;">
+      <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+      <span class="topnav-brand">KOJOH</span>
+    </div>
+    <div class="topnav">
+      <div class="topnav-links">
+        <a href="#">Home</a>
+        <a href="#">About</a>
+        <a href="#categories">Datasets</a>
+      </div>
+    </div>
+    <div class="topnav-profile" style="display:flex;align-items:center;gap:0.75rem;">
+      <div class="profile-trigger" onclick="openPanel()">
+        <div class="avatar">YC</div>
+        <div class="name">Yash</div>
+      </div>
+      <div class="avatar-only" onclick="openPanel()">
+        <div class="avatar">YC</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOBILE MENU -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#">Home</a>
+    <a href="#">About</a>
+    <a href="#categories">Datasets</a>
+  </div>
+
+  <!-- WELCOME -->
+  <div class="topbar">
+    <div class="brand-row">
+      <span class="welcome">Welcome</span>
+      <span class="name" id="welcomeName">Yash</span>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero-block">
+    <div class="hero-stack">
+      <h1 class="hero-ghost brand-size" aria-hidden="true">KOJOH</h1>
+      <h1 class="hero-ghost">Datasets nobody else's portfolio is built on.</h1>
+      <h1 id="heroTitle"><span id="typeTarget"></span><span class="cursor"></span><span class="face-layer" id="faceLayer"></span></h1>
+    </div>
+    <p>Every dataset here starts as a real business problem, not a random CSV. Get the data, the story, and the challenge — pick a folder below and see what's inside.</p>
+
+    <div class="hero-scene" aria-hidden="true">
+      <img class="scene-planet" src="icons/scene/planet.png" alt="">
+
+      <svg class="scene-svg scene-planet2" viewBox="0 0 120 120">
+        <circle class="scene-stroke" cx="55" cy="60" r="34"/>
+        <circle class="scene-fill" cx="46" cy="50" r="4.5"/>
+        <circle class="scene-fill" cx="64" cy="70" r="3.5"/>
+        <circle class="scene-stroke" cx="98" cy="30" r="9"/>
+        <circle class="scene-stroke" cx="14" cy="68" r="6"/>
+      </svg>
+      <svg class="scene-svg scene-moon" viewBox="0 0 80 80">
+        <circle class="scene-stroke" cx="42" cy="42" r="22"/>
+        <circle class="scene-fill" cx="34" cy="32" r="3"/>
+        <circle class="scene-stroke" cx="14" cy="16" r="6"/>
+      </svg>
+
+      <img class="scene-star scene-pos-1" src="icons/scene/star.png" alt="">
+      <img class="scene-star scene-pos-2 scene-s2" src="icons/scene/star.png" alt="">
+      <img class="scene-star scene-pos-3 scene-s3" src="icons/scene/star.png" alt="">
+      <img class="scene-star scene-pos-4 scene-s4" src="icons/scene/star.png" alt="">
+
+      <span class="scene-dot scene-dot-1 scene-s2"></span>
+      <span class="scene-dot scene-dot-2 scene-s3"></span>
+      <span class="scene-dot scene-dot-3 scene-s4"></span>
+      <span class="scene-dot scene-dot-4"></span>
+
+      <img class="scene-burst scene-burst-1" src="icons/scene/burst.png" alt="">
+      <img class="scene-burst scene-burst-2" src="icons/scene/burst.png" alt="">
+
+      <img class="scene-meteor scene-meteor-1" src="icons/scene/meteor.png" alt="">
+      <img class="scene-meteor scene-meteor-2" src="icons/scene/meteor.png" alt="">
+    </div>
+
+    <div class="hero-scene-workspace" aria-hidden="true">
+      <div class="wt-scene-float">
+        <img class="wt-scene-img wt-frame active" id="wtFrame1" src="icons/scene/person_male_1.png" alt="">
+        <img class="wt-scene-img wt-frame" id="wtFrame2" src="icons/scene/person_male_2.png" alt="">
+        <img class="wt-scene-img wt-frame" id="wtFrame3" src="icons/scene/person_male_3.png" alt="">
+      </div>
+    </div>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="search-row">
+    <div class="searchbox">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7A7772" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+      <input placeholder="Search datasets">
+    </div>
+  </div>
+
+  <!-- VIEW TOGGLE -->
+  <div class="view-toggle" role="tablist">
+    <button class="view-btn active" id="jobsToggleBtn" onclick="showFolderView('jobs')" role="tab" aria-selected="true">Datasets</button>
+    <button class="view-btn" id="practiceToggleBtn" onclick="showFolderView('practice')" role="tab" aria-selected="false">Practice</button>
+  </div>
+
+  <!-- FOLDERS -->
+  <h2 class="section-title" id="categories">Browse by folder</h2>
+  <p class="page-sub" id="foldersSub">Each folder is a job track. Open one to see what's inside.</p>
+
+  <div class="folder-grid" id="jobFolders">
+    <a class="folder f-analyst" href="#categories">
+      <div class="folder-tab"><span class="folder-count">4 datasets</span></div>
+      <div class="folder-body">
+        <span class="folder-title">Data analyst</span>
+        <p class="folder-desc">UPI fraud detection, churn, quotation drop-off, and AI adoption ROI — the highest-demand track for job-seekers.</p>
+        <span class="folder-link">View datasets &rarr;</span>
+      </div>
+    </a>
+    <a class="folder f-engineer" href="#categories">
+      <div class="folder-tab"><span class="folder-count">3 datasets</span></div>
+      <div class="folder-body">
+        <span class="folder-title">Data engineer</span>
+        <p class="folder-desc">Messy multi-source ETL, slowly-changing dimensions, and broken referential integrity to untangle.</p>
+        <span class="folder-link">View datasets &rarr;</span>
+      </div>
+    </a>
+    <a class="folder f-product" href="#categories">
+      <div class="folder-tab"><span class="folder-count">3 datasets</span></div>
+      <div class="folder-body">
+        <span class="folder-title">Product analyst</span>
+        <p class="folder-desc">Ambiguous A/B tests, silent onboarding drop-off, and feature adoption metrics that mislead.</p>
+        <span class="folder-link">View datasets &rarr;</span>
+      </div>
+    </a>
+    <a class="folder f-qa" href="#categories">
+      <div class="folder-tab"><span class="folder-count">3 datasets</span></div>
+      <div class="folder-body">
+        <span class="folder-title">Quality analyst</span>
+        <p class="folder-desc">Defect clustering across releases, coverage vs. incidents, and customer issue triage.</p>
+        <span class="folder-link">View datasets &rarr;</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="folder-grid" id="practiceFolders" style="display:none;">
+    <a class="folder f-python" href="#categories">
+      <div class="folder-tab"><span class="folder-count">3 levels</span></div>
+      <div class="folder-body">
+        <span class="folder-title">Python</span>
+        <p class="folder-desc">Beginner, Intermediate, and Hard tasks on the same real dataset — solved in pandas.</p>
+        <span class="folder-link">View tracks &rarr;</span>
+      </div>
+    </a>
+    <a class="folder f-sql" href="#categories">
+      <div class="folder-tab"><span class="folder-count">3 levels</span></div>
+      <div class="folder-body">
+        <span class="folder-title">SQL</span>
+        <p class="folder-desc">Query the same business data across three tiers — from simple filters to window functions.</p>
+        <span class="folder-link">View tracks &rarr;</span>
+      </div>
+    </a>
+    <a class="folder f-excel" href="#categories">
+      <div class="folder-tab"><span class="folder-count">3 levels</span></div>
+      <div class="folder-body">
+        <span class="folder-title">Excel</span>
+        <p class="folder-desc">Formulas, pivot tables, and dashboards — leveled up dataset by dataset.</p>
+        <span class="folder-link">View tracks &rarr;</span>
+      </div>
+    </a>
+    <a class="folder f-viz" href="#categories">
+      <div class="folder-tab"><span class="folder-count">3 levels</span></div>
+      <div class="folder-body">
+        <span class="folder-title">Visualization</span>
+        <p class="folder-desc">Turn the same numbers into charts and dashboards, from basics to a full data story.</p>
+        <span class="folder-link">View tracks &rarr;</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- RECENTLY ADDED -->
+  <div class="list-card">
+    <div class="list-head">
+      <h3>Recently added</h3>
+      <a href="#">View all datasets</a>
+    </div>
+    <div class="list-cols"><span>Dataset</span><span>Folder</span><span>Price</span></div>
+    <div class="list-row">
+      <div><div class="ds-name">UPI transaction fraud</div><div class="ds-cat">Synthetic, India fintech</div></div>
+      <span class="ds-cat">Data analyst</span>
+      <span class="ds-price">₹99</span>
+    </div>
+    <div class="list-row">
+      <div><div class="ds-name">21-script logistics pipeline</div><div class="ds-cat">Multi-source, needs ETL</div></div>
+      <span class="ds-cat">Data engineer</span>
+      <span class="ds-price">₹149</span>
+    </div>
+    <div class="list-row">
+      <div><div class="ds-name">A/B test, contradictory results</div><div class="ds-cat">Free</div></div>
+      <span class="ds-cat">Product analyst</span>
+      <span class="ds-price">₹0</span>
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE PANEL -->
+<div class="overlay" id="overlay" onclick="if(event.target===this) closePanel()">
+  <div class="panel">
+    <button class="panel-close" onclick="closePanel()">&times;</button>
+    <div class="panel-profile">
+      <div class="panel-avatar">YC</div>
+      <div class="name-edit-row">
+        <input class="panel-name" id="nameField" value="Yash Chauhan" disabled>
+        <button class="edit-icon" onclick="toggleNameEdit()" id="nameEditBtn" title="Edit name">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="panel-row">
+      <div>
+        <div class="panel-label">Email</div>
+        <div class="panel-value">yash@example.com</div>
+      </div>
+      <button class="panel-btn">Change</button>
+    </div>
+
+    <div class="settings-heading">Settings</div>
+    <div class="theme-row">
+      <div>
+        <div class="panel-label">Appearance</div>
+        <div class="panel-value" id="themeLabel">Light</div>
+      </div>
+      <div class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+        <div class="knob"></div>
+      </div>
+    </div>
+
+    <div class="settings-heading">Hero theme</div>
+    <div class="hero-theme-grid">
+      <button class="hero-theme-swatch active" data-hero-theme="space" onclick="setHeroTheme('space')">Space</button>
+      <button class="hero-theme-swatch" data-hero-theme="workspace" onclick="setHeroTheme('workspace')">Workspace</button>
+    </div>
+
+    <div style="flex:1;"></div>
+    <div class="panel-install-wrap">
+      <button class="panel-install-btn" id="panelInstallBtn" onclick="triggerInstall()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Install KOJOH app
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
