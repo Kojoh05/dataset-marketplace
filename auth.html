@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>KOJOH — Log in or Sign up</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="auth.css">
+</head>
+<body data-theme="light">
+
+  <header class="auth-header">
+    <a href="index.html" class="brand">KOJOH</a>
+  </header>
+
+  <main class="auth-wrap">
+    <div class="auth-card">
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Log in</button>
+        <button class="auth-tab" id="tabSignup" onclick="switchTab('signup')">Sign up</button>
+      </div>
+
+      <!-- ============ LOG IN ============ -->
+      <section id="loginPanel" class="auth-panel active">
+        <button type="button" class="google-btn" onclick="handleGoogleLogin()">
+          <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.7-3.88 2.7-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.95 10.7A5.4 5.4 0 0 1 3.67 9c0-.59.1-1.17.28-1.7V4.97H.96A9 9 0 0 0 0 9c0 1.45.35 2.83.96 4.03l2.99-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.97l2.99 2.33C4.66 5.17 6.65 3.58 9 3.58z"/></svg>
+          Continue with Google
+        </button>
+
+        <div class="auth-divider"><span>or</span></div>
+
+        <label class="field-label">Email or username</label>
+        <input type="text" id="loginId" class="auth-input" placeholder="you@example.com or your_username" autocomplete="username">
+
+        <label class="field-label">Password</label>
+        <input type="password" id="loginPassword" class="auth-input" placeholder="Your password" autocomplete="current-password">
+
+        <div class="auth-error" id="loginError"></div>
+
+        <button type="button" class="auth-submit" onclick="handleLogin()">Log in</button>
+
+        <p class="auth-switch">Don't have an account? <a href="#" onclick="switchTab('signup'); return false;">Sign up</a></p>
+      </section>
+
+      <!-- ============ SIGN UP ============ -->
+      <section id="signupPanel" class="auth-panel">
+
+        <button type="button" class="google-btn" id="googleSignupBtn" onclick="handleGoogleSignup()">
+          <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.57 2.7-3.88 2.7-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.84.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.95 10.7A5.4 5.4 0 0 1 3.67 9c0-.59.1-1.17.28-1.7V4.97H.96A9 9 0 0 0 0 9c0 1.45.35 2.83.96 4.03l2.99-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.97l2.99 2.33C4.66 5.17 6.65 3.58 9 3.58z"/></svg>
+          Continue with Google
+        </button>
+
+        <div id="googleConfirmChip" class="google-chip" hidden>
+          <span id="googleConfirmText">Signed in with Google</span>
+          <button type="button" class="google-chip-x" onclick="undoGoogle()">&times;</button>
+        </div>
+
+        <div class="auth-divider" id="signupDivider"><span>or</span></div>
+
+        <form id="signupForm" novalidate>
+
+          <!-- Step 1: email -->
+          <div class="auth-step" id="stepEmail">
+            <label class="field-label">Email</label>
+            <input type="email" id="suEmail" class="auth-input" placeholder="you@example.com" autocomplete="email">
+            <p class="field-hint" id="emailHint"></p>
+          </div>
+
+          <!-- Step 2: username -->
+          <div class="auth-step" id="stepUsername" hidden>
+            <label class="field-label">Username</label>
+            <div class="input-with-status">
+              <input type="text" id="suUsername" class="auth-input" placeholder="letters + numbers, e.g. yash21" autocomplete="username">
+              <span class="input-status" id="usernameStatus"></span>
+            </div>
+            <p class="field-hint" id="usernameHint">3–20 characters, must include letters and numbers, unique.</p>
+          </div>
+
+          <!-- Step 3: password -->
+          <div class="auth-step" id="stepPassword" hidden>
+            <label class="field-label" id="passwordLabel">Password</label>
+            <input type="password" id="suPassword" class="auth-input" placeholder="Create a password" autocomplete="new-password">
+            <ul class="pw-checklist" id="pwChecklist">
+              <li id="pwLen">At least 8 characters</li>
+              <li id="pwUpper">One uppercase letter</li>
+              <li id="pwNum">One number</li>
+              <li id="pwSpecial">One special character (@, #, !, …)</li>
+            </ul>
+          </div>
+
+          <!-- Step 4: country -->
+          <div class="auth-step" id="stepCountry" hidden>
+            <label class="field-label">Country</label>
+            <select id="suCountry" class="auth-input"></select>
+          </div>
+
+          <!-- Step 5: name -->
+          <div class="auth-step" id="stepName" hidden>
+            <label class="field-label">Name</label>
+            <div class="name-row">
+              <input type="text" id="suFirstName" class="auth-input" placeholder="First name">
+              <input type="text" id="suMiddleName" class="auth-input" placeholder="Middle (optional)">
+              <input type="text" id="suLastName" class="auth-input" placeholder="Last name">
+            </div>
+          </div>
+
+          <!-- Step 6: gender -->
+          <div class="auth-step" id="stepGender" hidden>
+            <label class="field-label">Gender</label>
+            <div class="pill-group" id="genderGroup">
+              <button type="button" class="pill-choice" data-value="male" onclick="selectGender('male')">Male</button>
+              <button type="button" class="pill-choice" data-value="female" onclick="selectGender('female')">Female</button>
+              <button type="button" class="pill-choice" data-value="other" onclick="selectGender('other')">Other</button>
+            </div>
+          </div>
+
+          <!-- Step 7: professions -->
+          <div class="auth-step" id="stepProfessions" hidden>
+            <label class="field-label">Interested professions</label>
+            <p class="field-hint">Pick as many as apply — this is how we tailor your recommendations.</p>
+            <div class="chip-group" id="professionChips">
+              <button type="button" class="chip-choice" data-value="Data Analyst" onclick="toggleProfession(this)">Data Analyst</button>
+              <button type="button" class="chip-choice" data-value="Data Engineer" onclick="toggleProfession(this)">Data Engineer</button>
+              <button type="button" class="chip-choice" data-value="Product Analyst" onclick="toggleProfession(this)">Product Analyst</button>
+              <button type="button" class="chip-choice" data-value="Quality Analyst" onclick="toggleProfession(this)">Quality Analyst</button>
+            </div>
+          </div>
+
+          <div class="auth-error" id="signupError"></div>
+          <div class="auth-note" id="backendNote" hidden></div>
+
+          <button type="button" class="auth-submit" id="createAccountBtn" onclick="handleSignup()" hidden>Create account</button>
+        </form>
+
+        <p class="auth-switch">Already have an account? <a href="#" onclick="switchTab('login'); return false;">Log in</a></p>
+      </section>
+
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="supabase-config.js"></script>
+  <script src="auth.js"></script>
+</body>
+</html>
