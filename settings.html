@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>KOJOH — Settings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="settings.css">
+</head>
+<body data-theme="light">
+
+<header class="settings-header">
+  <a href="index.html" class="settings-back" aria-label="Back to home">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+  </a>
+  <span class="settings-brand">Settings</span>
+</header>
+
+<main class="settings-wrap">
+
+  <!-- APPEARANCE -->
+  <section class="settings-section" id="appearance">
+    <h2 class="settings-section-title">Appearance</h2>
+    <div class="settings-row">
+      <div class="settings-row-info">
+        <div class="settings-row-label">Theme</div>
+        <div class="settings-row-sub" id="themeLabel">Light</div>
+      </div>
+      <div class="theme-toggle" id="themeToggle">
+        <div class="knob"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HERO THEME -->
+  <section class="settings-section" id="hero-theme">
+    <h2 class="settings-section-title">Hero theme</h2>
+    <p class="settings-section-sub">How the KOJOH landing hero looks.</p>
+    <div class="hero-theme-grid">
+      <button type="button" class="hero-theme-swatch active" data-hero-theme="space" onclick="setHeroThemeSetting('space')">Space</button>
+      <button type="button" class="hero-theme-swatch" data-hero-theme="workspace" onclick="setHeroThemeSetting('workspace')">Workspace</button>
+    </div>
+  </section>
+
+  <!-- PROFILE / USERNAME -->
+  <section class="settings-section" id="profile">
+    <h2 class="settings-section-title">Profile</h2>
+    <form class="settings-form" id="usernameForm">
+      <label class="settings-label">Username</label>
+      <div class="input-with-status">
+        <input type="text" class="settings-input" id="settingsUsername" placeholder="your_username" autocomplete="off">
+        <span class="input-status" id="settingsUsernameStatus"></span>
+      </div>
+      <p class="settings-hint">3–20 characters, must include letters and numbers, unique.</p>
+      <button type="submit" class="settings-submit">Save username</button>
+      <div class="settings-note" id="usernameNote" hidden></div>
+    </form>
+  </section>
+
+  <!-- EMAIL -->
+  <section class="settings-section" id="email">
+    <h2 class="settings-section-title">Email address</h2>
+    <form class="settings-form" id="emailForm">
+      <label class="settings-label">New email</label>
+      <input type="email" class="settings-input" id="settingsEmail" placeholder="new@example.com" autocomplete="email">
+      <label class="settings-label">Current password</label>
+      <input type="password" class="settings-input" id="settingsEmailPw" placeholder="Enter your current password" autocomplete="current-password">
+      <button type="submit" class="settings-submit">Change email</button>
+      <div class="settings-note" id="emailNote" hidden></div>
+    </form>
+  </section>
+
+  <!-- PASSWORD -->
+  <section class="settings-section" id="password">
+    <h2 class="settings-section-title">Password</h2>
+    <form class="settings-form" id="passwordForm">
+      <label class="settings-label">Current password</label>
+      <input type="password" class="settings-input" id="settingsOldPw" placeholder="Your current password" autocomplete="current-password">
+      <label class="settings-label">New password</label>
+      <input type="password" class="settings-input" id="settingsNewPw" placeholder="Create a new password" autocomplete="new-password">
+      <ul class="pw-checklist" id="settingsPwChecklist">
+        <li id="spwLen">At least 8 characters</li>
+        <li id="spwUpper">One uppercase letter</li>
+        <li id="spwNum">One number</li>
+        <li id="spwSpecial">One special character (@, #, !, …)</li>
+      </ul>
+      <button type="submit" class="settings-submit">Change password</button>
+      <div class="settings-note" id="passwordNote" hidden></div>
+    </form>
+  </section>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="supabase-config.js"></script>
+<script src="settings.js"></script>
+</body>
+</html>

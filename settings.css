@@ -1,0 +1,112 @@
+/* === SETTINGS PAGE === */
+
+.settings-header{
+  display:flex; align-items:center; gap:12px;
+  padding:1.5rem 2rem; max-width:44rem; margin:0 auto;
+}
+.settings-back{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:36px; height:36px; border-radius:50%;
+  color:var(--text); text-decoration:none;
+  transition:background 0.15s ease;
+}
+.settings-back:hover{background:var(--card);}
+.settings-brand{
+  font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.125rem;
+  color:var(--text);
+}
+
+.settings-wrap{max-width:44rem; margin:0 auto 6rem; padding:0 1.5rem;}
+
+.settings-section{
+  background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+  padding:1.75rem; margin-bottom:1.25rem;
+}
+.settings-section-title{
+  font-family:'Space Grotesk',sans-serif; font-size:1rem; font-weight:700;
+  margin-bottom:0.35rem;
+}
+.settings-section-sub{
+  font-size:0.8125rem; color:var(--muted); margin-bottom:1rem;
+}
+
+.settings-row{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0.5rem 0;
+}
+.settings-row-info{flex:1; min-width:0;}
+.settings-row-label{font-size:0.875rem; font-weight:600;}
+.settings-row-sub{font-size:0.75rem; color:var(--muted); margin-top:2px;}
+
+.theme-toggle{
+  width:46px; height:26px; background:var(--line); border-radius:20px; position:relative; cursor:pointer;
+  transition:background 0.2s ease;
+}
+.theme-toggle.on{background:var(--text);}
+.theme-toggle .knob{
+  width:20px; height:20px; background:#fff; border-radius:50%; position:absolute; top:3px; left:3px;
+  transition:left 0.2s ease; box-shadow:0 1px 3px rgba(0,0,0,0.2);
+}
+.theme-toggle.on .knob{left:23px;}
+
+.hero-theme-grid{display:flex; gap:0.5rem;}
+.hero-theme-swatch{
+  font-family:inherit; font-size:0.8125rem; font-weight:600; cursor:pointer;
+  padding:0.5rem 1.1rem; border-radius:999px; border:1px solid var(--line);
+  background:var(--bg); color:var(--text);
+  transition:background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.hero-theme-swatch.active{background:var(--text); color:var(--bg); border-color:var(--text);}
+
+.settings-form{display:flex; flex-direction:column;}
+.settings-label{
+  font-size:0.8125rem; font-weight:600; color:var(--text);
+  margin:0.9rem 0 0.35rem;
+}
+.settings-form .settings-label:first-child{margin-top:0;}
+.settings-input{
+  font-family:inherit; font-size:0.9375rem; color:var(--text);
+  background:var(--bg); border:1px solid var(--line); border-radius:0.65rem;
+  padding:0.65rem 0.85rem; outline:none;
+  transition:border-color 0.15s ease;
+}
+.settings-input:focus{border-color:var(--text);}
+.settings-hint{font-size:0.75rem; color:var(--muted); margin-top:0.35rem;}
+.settings-submit{
+  align-self:flex-start; margin-top:1.25rem;
+  font-family:inherit; font-size:0.875rem; font-weight:700; cursor:pointer;
+  padding:0.65rem 1.4rem; border:none; border-radius:999px;
+  background:var(--text); color:var(--bg);
+  transition:opacity 0.15s ease;
+}
+.settings-submit:hover{opacity:0.85;}
+.settings-submit:disabled{opacity:0.45; cursor:not-allowed;}
+
+.settings-note{
+  font-size:0.8125rem; padding:0.7rem 0.85rem; margin-top:0.9rem;
+  background:var(--bg); border:1px solid var(--line); border-radius:0.65rem; line-height:1.4;
+}
+.settings-note.error{color:#C62828; border-color:#F1B4B4;}
+.settings-note.ok{color:#2E7D32; border-color:#B7DBB9;}
+
+.input-with-status{position:relative; display:flex; flex-direction:column;}
+.input-status{
+  position:absolute; right:0.75rem; top:50%; transform:translateY(-50%);
+  font-size:0.75rem; font-weight:600;
+}
+.input-status.checking{color:var(--muted);}
+.input-status.available{color:#2E7D32;}
+.input-status.taken{color:#C62828;}
+
+.pw-checklist{
+  list-style:none; margin-top:0.6rem; display:flex; flex-direction:column; gap:0.3rem;
+  padding:0;
+}
+.pw-checklist li{
+  font-size:0.75rem; color:var(--muted); padding-left:1.25rem; position:relative;
+}
+.pw-checklist li::before{
+  content:'○'; position:absolute; left:0; top:0; font-size:0.7rem;
+}
+.pw-checklist li.met{color:#2E7D32;}
+.pw-checklist li.met::before{content:'●';}
