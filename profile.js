@@ -141,7 +141,7 @@
     }
   }
 
-  document.addEventListener('DOMContentLoaded', function(){
+  window.kReady(function(){
     renderVersion();
     loadSession();
     loadFeedbackState();

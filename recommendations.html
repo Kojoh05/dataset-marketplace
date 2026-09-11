@@ -9,6 +9,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="pages.css">
+<link rel="stylesheet" href="nav.css">
+<script src="nav.js"></script>
 </head>
 <body data-theme="light">
 
@@ -68,7 +70,7 @@
       return '<div class="ds-item"><div class="ds-item-info"><div class="ds-item-title">' + escape(d.title) + '</div><div class="ds-item-sub">' + escape(d.short_description || '') + '</div></div><div class="ds-item-meta"><span class="ds-item-price">' + (d.price ? '₹' + d.price : 'Free') + '</span></div></div>';
     }).join('') + '</div>';
   }
-  document.addEventListener('DOMContentLoaded', load);
+  window.kReady(load);
 </script>
 </body>
 </html>

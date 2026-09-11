@@ -1,3 +1,4 @@
+(function(){
 // === TYPEWRITER + FACE ANIMATION ===
 const phrases = [
   "KOJOH",
@@ -9,6 +10,7 @@ const faceLayer = document.getElementById('faceLayer');
 let phraseIndex = 0, charIndex = 0, deleting = false;
 
 function updateSizeClass(){
+  if(!heroTitle) return;
   if(phraseIndex === 0){
     heroTitle.classList.add('brand-size');
   } else {
@@ -18,6 +20,7 @@ function updateSizeClass(){
 updateSizeClass();
 
 function renderText(str){
+  if(!target) return;
   target.innerHTML = '';
   for(const ch of str){
     if(ch === ' '){
@@ -32,10 +35,11 @@ function renderText(str){
 }
 
 function clearFace(){
-  faceLayer.innerHTML = '';
+  if(faceLayer) faceLayer.innerHTML = '';
 }
 
 function buildFace(){
+  if(!target || !faceLayer) return;
   clearFace();
   const oSpans = target.querySelectorAll('.char-o');
   oSpans.forEach((span, i) => {
@@ -143,20 +147,21 @@ function typeLoop(){
   }
 }
 
-const prefersReducedType = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-if(prefersReducedType){
-  phraseIndex = 1;
-  renderText(phrases[1]);
-  updateSizeClass();
-} else {
-  typeLoop();
+if (target && heroTitle && faceLayer) {
+  const prefersReducedType = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(prefersReducedType){
+    phraseIndex = 1;
+    renderText(phrases[1]);
+    updateSizeClass();
+  } else {
+    typeLoop();
+  }
 }
 
-// === SERVICE WORKER ===
-if('serviceWorker' in navigator){
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js');
-  });
+// === SERVICE WORKER (register once per browser session) ===
+if('serviceWorker' in navigator && !window.__kojohSwRegistered){
+  window.__kojohSwRegistered = true;
+  navigator.serviceWorker.register('/sw.js').catch(function(){});
 }
 
 // === PWA INSTALL ===
@@ -164,10 +169,13 @@ let deferredPrompt = null;
 const panelInstallBtn = document.getElementById('panelInstallBtn');
 
 function showInstallBtns(){
-  panelInstallBtn.style.display = 'flex';
+  if(panelInstallBtn) panelInstallBtn.style.display = 'flex';
+  var btn = document.getElementById('panelInstallBtn');
+  if (btn) btn.style.display = 'flex';
 }
 function hideInstallBtns(){
-  panelInstallBtn.style.display = 'none';
+  var btn = document.getElementById('panelInstallBtn');
+  if (btn) btn.style.display = 'none';
   deferredPrompt = null;
 }
 
@@ -179,13 +187,17 @@ async function triggerInstall(){
   deferredPrompt = null;
 }
 
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredPrompt = e;
-  showInstallBtns();
-});
-
-window.addEventListener('appinstalled', hideInstallBtns);
+// These fire on `window` which persists across soft navigations, so only
+// attach them once per browser session (not once per script re-execution).
+if (!window.__kojohInstallListenersAttached) {
+  window.__kojohInstallListenersAttached = true;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    showInstallBtns();
+  });
+  window.addEventListener('appinstalled', hideInstallBtns);
+}
 
 // === FOLDER VIEW TOGGLE (Datasets vs Practice) ===
 function showFolderView(view){
@@ -195,25 +207,26 @@ function showFolderView(view){
   const practiceBtn = document.getElementById('practiceToggleBtn');
   const titleEl = document.getElementById('categories');
   const subEl = document.getElementById('foldersSub');
+  if (!jobs || !practice) return;
 
   if(view === 'practice'){
     jobs.style.display = 'none';
     practice.style.display = '';
-    jobsBtn.classList.remove('active');
-    practiceBtn.classList.add('active');
-    jobsBtn.setAttribute('aria-selected', 'false');
-    practiceBtn.setAttribute('aria-selected', 'true');
-    titleEl.textContent = 'Practice by tool';
-    subEl.textContent = 'Pick a tool — each folder has Beginner, Intermediate, and Hard tasks.';
+    if(jobsBtn) jobsBtn.classList.remove('active');
+    if(practiceBtn) practiceBtn.classList.add('active');
+    if(jobsBtn) jobsBtn.setAttribute('aria-selected', 'false');
+    if(practiceBtn) practiceBtn.setAttribute('aria-selected', 'true');
+    if(titleEl) titleEl.textContent = 'Practice by tool';
+    if(subEl) subEl.textContent = 'Pick a tool — each folder has Beginner, Intermediate, and Hard tasks.';
   } else {
     jobs.style.display = '';
     practice.style.display = 'none';
-    jobsBtn.classList.add('active');
-    practiceBtn.classList.remove('active');
-    jobsBtn.setAttribute('aria-selected', 'true');
-    practiceBtn.setAttribute('aria-selected', 'false');
-    titleEl.textContent = 'Browse by folder';
-    subEl.textContent = "Each folder is a job track. Open one to see what's inside.";
+    if(jobsBtn) jobsBtn.classList.add('active');
+    if(practiceBtn) practiceBtn.classList.remove('active');
+    if(jobsBtn) jobsBtn.setAttribute('aria-selected', 'true');
+    if(practiceBtn) practiceBtn.setAttribute('aria-selected', 'false');
+    if(titleEl) titleEl.textContent = 'Browse by folder';
+    if(subEl) subEl.textContent = "Each folder is a job track. Open one to see what's inside.";
   }
 }
 
@@ -221,6 +234,7 @@ function showFolderView(view){
 function toggleMenu(){
   const btn = document.getElementById('hamburger');
   const menu = document.getElementById('mobileMenu');
+  if (!btn || !menu) return;
   btn.classList.toggle('open');
   menu.classList.toggle('open');
 }
@@ -228,25 +242,28 @@ function toggleMenu(){
 // === PROFILE PANEL ===
 function openPanel(){
   const overlay = document.getElementById('overlay');
+  if (!overlay) return;
   overlay.style.display = 'block';
   requestAnimationFrame(() => overlay.classList.add('open'));
 }
 function closePanel(){
   const overlay = document.getElementById('overlay');
+  if (!overlay) return;
   overlay.classList.remove('open');
   setTimeout(() => { overlay.style.display = 'none'; }, 300);
 }
 
-// === NAME EDIT ===
+// === NAME EDIT (legacy — kept for pages that still have #nameField) ===
 function toggleNameEdit(){
   const field = document.getElementById('nameField');
+  if (!field) return;
   const isDisabled = field.disabled;
   field.disabled = !isDisabled;
   if(isDisabled){ field.focus(); field.select(); }
 }
 (function(){
   var nf = document.getElementById('nameField');
-  if (!nf) return; // panel was redesigned — nameField no longer exists
+  if (!nf) return;
   nf.addEventListener('blur', function(){ this.disabled = true; });
   nf.addEventListener('keydown', function(e){ if(e.key === 'Enter') this.blur(); });
 })();
@@ -266,9 +283,6 @@ function setHeroTheme(theme){
 })();
 
 // === HERO CHARACTER (GENDER) SWITCHER ===
-// For now this is a manual pick in the profile panel. Once signup collects a
-// gender field, call setHeroCharacter() with that stored value automatically
-// instead of (or in addition to) reading localStorage here.
 var wtCurrentCharacter = 'male';
 function setHeroCharacter(character){
   wtCurrentCharacter = character;
@@ -288,12 +302,21 @@ function setHeroCharacter(character){
 })();
 
 // Cycle the 3 working-pose frames for a subtle idle animation loop.
+// Guarded against soft-navigation re-runs: clear any interval from a
+// previous execution of this script before starting a new one, otherwise
+// repeated visits to index.html would stack multiple concurrent intervals
+// all animating the same (or now-detached) frames.
 (function(){
+  if (window.__kojohFrameInterval) {
+    clearInterval(window.__kojohFrameInterval);
+    window.__kojohFrameInterval = null;
+  }
   var frameIndex = 1;
   var total = 3;
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(reduceMotion) return;
-  setInterval(function(){
+  if (!document.getElementById('wtFrame1')) return; // not on this page
+  window.__kojohFrameInterval = setInterval(function(){
     var current = document.getElementById('wtFrame' + frameIndex);
     frameIndex = (frameIndex % total) + 1;
     var next = document.getElementById('wtFrame' + frameIndex);
@@ -302,7 +325,7 @@ function setHeroCharacter(character){
   }, 2600);
 })();
 
-// === THEME TOGGLE ===
+// === THEME TOGGLE (legacy helper — settings.html has its own copy) ===
 function toggleTheme(){
   const body = document.body;
   const toggle = document.getElementById('themeToggle');
@@ -321,4 +344,20 @@ function toggleTheme(){
     var saved = localStorage.getItem('kojoh-theme');
     if (saved === 'dark' || saved === 'light') document.body.setAttribute('data-theme', saved);
   }catch(e){}
+})();
+
+// Expose the functions index.html's inline onclick="..." attributes need —
+// wrapping this whole file in an IIFE (so it's safe to re-run on every
+// soft-navigation visit without "already declared" errors) means these
+// would otherwise be invisible to the global scope those attributes run in.
+window.toggleMenu = toggleMenu;
+window.openPanel = openPanel;
+window.closePanel = closePanel;
+window.showFolderView = showFolderView;
+window.triggerInstall = triggerInstall;
+window.toggleTheme = toggleTheme;
+window.setHeroTheme = setHeroTheme;
+window.setHeroCharacter = setHeroCharacter;
+window.toggleNameEdit = toggleNameEdit;
+
 })();

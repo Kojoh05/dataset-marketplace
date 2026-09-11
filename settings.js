@@ -149,4 +149,4 @@ $('passwordForm').addEventListener('submit', async function(e){
   showNote('passwordNote', 'Password updated.', 'ok');
 });
 
-document.addEventListener('DOMContentLoaded', loadUser);
+window.kReady(loadUser);

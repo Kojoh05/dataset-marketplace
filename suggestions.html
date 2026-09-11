@@ -9,6 +9,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="pages.css">
+<link rel="stylesheet" href="nav.css">
+<script src="nav.js"></script>
 </head>
 <body data-theme="light">
 
@@ -79,7 +81,7 @@
     note('Thanks — got it! We read every suggestion.', 'ok');
     loadPast(uid);
   });
-  document.addEventListener('DOMContentLoaded', init);
+  window.kReady(init);
 </script>
 </body>
 </html>
