@@ -1,6 +1,6 @@
 // === KOJOH SHARED SIDEBAR + SOFT NAVIGATION ===
 // Injects a persistent left navigation rail (icon-only collapsed, labeled
-// when expanded) — present on every app page, styled as part of the KOJOH
+// when expanded), present on every app page, styled as part of the KOJOH
 // UI rather than a bolted-on dashboard drawer.
 // Also implements client-side "soft" navigation between app pages so
 // clicking a sidebar link swaps content instead of a full page reload.
@@ -85,6 +85,26 @@
     document.body.classList.toggle('ksb-expanded', expanded);
   }
 
+  function collapse() {
+    applyExpandedState(false);
+    setExpandedPref(false);
+  }
+
+  // After navigating from the expanded panel, the panel gets out of the way
+  // on its own as soon as the pointer moves onto the page, so the content
+  // goes full width. The CSS width/padding transitions animate the close.
+  var autoCloseArmed = false;
+
+  document.addEventListener('pointerover', function (e) {
+    if (!autoCloseArmed) return;
+    var rail = document.getElementById('ksbRail');
+    if (!rail || !rail.classList.contains('expanded')) { autoCloseArmed = false; return; }
+    // Still hovering inside the panel itself: leave it open.
+    if (e.target && e.target.closest && e.target.closest('#ksbRail')) return;
+    autoCloseArmed = false;
+    collapse();
+  });
+
   function ensureSidebar() {
     var existing = document.getElementById('ksbRail');
     if (existing) existing.remove();
@@ -123,18 +143,12 @@
       applyExpandedState(next);
       setExpandedPref(next);
     });
-    document.getElementById('ksbCollapseBtn').addEventListener('click', function () {
-      applyExpandedState(false);
-      setExpandedPref(false);
-    });
+    document.getElementById('ksbCollapseBtn').addEventListener('click', collapse);
     trigger.addEventListener('click', function () {
       applyExpandedState(true);
       setExpandedPref(true);
     });
-    overlay.addEventListener('click', function () {
-      applyExpandedState(false);
-      setExpandedPref(false);
-    });
+    overlay.addEventListener('click', collapse);
   }
 
   // ---------- Soft navigation (fetch + swap, no full reload) ----------
@@ -165,6 +179,37 @@
     }
   }
 
+  // Only the <body> gets swapped on a soft navigation, so any stylesheet
+  // the destination page needs and this one doesn't have yet (pages.css,
+  // settings.css, ...) has to be pulled into <head> first, otherwise the
+  // swapped-in page renders unstyled. Resolves once they've loaded so the
+  // swap never shows a flash of unstyled content.
+  function ensureStylesheets(doc) {
+    var wanted = Array.prototype.slice.call(doc.querySelectorAll('link[rel="stylesheet"]'));
+    var have = Array.prototype.slice.call(document.querySelectorAll('link[rel="stylesheet"]'))
+      .map(function (l) { return l.getAttribute('href'); });
+    var pending = [];
+
+    wanted.forEach(function (link) {
+      var href = link.getAttribute('href');
+      if (!href || have.indexOf(href) !== -1) return;
+      have.push(href);
+      var el = document.createElement('link');
+      el.rel = 'stylesheet';
+      el.href = href;
+      pending.push(new Promise(function (resolve) {
+        var done = false;
+        function finish() { if (!done) { done = true; resolve(); } }
+        el.onload = finish;
+        el.onerror = finish;
+        setTimeout(finish, 800); // never block the navigation on a slow sheet
+      }));
+      document.head.appendChild(el);
+    });
+
+    return pending.length ? Promise.all(pending) : Promise.resolve();
+  }
+
   function swapTo(url, pushHistory) {
     fetch(url, { credentials: 'same-origin' })
       .then(function (res) { return res.text(); })
@@ -172,6 +217,13 @@
         var doc = new DOMParser().parseFromString(html, 'text/html');
         var newBody = doc.body;
         if (!newBody) { window.location.href = url; return; }
+
+        return ensureStylesheets(doc).then(function () { return { doc: doc, newBody: newBody }; });
+      })
+      .then(function (parsed) {
+        if (!parsed) return;
+        var doc = parsed.doc;
+        var newBody = parsed.newBody;
 
         document.title = doc.title || document.title;
 
@@ -189,7 +241,7 @@
           window.history.pushState({ ksbNav: true }, '', url);
         }
 
-        // Re-attach the sidebar (body content — and its classes — were
+        // Re-attach the sidebar (body content, and its classes, were
         // fully replaced, so re-apply the ksb-has-rail/expanded state too).
         ensureSidebar();
 
@@ -209,11 +261,22 @@
     var href = a.getAttribute('href');
     if (!href || href.charAt(0) === '#') return;
     e.preventDefault();
-    // On mobile the rail is an overlay drawer — close it after a nav pick.
-    if (window.matchMedia && window.matchMedia('(max-width: 720px)').matches) {
-      applyExpandedState(false);
-      setExpandedPref(false);
+
+    var rail = document.getElementById('ksbRail');
+    var wasExpanded = !!(rail && rail.classList.contains('expanded'));
+    var isMobile = !!(window.matchMedia && window.matchMedia('(max-width: 720px)').matches);
+
+    if (a.classList.contains('ksb-wordmark')) {
+      // The KOJOH wordmark goes home and closes the panel straight away.
+      collapse();
+    } else if (isMobile) {
+      // On mobile the rail is an overlay drawer, so close it after a nav pick.
+      collapse();
+    } else if (wasExpanded) {
+      // On desktop it stays open until the pointer moves onto the page.
+      autoCloseArmed = true;
     }
+
     if (href === currentFile()) return;
     swapTo(href, true);
   });

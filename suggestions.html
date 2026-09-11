@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>KOJOH — Suggestions</title>
+<title>KOJOH | Suggestions</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -15,15 +15,13 @@
 <body data-theme="light">
 
 <header class="page-header">
-  <a href="index.html" class="page-back" aria-label="Back to home"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></a>
   <span class="page-title">Suggestions</span>
-  <a href="index.html" class="page-brand">KOJOH</a>
 </header>
 
 <main class="page-wrap">
   <div class="page-lead">
     <h1>Tell us what to build next</h1>
-    <p>A dataset you wish existed, a job track we should add, a feature that's missing — anything. Your suggestions land in our review queue and shape the roadmap.</p>
+    <p>A dataset you wish existed, a job track we should add, a feature that's missing. Anything at all. Your suggestions land in our review queue and shape the roadmap.</p>
   </div>
 
   <div class="page-card">
@@ -70,15 +68,15 @@
     e.preventDefault();
     var msg = document.getElementById('sMessage').value.trim();
     if (!msg) { note('Type something first.', 'error'); return; }
-    if (msg.length < 6) { note('A little more detail helps — at least a few words.', 'error'); return; }
-    if (!LIVE) { note('Preview mode — connect Supabase to send suggestions.', 'error'); return; }
+    if (msg.length < 6) { note('A little more detail helps. At least a few words, please.', 'error'); return; }
+    if (!LIVE) { note('Preview mode. Connect Supabase to send suggestions.', 'error'); return; }
     var s = await SUPA.auth.getSession();
     if (!s.data.session) { note('Please log in first so we can follow up if needed.', 'error'); return; }
     var uid = s.data.session.user.id;
     var res = await SUPA.from('suggestions').insert({ user_id: uid, message: msg });
     if (res.error) { note(res.error.message, 'error'); return; }
     document.getElementById('sMessage').value = '';
-    note('Thanks — got it! We read every suggestion.', 'ok');
+    note('Thanks, got it! We read every suggestion.', 'ok');
     loadPast(uid);
   });
   window.kReady(init);

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>KOJOH — Your purchases</title>
+<title>KOJOH | Your purchases</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -15,15 +15,13 @@
 <body data-theme="light">
 
 <header class="page-header">
-  <a href="index.html" class="page-back" aria-label="Back to home"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></a>
   <span class="page-title">Your purchases</span>
-  <a href="index.html" class="page-brand">KOJOH</a>
 </header>
 
 <main class="page-wrap">
   <div class="page-lead">
     <h1>Purchased datasets</h1>
-    <p>Everything you've bought lives here — click through to re-download any file you own.</p>
+    <p>Everything you've bought lives here. Click through to re-download any file you own.</p>
   </div>
 
   <div id="purchaseResults"></div>
@@ -49,7 +47,7 @@
     var res = await SUPA.from('purchases').select('dataset_id, price_paid, purchased_at, datasets(title, short_description, slug)').order('purchased_at', { ascending: false });
     if (res.error) { empty('⚠️', 'Could not load', res.error.message); return; }
     var rows = (res.data || []).filter(function(r){ return r.datasets; });
-    if (!rows.length) { empty('🛒', 'No purchases yet', 'Free datasets don\'t count here — this page shows paid datasets you own. Once you buy one it lives here for re-download.'); return; }
+    if (!rows.length) { empty('🛒', 'No purchases yet', 'Free datasets don\'t count here. This page shows paid datasets you own. Once you buy one it lives here for re-download.'); return; }
     el.innerHTML = '<div class="ds-list">' + rows.map(function(r){
       var d = r.datasets;
       var paid = r.price_paid ? '₹' + r.price_paid + ' paid' : 'Free';

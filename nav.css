@@ -8,7 +8,7 @@
    (see body{margin:10px 10px 0; border-radius:20px 20px 0 0} in
    styles.css) sitting on a near-black html background. The rail is
    inset/rounded to match that same card on its top-left corner instead
-   of sitting flush at the true viewport edge — otherwise it reads as a
+   of sitting flush at the true viewport edge. Otherwise it reads as a
    separate layer floating on top of the page rather than the page's own
    left edge. */
 
@@ -211,7 +211,7 @@
   display: none;
 }
 
-/* Mobile off-canvas trigger — an independent fixed button so it's always
+/* Mobile off-canvas trigger: an independent fixed button so it's always
    reachable even when the rail itself is collapsed to width 0. Hidden on
    larger screens where the rail's own hamburger is already visible. */
 .ksb-mobile-trigger {
@@ -240,7 +240,7 @@
   border-radius: 2px;
 }
 
-/* Content offset so the fixed rail never overlaps page content — grows
+/* Content offset so the fixed rail never overlaps page content. It grows
    with the rail so expanding it "pushes" the layout instead of covering it. */
 body.ksb-has-rail {
   padding-left: var(--ksb-collapsed);

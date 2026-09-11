@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>KOJOH — Saved datasets</title>
+<title>KOJOH | Saved datasets</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -15,9 +15,7 @@
 <body data-theme="light">
 
 <header class="page-header">
-  <a href="index.html" class="page-back" aria-label="Back to home"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></a>
   <span class="page-title">Saved datasets</span>
-  <a href="index.html" class="page-brand">KOJOH</a>
 </header>
 
 <main class="page-wrap">
@@ -49,7 +47,7 @@
     var res = await SUPA.from('bookmarks').select('dataset_id, created_at, datasets(title, short_description, slug, price)').order('created_at', { ascending: false });
     if (res.error) { empty('⚠️', 'Could not load', res.error.message); return; }
     var rows = (res.data || []).filter(function(r){ return r.datasets; });
-    if (!rows.length) { empty('🔖', 'No bookmarks yet', 'When you find a dataset you like, tap the bookmark icon on it — it will appear here.'); return; }
+    if (!rows.length) { empty('🔖', 'No bookmarks yet', 'When you find a dataset you like, tap the bookmark icon on it and it will appear here.'); return; }
     el.innerHTML = '<div class="ds-list">' + rows.map(function(r){
       var d = r.datasets;
       return '<div class="ds-item"><div class="ds-item-info"><div class="ds-item-title">' + escape(d.title) + '</div><div class="ds-item-sub">' + escape(d.short_description || '') + '</div></div><div class="ds-item-meta"><span class="ds-item-price">' + (d.price ? '₹' + d.price : 'Free') + '</span><button class="ds-item-bookmark on" data-id="' + escape(r.dataset_id) + '" title="Remove bookmark">★</button></div></div>';

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>KOJOH — Search datasets</title>
+<title>KOJOH | Search datasets</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -15,11 +15,7 @@
 <body data-theme="light">
 
 <header class="page-header">
-  <a href="index.html" class="page-back" aria-label="Back to home">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-  </a>
   <span class="page-title">Search datasets</span>
-  <a href="index.html" class="page-brand">KOJOH</a>
 </header>
 
 <main class="page-wrap">
@@ -50,10 +46,10 @@
     results.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔎</div><h3>No matches</h3><p>' + msg + '</p></div>';
   }
   function initialState(){
-    results.innerHTML = '<div class="empty-state"><div class="empty-state-icon">💡</div><h3>Start typing</h3><p>Try a role like <em>data engineer</em>, a tool like <em>Power BI</em>, or a domain like <em>e-commerce</em>. The catalog is still growing — early searches may return no results.</p></div>';
+    results.innerHTML = '<div class="empty-state"><div class="empty-state-icon">💡</div><h3>Start typing</h3><p>Try a role like <em>data engineer</em>, a tool like <em>Power BI</em>, or a domain like <em>e-commerce</em>. The catalog is still growing, so early searches may return no results.</p></div>';
   }
   function renderResults(rows){
-    if (!rows || !rows.length) { emptyState('Nothing matched that query yet — the catalog is still being seeded. Try a broader term.'); return; }
+    if (!rows || !rows.length) { emptyState('Nothing matched that query yet. The catalog is still being seeded, so try a broader term.'); return; }
     results.innerHTML = '<div class="ds-list">' + rows.map(function(r){
       return '<div class="ds-item"><div class="ds-item-info"><div class="ds-item-title">' + escape(r.title) + '</div><div class="ds-item-sub">' + escape(r.short_description || '') + '</div></div></div>';
     }).join('') + '</div>';
@@ -65,7 +61,7 @@
     var q = this.value.trim();
     clearTimeout(searchDebounce);
     if (!q) { initialState(); return; }
-    if (!LIVE) { emptyState('Search backend not connected — preview mode.'); return; }
+    if (!LIVE) { emptyState('Search backend not connected (preview mode).'); return; }
     searchDebounce = setTimeout(function(){
       SUPA.rpc('search_datasets', { query: q }).then(function(res){
         if (res.error) { emptyState('Search error: ' + res.error.message); return; }

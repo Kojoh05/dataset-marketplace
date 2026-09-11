@@ -41,7 +41,7 @@
     setText('navName', displayName);
     setText('panelAvatar', initialsText);
     setText('panelDisplayName', [first, last].filter(Boolean).join(' ') || displayName);
-    setText('panelUsername', username ? '@' + username : '—');
+    setText('panelUsername', username ? '@' + username : '');
     setText('panelEmail', email || '');
 
     var editLink = $('panelEditLink'); if (editLink) editLink.hidden = false;
@@ -119,7 +119,7 @@
     var noteEl = $('panelFeedbackNote');
     var likeBtn = document.querySelector('.panel-vote-btn[data-vote="like"]');
     var disBtn = document.querySelector('.panel-vote-btn[data-vote="dislike"]');
-    if (!LIVE) { if (noteEl) noteEl.textContent = 'Preview mode — connect Supabase.'; return; }
+    if (!LIVE) { if (noteEl) noteEl.textContent = 'Preview mode. Connect Supabase.'; return; }
     var s = await SUPA.auth.getSession();
     if (!s.data.session) { if (noteEl) noteEl.textContent = 'Sign in to leave a vote.'; return; }
     var uid = s.data.session.user.id;

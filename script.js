@@ -68,7 +68,7 @@ function buildFace(){
     requestAnimationFrame(() => pupil.classList.add('show'));
   });
 
-  // mouth — bold rounded smile, sits right under the letters
+  // mouth: bold rounded smile, sits right under the letters
   const wordLeft = target.offsetLeft;
   const wordTop = target.offsetTop;
   const wordWidth = target.offsetWidth;
@@ -217,7 +217,7 @@ function showFolderView(view){
     if(jobsBtn) jobsBtn.setAttribute('aria-selected', 'false');
     if(practiceBtn) practiceBtn.setAttribute('aria-selected', 'true');
     if(titleEl) titleEl.textContent = 'Practice by tool';
-    if(subEl) subEl.textContent = 'Pick a tool — each folder has Beginner, Intermediate, and Hard tasks.';
+    if(subEl) subEl.textContent = 'Pick a tool. Each folder has Beginner, Intermediate, and Hard tasks.';
   } else {
     jobs.style.display = '';
     practice.style.display = 'none';
@@ -253,7 +253,7 @@ function closePanel(){
   setTimeout(() => { overlay.style.display = 'none'; }, 300);
 }
 
-// === NAME EDIT (legacy — kept for pages that still have #nameField) ===
+// === NAME EDIT (legacy, kept for pages that still have #nameField) ===
 function toggleNameEdit(){
   const field = document.getElementById('nameField');
   if (!field) return;
@@ -325,7 +325,7 @@ function setHeroCharacter(character){
   }, 2600);
 })();
 
-// === THEME TOGGLE (legacy helper — settings.html has its own copy) ===
+// === THEME TOGGLE (legacy helper, settings.html has its own copy) ===
 function toggleTheme(){
   const body = document.body;
   const toggle = document.getElementById('themeToggle');
@@ -346,7 +346,7 @@ function toggleTheme(){
   }catch(e){}
 })();
 
-// Expose the functions index.html's inline onclick="..." attributes need —
+// Expose the functions index.html's inline onclick="..." attributes need:
 // wrapping this whole file in an IIFE (so it's safe to re-run on every
 // soft-navigation visit without "already declared" errors) means these
 // would otherwise be invisible to the global scope those attributes run in.

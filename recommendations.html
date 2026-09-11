@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>KOJOH — Recommended datasets</title>
+<title>KOJOH | Recommended datasets</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -15,15 +15,13 @@
 <body data-theme="light">
 
 <header class="page-header">
-  <a href="index.html" class="page-back" aria-label="Back to home"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></a>
   <span class="page-title">Recommended</span>
-  <a href="index.html" class="page-brand">KOJOH</a>
 </header>
 
 <main class="page-wrap">
   <div class="page-lead">
     <h1>For your job track</h1>
-    <p id="recSub">Ranked using the professions you picked at signup and the KOJOH job-title ontology — no AI black box.</p>
+    <p id="recSub">Ranked using the professions you picked at signup and the KOJOH job-title ontology, not an AI black box.</p>
   </div>
 
   <div id="recResults"></div>
@@ -53,7 +51,7 @@
     if (pjt.error) { empty('⚠️', 'Could not load your tracks', pjt.error.message); return; }
     var jobs = (pjt.data || []).map(function(r){ return r.job_titles && r.job_titles.name; }).filter(Boolean);
     if (!jobs.length) {
-      empty('🎯', 'Pick your job tracks first', 'Head to <a href="settings.html#profile">settings</a> to set your interested professions — recommendations key off those.');
+      empty('🎯', 'Pick your job tracks first', 'Head to <a href="settings.html#profile">settings</a> to set your interested professions. Recommendations key off those.');
       return;
     }
     subEl.textContent = 'Based on your tracks: ' + jobs.join(', ');
@@ -64,7 +62,7 @@
 
     var seen = {};
     var rows = (djt.data || []).filter(function(r){ if (!r.datasets || seen[r.datasets.id]) return false; seen[r.datasets.id] = 1; return true; });
-    if (!rows.length) { empty('📥', 'No datasets yet', 'No datasets have been tagged for your tracks yet. The catalog is still being seeded — check back soon.'); return; }
+    if (!rows.length) { empty('📥', 'No datasets yet', 'No datasets have been tagged for your tracks yet. The catalog is still being seeded. Check back soon.'); return; }
     el.innerHTML = '<div class="ds-list">' + rows.map(function(r){
       var d = r.datasets;
       return '<div class="ds-item"><div class="ds-item-info"><div class="ds-item-title">' + escape(d.title) + '</div><div class="ds-item-sub">' + escape(d.short_description || '') + '</div></div><div class="ds-item-meta"><span class="ds-item-price">' + (d.price ? '₹' + d.price : 'Free') + '</span></div></div>';

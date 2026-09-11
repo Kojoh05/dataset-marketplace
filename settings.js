@@ -18,7 +18,7 @@ function showNote(id, msg, kind){
 // ---------- Guard: must be logged in ----------
 async function loadUser(){
   if (!LIVE) {
-    showNote('usernameNote', 'Preview mode — connect Supabase to use settings.', 'error');
+    showNote('usernameNote', 'Preview mode. Connect Supabase to use settings.', 'error');
     return;
   }
   var res = await SUPA.auth.getSession();

@@ -56,7 +56,7 @@ populateCountries('India');
     SUPA.auth.getSession().then(function(res){
       var session = res.data && res.data.session;
       if (!session || !session.user) {
-        document.getElementById('signupError').textContent = 'Google sign-in didn\'t complete — please try again.';
+        document.getElementById('signupError').textContent = 'Google sign-in didn\'t complete. Please try again.';
         return;
       }
       switchTab('signup');
@@ -232,7 +232,7 @@ function handleGoogleLogin(){
     SUPA.auth.signInWithOAuth({ provider: 'google' });
     return;
   }
-  document.getElementById('loginError').textContent = 'Preview mode — connect Supabase to enable real Google login.';
+  document.getElementById('loginError').textContent = 'Preview mode. Connect Supabase to enable real Google login.';
   document.getElementById('loginError').style.color = 'var(--muted)';
 }
 
@@ -273,7 +273,7 @@ function handleSignup(){
   // signup). Email signups need to create the account here.
   var accountStep = googleMode
     ? SUPA.auth.getUser().then(function(userRes){
-        if (userRes.error || !userRes.data.user) { errEl.textContent = 'Your Google session expired — please try again.'; return Promise.reject(); }
+        if (userRes.error || !userRes.data.user) { errEl.textContent = 'Your Google session expired. Please try again.'; return Promise.reject(); }
         var userId = userRes.data.user.id;
         // Set a KOJOH-only fallback password (never the user's real Google password).
         return SUPA.auth.updateUser({ password: payload.password }).then(function(){
@@ -285,7 +285,7 @@ function handleSignup(){
         password: payload.password,
         options: {
           // Stash profile fields on the user's own metadata so profile.js can
-          // materialize the profiles row on their first successful login —
+          // materialize the profiles row on their first successful login:
           // needed because signUp() with email-confirmation enabled returns
           // no session, so RLS-protected profiles.insert cannot run yet.
           data: {
@@ -310,12 +310,12 @@ function handleSignup(){
   accountStep
     .then(function(acct){
       // Google mode has a session, so we can write the profile row now.
-      // Email mode with email-confirmation ON has NO session yet — the
+      // Email mode with email-confirmation ON has NO session yet, so the
       // profile row will be created by profile.js on first login.
       if (!acct.hasSession && !googleMode) {
         var note = document.getElementById('backendNote');
         note.hidden = false;
-        note.textContent = 'Account created! Check your email to verify — your profile finishes setting up automatically when you log in.';
+        note.textContent = 'Account created! Check your email to verify. Your profile finishes setting up automatically when you log in.';
         return;
       }
       var userId = acct.userId;
