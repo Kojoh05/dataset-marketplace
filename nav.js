@@ -1,6 +1,7 @@
 // === KOJOH SHARED SIDEBAR + SOFT NAVIGATION ===
-// Injects a persistent left icon-rail (collapsed) that expands into a
-// labeled page list on hamburger click — present on every app page.
+// Injects a persistent left navigation rail (icon-only collapsed, labeled
+// when expanded) — present on every app page, styled as part of the KOJOH
+// UI rather than a bolted-on dashboard drawer.
 // Also implements client-side "soft" navigation between app pages so
 // clicking a sidebar link swaps content instead of a full page reload.
 
@@ -30,17 +31,26 @@
     gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
     info: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
     help: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
-    bulb: '<path d="M12 2 2 22h20L12 2z"/><line x1="12" y1="9" x2="12" y2="14"/><line x1="12" y1="17" x2="12.01" y2="17"/>'
+    bulb: '<path d="M12 2 2 22h20L12 2z"/><line x1="12" y1="9" x2="12" y2="14"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+    chevronLeft: '<polyline points="15 18 9 12 15 6"/>'
   };
 
-  function svg(name, size) {
+  function svg(name, size, stroke) {
     size = size || 18;
-    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + (ICONS[name] || '') + '</svg>';
+    stroke = stroke || 1.75;
+    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + stroke + '" stroke-linecap="round" stroke-linejoin="round">' + (ICONS[name] || '') + '</svg>';
   }
 
   function currentFile() {
     var p = window.location.pathname.split('/').pop();
     return p || 'index.html';
+  }
+
+  function isExpandedPref() {
+    try { return localStorage.getItem('kojoh-sidebar-expanded') === '1'; } catch (e) { return false; }
+  }
+  function setExpandedPref(val) {
+    try { localStorage.setItem('kojoh-sidebar-expanded', val ? '1' : '0'); } catch (e) {}
   }
 
   function buildSidebarHTML() {
@@ -50,7 +60,8 @@
     html += '  <button type="button" class="ksb-hamburger" id="ksbToggle" aria-label="Toggle navigation">';
     html += '    <span></span><span></span><span></span>';
     html += '  </button>';
-    html += '  <a href="index.html" class="ksb-logo" data-ksb-link>K</a>';
+    html += '  <a href="index.html" class="ksb-wordmark" data-ksb-link>KOJOH</a>';
+    html += '  <button type="button" class="ksb-collapse-btn" id="ksbCollapseBtn" aria-label="Collapse navigation">' + svg('chevronLeft', 16, 2) + '</button>';
     html += '</div>';
     html += '<nav class="ksb-nav">';
     PAGES.forEach(function (section) {
@@ -67,15 +78,22 @@
     return html;
   }
 
+  function applyExpandedState(expanded) {
+    var rail = document.getElementById('ksbRail');
+    if (!rail) return;
+    rail.classList.toggle('expanded', expanded);
+    document.body.classList.toggle('ksb-expanded', expanded);
+  }
+
   function ensureSidebar() {
     var existing = document.getElementById('ksbRail');
     if (existing) existing.remove();
+    var mobileTrigger = document.getElementById('ksbMobileTrigger');
+    if (mobileTrigger) mobileTrigger.remove();
+
     var rail = document.createElement('aside');
     rail.id = 'ksbRail';
     rail.className = 'ksb-rail';
-    try {
-      if (localStorage.getItem('kojoh-sidebar-expanded') === '1') rail.classList.add('expanded');
-    } catch (e) {}
     rail.innerHTML = buildSidebarHTML();
     document.body.insertBefore(rail, document.body.firstChild);
     document.body.classList.add('ksb-has-rail');
@@ -88,13 +106,34 @@
       document.body.appendChild(overlay);
     }
 
+    // A small independent trigger that stays clickable on mobile even when
+    // the rail itself is collapsed down to width 0 (off-canvas).
+    var trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.id = 'ksbMobileTrigger';
+    trigger.className = 'ksb-mobile-trigger';
+    trigger.setAttribute('aria-label', 'Open navigation');
+    trigger.innerHTML = '<span></span><span></span><span></span>';
+    document.body.appendChild(trigger);
+
+    applyExpandedState(isExpandedPref());
+
     document.getElementById('ksbToggle').addEventListener('click', function () {
-      var isExpanded = rail.classList.toggle('expanded');
-      try { localStorage.setItem('kojoh-sidebar-expanded', isExpanded ? '1' : '0'); } catch (e) {}
+      var next = !rail.classList.contains('expanded');
+      applyExpandedState(next);
+      setExpandedPref(next);
+    });
+    document.getElementById('ksbCollapseBtn').addEventListener('click', function () {
+      applyExpandedState(false);
+      setExpandedPref(false);
+    });
+    trigger.addEventListener('click', function () {
+      applyExpandedState(true);
+      setExpandedPref(true);
     });
     overlay.addEventListener('click', function () {
-      rail.classList.remove('expanded');
-      try { localStorage.setItem('kojoh-sidebar-expanded', '0'); } catch (e) {}
+      applyExpandedState(false);
+      setExpandedPref(false);
     });
   }
 
@@ -150,7 +189,8 @@
           window.history.pushState({ ksbNav: true }, '', url);
         }
 
-        // Re-attach the sidebar (body content was fully replaced)
+        // Re-attach the sidebar (body content — and its classes — were
+        // fully replaced, so re-apply the ksb-has-rail/expanded state too).
         ensureSidebar();
 
         window.scrollTo(0, 0);
@@ -169,8 +209,11 @@
     var href = a.getAttribute('href');
     if (!href || href.charAt(0) === '#') return;
     e.preventDefault();
-    var rail = document.getElementById('ksbRail');
-    if (rail) rail.classList.remove('mobile-open');
+    // On mobile the rail is an overlay drawer — close it after a nav pick.
+    if (window.matchMedia && window.matchMedia('(max-width: 720px)').matches) {
+      applyExpandedState(false);
+      setExpandedPref(false);
+    }
     if (href === currentFile()) return;
     swapTo(href, true);
   });
