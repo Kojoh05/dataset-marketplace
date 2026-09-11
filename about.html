@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>KOJOH — About</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="pages.css">
+</head>
+<body data-theme="light">
+
+<header class="page-header">
+  <a href="index.html" class="page-back" aria-label="Back to home"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></a>
+  <span class="page-title">About</span>
+  <a href="index.html" class="page-brand">KOJOH</a>
+</header>
+
+<main class="page-wrap">
+  <div class="page-lead">
+    <h1>About KOJOH</h1>
+    <p>KOJOH is a dataset marketplace built for people who want a data career — not another folder of clean CSVs, but real business problems with the messy data they came with.</p>
+  </div>
+
+  <div class="page-card">
+    <h2>Why we exist</h2>
+    <p>Most learning datasets are toy problems. Employers hire for judgment on real, ambiguous data. Every KOJOH dataset starts as an actual problem pulled from Logistics, Sales, Service, Product, E-commerce, or HR — with its own schema, its own story, and a challenge worth solving.</p>
+  </div>
+
+  <div class="page-card">
+    <h2>What makes it different</h2>
+    <p>Datasets are organized by <strong>job track</strong> (Data Analyst, Data Engineer, Product Analyst, Quality Analyst) rather than generic topic labels. Every dataset keeps its own independent schema — because real business data never looks the same twice. Search is powered by a transparent ontology of job titles, tools, and domains — no AI black box.</p>
+  </div>
+
+  <div class="page-card">
+    <h2>Built by</h2>
+    <p>KOJOH is built and maintained by <strong>Yash Chauhan</strong> — a working data analyst who spent years watching junior candidates struggle to bridge the gap between coursework and real analytics. This is the resource he wished existed.</p>
+  </div>
+
+  <div class="page-card">
+    <h2>Version</h2>
+    <p>You're on KOJOH <strong id="aboutVersion">v0.3.0</strong> — the accounts, profile panel, and settings release. Full changelog coming soon.</p>
+  </div>
+</main>
+
+<script src="config.js"></script>
+<script>
+  document.getElementById('aboutVersion').textContent = 'v' + (window.KOJOH_VERSION || '0.0.0');
+</script>
+</body>
+</html>

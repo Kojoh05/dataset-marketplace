@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>KOJOH — Saved datasets</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="pages.css">
+</head>
+<body data-theme="light">
+
+<header class="page-header">
+  <a href="index.html" class="page-back" aria-label="Back to home"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></a>
+  <span class="page-title">Saved datasets</span>
+  <a href="index.html" class="page-brand">KOJOH</a>
+</header>
+
+<main class="page-wrap">
+  <div class="page-lead">
+    <h1>Your bookmarks</h1>
+    <p>Click the bookmark icon on any dataset to save it here for later. Bookmarks are tied to your account and follow you across devices.</p>
+  </div>
+
+  <div id="savedResults"></div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="supabase-config.js"></script>
+<script src="config.js"></script>
+<script>
+  var LIVE = !!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase);
+  var SUPA = LIVE ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY) : null;
+  var el = document.getElementById('savedResults');
+
+  function empty(icon, title, body){
+    el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">' + icon + '</div><h3>' + title + '</h3><p>' + body + '</p></div>';
+  }
+  function escape(s){ return String(s || '').replace(/[<>&"]/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]; }); }
+
+  async function load(){
+    if (!LIVE) { empty('🔌', 'Preview mode', 'Connect Supabase to see your bookmarks.'); return; }
+    var s = await SUPA.auth.getSession();
+    if (!s.data.session) { empty('🔒', 'Sign in required', 'Please <a href="auth.html">log in</a> to see your saved datasets.'); return; }
+    var res = await SUPA.from('bookmarks').select('dataset_id, created_at, datasets(title, short_description, slug, price)').order('created_at', { ascending: false });
+    if (res.error) { empty('⚠️', 'Could not load', res.error.message); return; }
+    var rows = (res.data || []).filter(function(r){ return r.datasets; });
+    if (!rows.length) { empty('🔖', 'No bookmarks yet', 'When you find a dataset you like, tap the bookmark icon on it — it will appear here.'); return; }
+    el.innerHTML = '<div class="ds-list">' + rows.map(function(r){
+      var d = r.datasets;
+      return '<div class="ds-item"><div class="ds-item-info"><div class="ds-item-title">' + escape(d.title) + '</div><div class="ds-item-sub">' + escape(d.short_description || '') + '</div></div><div class="ds-item-meta"><span class="ds-item-price">' + (d.price ? '₹' + d.price : 'Free') + '</span><button class="ds-item-bookmark on" data-id="' + escape(r.dataset_id) + '" title="Remove bookmark">★</button></div></div>';
+    }).join('') + '</div>';
+    el.querySelectorAll('.ds-item-bookmark').forEach(function(b){
+      b.addEventListener('click', async function(){
+        await SUPA.from('bookmarks').delete().eq('user_id', s.data.session.user.id).eq('dataset_id', b.dataset.id);
+        load();
+      });
+    });
+  }
+  document.addEventListener('DOMContentLoaded', load);
+</script>
+</body>
+</html>

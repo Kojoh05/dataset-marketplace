@@ -259,6 +259,49 @@
     </div>
 
     <div class="panel-section">
+      <div class="panel-section-title">BROWSE</div>
+      <a href="search.html" class="panel-menu-row panel-menu-link">
+        <span class="panel-menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+        <span class="panel-menu-text">Search datasets</span>
+        <span class="panel-menu-arrow">&rsaquo;</span>
+      </a>
+      <a href="recommendations.html" class="panel-menu-row panel-menu-link">
+        <span class="panel-menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15 8 22 9 17 14 18 21 12 18 6 21 7 14 2 9 9 8 12 2"/></svg></span>
+        <span class="panel-menu-text">Recommended</span>
+        <span class="panel-menu-arrow">&rsaquo;</span>
+      </a>
+      <a href="saved.html" class="panel-menu-row panel-menu-link">
+        <span class="panel-menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span>
+        <span class="panel-menu-text">Saved datasets</span>
+        <span class="panel-menu-arrow">&rsaquo;</span>
+      </a>
+      <a href="purchases.html" class="panel-menu-row panel-menu-link">
+        <span class="panel-menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span>
+        <span class="panel-menu-text">Your purchases</span>
+        <span class="panel-menu-arrow">&rsaquo;</span>
+      </a>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-section-title">MORE</div>
+      <a href="about.html" class="panel-menu-row panel-menu-link">
+        <span class="panel-menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span>
+        <span class="panel-menu-text">About KOJOH</span>
+        <span class="panel-menu-arrow">&rsaquo;</span>
+      </a>
+      <a href="help.html" class="panel-menu-row panel-menu-link">
+        <span class="panel-menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+        <span class="panel-menu-text">Help &amp; contact</span>
+        <span class="panel-menu-arrow">&rsaquo;</span>
+      </a>
+      <a href="suggestions.html" class="panel-menu-row panel-menu-link">
+        <span class="panel-menu-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 2 22h20L12 2z"/><line x1="12" y1="9" x2="12" y2="14"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+        <span class="panel-menu-text">Suggestions</span>
+        <span class="panel-menu-arrow">&rsaquo;</span>
+      </a>
+    </div>
+
+    <div class="panel-section">
       <div class="panel-section-title">PREFERENCES</div>
       <a href="settings.html" class="panel-menu-row panel-menu-link">
         <span class="panel-menu-icon">
@@ -285,6 +328,23 @@
 
     <div style="flex:1;"></div>
 
+    <div class="panel-feedback" id="panelFeedback">
+      <div class="panel-feedback-q">Find this app useful?</div>
+      <div class="panel-feedback-btns">
+        <button type="button" class="panel-vote-btn" data-vote="like" onclick="handleFeedback('like')" aria-label="Like">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+          <span>Like</span>
+        </button>
+        <button type="button" class="panel-vote-btn" data-vote="dislike" onclick="handleFeedback('dislike')" aria-label="Dislike">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zM17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg>
+          <span>Dislike</span>
+        </button>
+      </div>
+      <div class="panel-feedback-note" id="panelFeedbackNote"></div>
+    </div>
+
+    <div class="panel-version">KOJOH <span id="panelVersion">v0.0.0</span></div>
+
     <div class="panel-install-wrap">
       <button class="panel-install-btn" id="panelInstallBtn" onclick="triggerInstall()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -296,6 +356,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="supabase-config.js"></script>
+<script src="config.js"></script>
 <script src="profile.js"></script>
 <script src="script.js"></script>
 </body>

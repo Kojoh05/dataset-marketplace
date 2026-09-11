@@ -512,3 +512,29 @@ h2.section-title{font-size:1.5rem; margin-bottom:0.375rem;}
   .folder-grid{display:flex; flex-direction:column; gap:1.25rem;}
   .list-card{padding:1rem;}
 }
+
+
+/* === PANEL: LIKE/DISLIKE + VERSION === */
+.panel-feedback{
+  margin-top:1.25rem; padding:0.9rem 1rem;
+  background:var(--bg); border:1px solid var(--line); border-radius:12px;
+  text-align:center;
+}
+.panel-feedback-q{font-size:12px; font-weight:600; color:var(--muted); margin-bottom:0.55rem;}
+.panel-feedback-btns{display:flex; gap:0.5rem; justify-content:center;}
+.panel-vote-btn{
+  display:inline-flex; align-items:center; gap:0.35rem;
+  font-family:inherit; font-size:0.75rem; font-weight:600; cursor:pointer;
+  padding:0.4rem 0.85rem; border-radius:999px;
+  background:var(--card); border:1px solid var(--line); color:var(--text);
+  transition:background 0.15s ease, border-color 0.15s ease;
+}
+.panel-vote-btn:hover{background:var(--bg);}
+.panel-vote-btn.on{background:var(--text); color:var(--bg); border-color:var(--text);}
+.panel-feedback-note{
+  font-size:11px; color:var(--muted); margin-top:0.5rem; min-height:14px;
+}
+.panel-version{
+  text-align:center; font-size:11px; color:var(--muted);
+  margin-top:0.75rem; letter-spacing:0.02em;
+}

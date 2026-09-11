@@ -244,8 +244,12 @@ function toggleNameEdit(){
   field.disabled = !isDisabled;
   if(isDisabled){ field.focus(); field.select(); }
 }
-document.getElementById('nameField').addEventListener('blur', function(){ this.disabled = true; });
-document.getElementById('nameField').addEventListener('keydown', function(e){ if(e.key === 'Enter') this.blur(); });
+(function(){
+  var nf = document.getElementById('nameField');
+  if (!nf) return; // panel was redesigned — nameField no longer exists
+  nf.addEventListener('blur', function(){ this.disabled = true; });
+  nf.addEventListener('keydown', function(e){ if(e.key === 'Enter') this.blur(); });
+})();
 
 // === HERO THEME SWITCHER ===
 function setHeroTheme(theme){
@@ -304,13 +308,17 @@ function toggleTheme(){
   const toggle = document.getElementById('themeToggle');
   const label = document.getElementById('themeLabel');
   const isDark = body.getAttribute('data-theme') === 'dark';
-  if(isDark){
-    body.setAttribute('data-theme','light');
-    toggle.classList.remove('on');
-    label.textContent = 'Light';
-  } else {
-    body.setAttribute('data-theme','dark');
-    toggle.classList.add('on');
-    label.textContent = 'Dark';
-  }
+  var next = isDark ? 'light' : 'dark';
+  body.setAttribute('data-theme', next);
+  if (toggle) toggle.classList.toggle('on', next === 'dark');
+  if (label) label.textContent = next === 'dark' ? 'Dark' : 'Light';
+  try{ localStorage.setItem('kojoh-theme', next); }catch(e){}
 }
+
+// Apply persisted theme on load (written from settings.html)
+(function(){
+  try{
+    var saved = localStorage.getItem('kojoh-theme');
+    if (saved === 'dark' || saved === 'light') document.body.setAttribute('data-theme', saved);
+  }catch(e){}
+})();

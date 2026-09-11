@@ -108,5 +108,42 @@
     }
   }
 
-  document.addEventListener('DOMContentLoaded', loadSession);
+  // ---------- Version display ----------
+  function renderVersion(){
+    var v = window.KOJOH_VERSION || '0.0.0';
+    var el = $('panelVersion'); if (el) el.textContent = 'v' + v;
+  }
+
+  // ---------- Like / dislike ----------
+  window.handleFeedback = async function(vote){
+    var noteEl = $('panelFeedbackNote');
+    var likeBtn = document.querySelector('.panel-vote-btn[data-vote="like"]');
+    var disBtn = document.querySelector('.panel-vote-btn[data-vote="dislike"]');
+    if (!LIVE) { if (noteEl) noteEl.textContent = 'Preview mode — connect Supabase.'; return; }
+    var s = await SUPA.auth.getSession();
+    if (!s.data.session) { if (noteEl) noteEl.textContent = 'Sign in to leave a vote.'; return; }
+    var uid = s.data.session.user.id;
+    var res = await SUPA.from('app_feedback').upsert({ user_id: uid, vote: vote, updated_at: new Date().toISOString() });
+    if (res.error) { if (noteEl) noteEl.textContent = res.error.message; return; }
+    if (likeBtn) likeBtn.classList.toggle('on', vote === 'like');
+    if (disBtn) disBtn.classList.toggle('on', vote === 'dislike');
+    if (noteEl) noteEl.textContent = 'Thanks for the feedback!';
+  };
+  async function loadFeedbackState(){
+    if (!LIVE) return;
+    var s = await SUPA.auth.getSession();
+    if (!s.data.session) return;
+    var uid = s.data.session.user.id;
+    var res = await SUPA.from('app_feedback').select('vote').eq('user_id', uid).maybeSingle();
+    if (res.data && res.data.vote){
+      var btn = document.querySelector('.panel-vote-btn[data-vote="' + res.data.vote + '"]');
+      if (btn) btn.classList.add('on');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    renderVersion();
+    loadSession();
+    loadFeedbackState();
+  });
 })();

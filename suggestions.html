@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>KOJOH — Suggestions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="pages.css">
+</head>
+<body data-theme="light">
+
+<header class="page-header">
+  <a href="index.html" class="page-back" aria-label="Back to home"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></a>
+  <span class="page-title">Suggestions</span>
+  <a href="index.html" class="page-brand">KOJOH</a>
+</header>
+
+<main class="page-wrap">
+  <div class="page-lead">
+    <h1>Tell us what to build next</h1>
+    <p>A dataset you wish existed, a job track we should add, a feature that's missing — anything. Your suggestions land in our review queue and shape the roadmap.</p>
+  </div>
+
+  <div class="page-card">
+    <h2>Your idea</h2>
+    <form class="page-form" id="sForm">
+      <label class="page-label">What would you like us to add or fix?</label>
+      <textarea class="page-textarea" id="sMessage" placeholder="I wish KOJOH had a dataset for..."></textarea>
+      <button type="submit" class="page-submit">Send suggestion</button>
+      <div class="page-note" id="sNote" hidden></div>
+    </form>
+  </div>
+
+  <div id="pastList" class="page-card" hidden>
+    <h2>Your past suggestions</h2>
+    <div id="pastListBody" style="margin-top:0.75rem;"></div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="supabase-config.js"></script>
+<script src="config.js"></script>
+<script>
+  var LIVE = !!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase);
+  var SUPA = LIVE ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY) : null;
+  var noteEl = document.getElementById('sNote');
+  function note(msg, kind){ noteEl.hidden = false; noteEl.textContent = msg; noteEl.classList.remove('error','ok'); if (kind) noteEl.classList.add(kind); }
+
+  async function loadPast(uid){
+    var res = await SUPA.from('suggestions').select('message, created_at').eq('user_id', uid).order('created_at', { ascending: false }).limit(10);
+    if (res.error || !res.data || !res.data.length) return;
+    document.getElementById('pastList').hidden = false;
+    document.getElementById('pastListBody').innerHTML = res.data.map(function(r){
+      var d = new Date(r.created_at); var when = d.toLocaleDateString();
+      return '<div style="padding:0.75rem 0;border-bottom:1px solid var(--line);"><div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.2rem;">' + when + '</div><div style="font-size:0.875rem;">' + (r.message||'').replace(/[<>&]/g, function(c){return{'<':'&lt;','>':'&gt;','&':'&amp;'}[c];}) + '</div></div>';
+    }).join('');
+  }
+
+  async function init(){
+    if (!LIVE) return;
+    var s = await SUPA.auth.getSession();
+    if (s.data.session) loadPast(s.data.session.user.id);
+  }
+  document.getElementById('sForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    var msg = document.getElementById('sMessage').value.trim();
+    if (!msg) { note('Type something first.', 'error'); return; }
+    if (msg.length < 6) { note('A little more detail helps — at least a few words.', 'error'); return; }
+    if (!LIVE) { note('Preview mode — connect Supabase to send suggestions.', 'error'); return; }
+    var s = await SUPA.auth.getSession();
+    if (!s.data.session) { note('Please log in first so we can follow up if needed.', 'error'); return; }
+    var uid = s.data.session.user.id;
+    var res = await SUPA.from('suggestions').insert({ user_id: uid, message: msg });
+    if (res.error) { note(res.error.message, 'error'); return; }
+    document.getElementById('sMessage').value = '';
+    note('Thanks — got it! We read every suggestion.', 'ok');
+    loadPast(uid);
+  });
+  document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
