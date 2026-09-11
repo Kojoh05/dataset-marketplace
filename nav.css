@@ -2,12 +2,20 @@
    Designed to read as part of the existing KOJOH UI: same cream
    background, same hairline borders, same type, no separate "dashboard"
    surface or accent color. Monochrome except the existing pale-blue
-   avatar, which lives outside this component. */
+   avatar, which lives outside this component.
+
+   The page body itself is a rounded "card" inset 10px from the viewport
+   (see body{margin:10px 10px 0; border-radius:20px 20px 0 0} in
+   styles.css) sitting on a near-black html background. The rail is
+   inset/rounded to match that same card on its top-left corner instead
+   of sitting flush at the true viewport edge — otherwise it reads as a
+   separate layer floating on top of the page rather than the page's own
+   left edge. */
 
 :root {
-  --ksb-collapsed: 88px;
-  --ksb-expanded: 320px;
-  --ksb-duration: 260ms;
+  --ksb-collapsed: 64px;
+  --ksb-expanded: 240px;
+  --ksb-duration: 240ms;
   --ksb-ease: cubic-bezier(0.4, 0, 0.2, 1);
   --ksb-hover: rgba(28, 26, 30, 0.045);
   --ksb-active: rgba(28, 26, 30, 0.07);
@@ -19,12 +27,13 @@
 
 .ksb-rail {
   position: fixed;
-  top: 0;
-  left: 0;
+  top: 10px;
+  left: 10px;
   bottom: 0;
   width: var(--ksb-collapsed);
   background: var(--bg, #F4F1EA);
   border-right: 1px solid var(--line, #E4E0D6);
+  border-top-left-radius: 20px;
   z-index: 900;
   display: flex;
   flex-direction: column;
@@ -41,19 +50,19 @@
 .ksb-top {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 1.35rem 1rem 1rem;
+  gap: 0.5rem;
+  padding: 1.1rem 0.85rem 0.75rem;
   flex-shrink: 0;
-  min-height: 28px;
+  min-height: 24px;
 }
 
 .ksb-hamburger {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   flex-shrink: 0;
   border: none;
   background: transparent;
-  border-radius: 8px;
+  border-radius: 7px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -69,7 +78,7 @@
 
 .ksb-hamburger span {
   display: block;
-  width: 16px;
+  width: 15px;
   height: 1.5px;
   background: var(--text, #1C1A1E);
   border-radius: 2px;
@@ -78,14 +87,14 @@
 .ksb-wordmark {
   font-family: 'Space Grotesk', sans-serif;
   font-weight: 700;
-  font-size: 1.0625rem;
+  font-size: 0.9375rem;
   letter-spacing: 0.01em;
   color: var(--text, #1C1A1E);
   text-decoration: none;
   white-space: nowrap;
   opacity: 0;
   transform: translateX(-6px);
-  transition: opacity 0.18s ease, transform 0.18s ease;
+  transition: opacity 0.16s ease, transform 0.16s ease;
   pointer-events: none;
 }
 
@@ -93,17 +102,17 @@
   opacity: 1;
   transform: translateX(0);
   pointer-events: auto;
-  transition-delay: 0.06s;
+  transition-delay: 0.05s;
 }
 
 .ksb-collapse-btn {
-  width: 26px;
-  height: 26px;
+  width: 22px;
+  height: 22px;
   flex-shrink: 0;
   margin-left: auto;
   border: none;
   background: transparent;
-  border-radius: 7px;
+  border-radius: 6px;
   display: none;
   align-items: center;
   justify-content: center;
@@ -122,7 +131,7 @@
 /* ---------- Nav list ---------- */
 .ksb-nav {
   flex: 1;
-  padding: 0.35rem 0.75rem 1rem;
+  padding: 0.3rem 0.5rem 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.1rem;
@@ -133,7 +142,7 @@
   font-weight: 600;
   letter-spacing: 0.06em;
   color: var(--muted, #7A7772);
-  padding: 1rem 0.65rem 0.4rem;
+  padding: 0.9rem 0.55rem 0.35rem;
   white-space: nowrap;
   opacity: 0;
   height: 0;
@@ -150,9 +159,9 @@
 .ksb-item {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
-  padding: 0.6rem 0.65rem;
-  border-radius: 12px;
+  gap: 0.7rem;
+  padding: 0.55rem 0.5rem;
+  border-radius: 10px;
   text-decoration: none;
   color: var(--text, #1C1A1E);
   white-space: nowrap;
@@ -171,8 +180,8 @@
 
 .ksb-item-icon {
   flex-shrink: 0;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -180,7 +189,7 @@
 }
 
 .ksb-item-label {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   opacity: 0;
   max-width: 0;
   transition: opacity 0.15s ease;
@@ -188,15 +197,13 @@
 
 .ksb-rail.expanded .ksb-item-label {
   opacity: 1;
-  max-width: 220px;
-  transition-delay: 0.05s;
+  max-width: 170px;
+  transition-delay: 0.04s;
 }
 
-/* Divider between BROWSE and MORE groups (the second group-label already
-   carries top spacing; a hairline reinforces the section break once
-   expanded). */
+/* Divider between BROWSE and MORE groups. */
 .ksb-nav > .ksb-group-label ~ .ksb-group-label {
-  margin-top: 0.4rem;
+  margin-top: 0.35rem;
   border-top: 1px solid var(--line, #E4E0D6);
 }
 
@@ -212,8 +219,8 @@
   position: fixed;
   top: 14px;
   left: 14px;
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   z-index: 950;
   background: var(--bg, #F4F1EA);
   border: 1px solid var(--line, #E4E0D6);
@@ -227,7 +234,7 @@
 }
 .ksb-mobile-trigger span {
   display: block;
-  width: 16px;
+  width: 15px;
   height: 1.5px;
   background: var(--text, #1C1A1E);
   border-radius: 2px;
@@ -244,20 +251,24 @@ body.ksb-has-rail.ksb-expanded {
   padding-left: var(--ksb-expanded);
 }
 
-/* Mobile: the rail becomes a true off-canvas drawer. Collapsed = hidden
-   entirely (no persistent strip), so it never competes with the site's
-   own mobile nav; the small trigger button opens it as an overlay. */
+/* Mobile: the rail becomes a true off-canvas drawer, flush with the real
+   viewport edge (the body's own rounded-card margin is already dropped
+   at this width, so nothing to align with). Collapsed = hidden entirely
+   (no persistent strip); the small trigger button opens it as an overlay. */
 @media (max-width: 720px) {
   body.ksb-has-rail,
   body.ksb-has-rail.ksb-expanded {
     padding-left: 0;
   }
   .ksb-rail {
+    top: 0;
+    left: 0;
     width: 0;
     border-right: none;
+    border-top-left-radius: 0;
   }
   .ksb-rail.expanded {
-    width: min(320px, 85vw);
+    width: min(240px, 80vw);
     border-right: 1px solid var(--line, #E4E0D6);
     box-shadow: 2px 0 24px rgba(0, 0, 0, 0.14);
   }
@@ -270,13 +281,5 @@ body.ksb-has-rail.ksb-expanded {
     inset: 0;
     z-index: 890;
     background: rgba(20, 19, 17, 0.32);
-  }
-}
-
-/* Narrower desktop / tablet widths: keep the expanded rail from crowding
-   the content, without changing the collapsed (default) behavior. */
-@media (min-width: 721px) and (max-width: 1080px) {
-  :root {
-    --ksb-expanded: 288px;
   }
 }
