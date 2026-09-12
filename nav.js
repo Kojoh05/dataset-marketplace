@@ -94,9 +94,12 @@
   // Reading shouldn't have a menu sitting on top of the page, so the rail
   // slides off to the left edge on scroll down and slides back when the
   // reader scrolls up, returns to the top, or reaches for the edge handle.
-  var TUCK_AFTER = 64;   // px scrolled before tucking is allowed at all
-  var TUCK_DELTA = 5;    // ignore tiny scroll jitter
+  var TUCK_AFTER = 140;  // px scrolled before tucking is allowed at all
+  var TUCK_DELTA = 26;   // needs a deliberate scroll, not a nudge
+  var UNTUCK_DELTA = 40; // and a deliberate scroll back up to bring it in
   var lastScrollY = 0;
+  var anchorY = 0;
+  var scrollDir = 0;
   var scrollTicking = false;
 
   function setTucked(tucked) {
@@ -107,19 +110,33 @@
     document.body.classList.toggle('ksb-tucked', tucked);
   }
 
+  // Distance is measured from the last point where the scroll direction
+  // changed, not frame to frame, so it takes a deliberate scroll to move
+  // the rail rather than the smallest flick of the wheel.
   function onScroll() {
     if (scrollTicking) return;
     scrollTicking = true;
     window.requestAnimationFrame(function () {
       scrollTicking = false;
       var y = window.scrollY || window.pageYOffset || 0;
+      var dir = y > lastScrollY ? 1 : (y < lastScrollY ? -1 : scrollDir);
+
+      if (dir !== scrollDir) {
+        // Turned around: measure from where the turn happened, not from
+        // here, so a single fast scroll still counts its full distance.
+        scrollDir = dir;
+        anchorY = lastScrollY;
+      }
+
       if (y <= TUCK_AFTER) {
         setTucked(false);
-      } else if (y > lastScrollY + TUCK_DELTA) {
-        setTucked(true);            // scrolling down: get out of the way
-      } else if (y < lastScrollY - TUCK_DELTA) {
-        setTucked(false);           // scrolling back up: come back
+        anchorY = y;
+      } else if (dir === 1 && y - anchorY > TUCK_DELTA) {
+        setTucked(true);         // scrolling down: get out of the way
+      } else if (dir === -1 && anchorY - y > UNTUCK_DELTA) {
+        setTucked(false);        // scrolling back up: come back
       }
+
       lastScrollY = y;
     });
   }
@@ -129,15 +146,29 @@
   // on its own as soon as the pointer moves onto the page, so the content
   // goes full width. The CSS width/padding transitions animate the close.
   var autoCloseArmed = false;
+  var autoCloseTimer = null;
+  var AUTO_CLOSE_DELAY = 450; // let the pointer settle before closing
 
   document.addEventListener('pointerover', function (e) {
     if (!autoCloseArmed) return;
     var rail = document.getElementById('ksbRail');
-    if (!rail || !rail.classList.contains('expanded')) { autoCloseArmed = false; return; }
-    // Still hovering inside the panel itself: leave it open.
-    if (e.target && e.target.closest && e.target.closest('#ksbRail')) return;
-    autoCloseArmed = false;
-    collapse();
+    if (!rail || !rail.classList.contains('expanded')) {
+      autoCloseArmed = false;
+      clearTimeout(autoCloseTimer);
+      return;
+    }
+    // Back inside the panel: cancel any pending close, they're still using it.
+    if (e.target && e.target.closest && e.target.closest('#ksbRail')) {
+      clearTimeout(autoCloseTimer);
+      autoCloseTimer = null;
+      return;
+    }
+    if (autoCloseTimer) return; // already counting down
+    autoCloseTimer = setTimeout(function () {
+      autoCloseTimer = null;
+      autoCloseArmed = false;
+      collapse();
+    }, AUTO_CLOSE_DELAY);
   });
 
   function ensureSidebar() {
@@ -183,7 +214,8 @@
     edge.addEventListener('pointerenter', function () { setTucked(false); });
     edge.addEventListener('click', function () { setTucked(false); });
 
-    lastScrollY = window.scrollY || window.pageYOffset || 0;
+    lastScrollY = anchorY = window.scrollY || window.pageYOffset || 0;
+    scrollDir = 0;
     applyExpandedState(isExpandedPref());
 
     document.getElementById('ksbToggle').addEventListener('click', function () {

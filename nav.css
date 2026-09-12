@@ -15,8 +15,9 @@
 :root {
   --ksb-collapsed: 64px;
   --ksb-expanded: 240px;
-  --ksb-duration: 240ms;
-  --ksb-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --ksb-duration: 380ms;        /* open/close the panel: unhurried */
+  --ksb-tuck-duration: 560ms;   /* sliding away on scroll: slower still */
+  --ksb-ease: cubic-bezier(0.33, 0, 0.2, 1);
   --ksb-hover: rgba(28, 26, 30, 0.045);
   --ksb-active: rgba(28, 26, 30, 0.07);
 }
@@ -40,8 +41,8 @@
   overflow-x: hidden;
   overflow-y: auto;
   transition: width var(--ksb-duration) var(--ksb-ease),
-              transform var(--ksb-duration) var(--ksb-ease),
-              opacity var(--ksb-duration) var(--ksb-ease);
+              transform var(--ksb-tuck-duration) var(--ksb-ease),
+              opacity var(--ksb-tuck-duration) var(--ksb-ease);
 }
 
 .ksb-rail.expanded {
@@ -58,7 +59,9 @@
 }
 
 /* The sliver left behind when the rail is tucked: a quiet little grab
-   handle at the left edge, with a generous invisible hit area. */
+   handle at the left edge, with a generous invisible hit area.
+   Mobile only. On desktop scrolling back up brings the rail in, so an
+   edge handle there would just be clutter. */
 .ksb-edge {
   position: fixed;
   left: 0;
@@ -87,9 +90,6 @@
 .ksb-edge:hover::before {
   height: 72px;
   background: var(--muted, #7A7772);
-}
-body.ksb-tucked .ksb-edge {
-  display: flex;
 }
 
 /* ---------- Top bar ---------- */
@@ -329,6 +329,11 @@ body.ksb-has-rail.ksb-expanded {
     box-shadow: 2px 0 24px rgba(0, 0, 0, 0.14);
   }
   .ksb-mobile-trigger {
+    display: flex;
+  }
+  /* On a phone there's no "scroll up a little" muscle memory, so the
+     edge handle is how you pull the drawer back. */
+  body.ksb-tucked .ksb-edge {
     display: flex;
   }
   .ksb-rail.expanded ~ .ksb-overlay {

@@ -31,19 +31,18 @@ async function loadUser(){
   $('settingsEmail').placeholder = currentUser.email || 'new@example.com';
 }
 
-// ---------- Appearance toggle (shared with index.html localStorage) ----------
+// ---------- Appearance toggle ----------
+// theme.js is the single source of truth: it stores the preference and has
+// already applied it to <html> before this page painted. All this does is
+// mirror that state in the toggle and flip it on click, so every other page
+// picks up the change on its next load.
 (function initTheme(){
-  var saved = 'light';
-  try { saved = localStorage.getItem('kojoh-theme') || 'light'; } catch(e){}
-  applyTheme(saved);
+  markTheme(window.kojohGetTheme ? window.kojohGetTheme() : 'light');
   $('themeToggle').addEventListener('click', function(){
-    var next = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    applyTheme(next);
-    try { localStorage.setItem('kojoh-theme', next); } catch(e){}
+    markTheme(window.kojohToggleTheme ? window.kojohToggleTheme() : 'light');
   });
 })();
-function applyTheme(theme){
-  document.body.setAttribute('data-theme', theme);
+function markTheme(theme){
   $('themeToggle').classList.toggle('on', theme === 'dark');
   $('themeLabel').textContent = theme === 'dark' ? 'Dark' : 'Light';
 }

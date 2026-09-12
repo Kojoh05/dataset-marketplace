@@ -325,26 +325,17 @@ function setHeroCharacter(character){
   }, 2600);
 })();
 
-// === THEME TOGGLE (legacy helper, settings.html has its own copy) ===
+// === THEME TOGGLE ===
+// theme.js owns the stored preference and applies it to <html> before the
+// first paint, so there's nothing to restore here: this only flips it and
+// updates whatever toggle UI the current page happens to show.
 function toggleTheme(){
-  const body = document.body;
-  const toggle = document.getElementById('themeToggle');
-  const label = document.getElementById('themeLabel');
-  const isDark = body.getAttribute('data-theme') === 'dark';
-  var next = isDark ? 'light' : 'dark';
-  body.setAttribute('data-theme', next);
+  var next = window.kojohToggleTheme ? window.kojohToggleTheme() : 'light';
+  var toggle = document.getElementById('themeToggle');
+  var label = document.getElementById('themeLabel');
   if (toggle) toggle.classList.toggle('on', next === 'dark');
   if (label) label.textContent = next === 'dark' ? 'Dark' : 'Light';
-  try{ localStorage.setItem('kojoh-theme', next); }catch(e){}
 }
-
-// Apply persisted theme on load (written from settings.html)
-(function(){
-  try{
-    var saved = localStorage.getItem('kojoh-theme');
-    if (saved === 'dark' || saved === 'light') document.body.setAttribute('data-theme', saved);
-  }catch(e){}
-})();
 
 // Expose the functions index.html's inline onclick="..." attributes need:
 // wrapping this whole file in an IIFE (so it's safe to re-run on every
