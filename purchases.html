@@ -30,6 +30,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="supabase-config.js"></script>
 <script src="config.js"></script>
+<script src="icons.js"></script>
 <script>
   var LIVE = !!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase);
   var SUPA = LIVE ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY) : null;
@@ -41,13 +42,13 @@
   function escape(s){ return String(s || '').replace(/[<>&"]/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]; }); }
 
   async function load(){
-    if (!LIVE) { empty('🔌', 'Preview mode', 'Connect Supabase to see your purchases.'); return; }
+    if (!LIVE) { empty(kIcon('plug'), 'Preview mode', 'Connect Supabase to see your purchases.'); return; }
     var s = await SUPA.auth.getSession();
-    if (!s.data.session) { empty('🔒', 'Sign in required', 'Please <a href="auth.html">log in</a> to see your purchases.'); return; }
+    if (!s.data.session) { empty(kIcon('lock'), 'Sign in required', 'Please <a href="auth.html">log in</a> to see your purchases.'); return; }
     var res = await SUPA.from('purchases').select('dataset_id, price_paid, purchased_at, datasets(title, short_description, slug)').order('purchased_at', { ascending: false });
-    if (res.error) { empty('⚠️', 'Could not load', res.error.message); return; }
+    if (res.error) { empty(kIcon('alert'), 'Could not load', res.error.message); return; }
     var rows = (res.data || []).filter(function(r){ return r.datasets; });
-    if (!rows.length) { empty('🛒', 'No purchases yet', 'Free datasets don\'t count here. This page shows paid datasets you own. Once you buy one it lives here for re-download.'); return; }
+    if (!rows.length) { empty(kIcon('bag'), 'No purchases yet', 'Free datasets don\'t count here. This page shows paid datasets you own. Once you buy one it lives here for re-download.'); return; }
     el.innerHTML = '<div class="ds-list">' + rows.map(function(r){
       var d = r.datasets;
       var paid = r.price_paid ? '₹' + r.price_paid + ' paid' : 'Free';

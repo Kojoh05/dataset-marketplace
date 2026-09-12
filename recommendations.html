@@ -30,6 +30,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="supabase-config.js"></script>
 <script src="config.js"></script>
+<script src="icons.js"></script>
 <script>
   var LIVE = !!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase);
   var SUPA = LIVE ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY) : null;
@@ -42,27 +43,27 @@
   function escape(s){ return String(s || '').replace(/[<>&"]/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]; }); }
 
   async function load(){
-    if (!LIVE) { empty('🔌', 'Preview mode', 'Connect Supabase to load recommendations.'); return; }
+    if (!LIVE) { empty(kIcon('plug'), 'Preview mode', 'Connect Supabase to load recommendations.'); return; }
     var s = await SUPA.auth.getSession();
-    if (!s.data.session) { empty('🔒', 'Sign in required', 'Please <a href="auth.html">log in</a> so we can tailor recommendations to your job tracks.'); return; }
+    if (!s.data.session) { empty(kIcon('lock'), 'Sign in required', 'Please <a href="auth.html">log in</a> so we can tailor recommendations to your job tracks.'); return; }
     var uid = s.data.session.user.id;
 
     var pjt = await SUPA.from('profile_job_titles').select('job_title_id, job_titles(name)').eq('profile_id', uid);
-    if (pjt.error) { empty('⚠️', 'Could not load your tracks', pjt.error.message); return; }
+    if (pjt.error) { empty(kIcon('alert'), 'Could not load your tracks', pjt.error.message); return; }
     var jobs = (pjt.data || []).map(function(r){ return r.job_titles && r.job_titles.name; }).filter(Boolean);
     if (!jobs.length) {
-      empty('🎯', 'Pick your job tracks first', 'Head to <a href="settings.html#profile">settings</a> to set your interested professions. Recommendations key off those.');
+      empty(kIcon('target'), 'Pick your job tracks first', 'Head to <a href="settings.html#profile">settings</a> to set your interested professions. Recommendations key off those.');
       return;
     }
     subEl.textContent = 'Based on your tracks: ' + jobs.join(', ');
 
     var jobIds = (pjt.data || []).map(function(r){ return r.job_title_id; });
     var djt = await SUPA.from('dataset_job_titles').select('dataset_id, datasets(id, title, short_description, price, slug)').in('job_title_id', jobIds);
-    if (djt.error) { empty('⚠️', 'Could not load datasets', djt.error.message); return; }
+    if (djt.error) { empty(kIcon('alert'), 'Could not load datasets', djt.error.message); return; }
 
     var seen = {};
     var rows = (djt.data || []).filter(function(r){ if (!r.datasets || seen[r.datasets.id]) return false; seen[r.datasets.id] = 1; return true; });
-    if (!rows.length) { empty('📥', 'No datasets yet', 'No datasets have been tagged for your tracks yet. The catalog is still being seeded. Check back soon.'); return; }
+    if (!rows.length) { empty(kIcon('inbox'), 'No datasets yet', 'No datasets have been tagged for your tracks yet. The catalog is still being seeded. Check back soon.'); return; }
     el.innerHTML = '<div class="ds-list">' + rows.map(function(r){
       var d = r.datasets;
       return '<div class="ds-item"><div class="ds-item-info"><div class="ds-item-title">' + escape(d.title) + '</div><div class="ds-item-sub">' + escape(d.short_description || '') + '</div></div><div class="ds-item-meta"><span class="ds-item-price">' + (d.price ? '₹' + d.price : 'Free') + '</span></div></div>';

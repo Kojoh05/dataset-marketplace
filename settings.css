@@ -106,7 +106,10 @@
   font-size:0.75rem; color:var(--muted); padding-left:1.25rem; position:relative;
 }
 .pw-checklist li::before{
-  content:'○'; position:absolute; left:0; top:0; font-size:0.7rem;
+  content:''; position:absolute; left:1px; top:0.32em;
+  width:7px; height:7px; border-radius:50%;
+  border:1.5px solid var(--muted); background:transparent;
+  transition:background 0.15s ease, border-color 0.15s ease;
 }
 .pw-checklist li.met{color:#2E7D32;}
-.pw-checklist li.met::before{content:'●';}
+.pw-checklist li.met::before{border-color:#2E7D32; background:#2E7D32;}

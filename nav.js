@@ -90,6 +90,41 @@
     setExpandedPref(false);
   }
 
+  // ---------- Tuck away while the page is being scrolled ----------
+  // Reading shouldn't have a menu sitting on top of the page, so the rail
+  // slides off to the left edge on scroll down and slides back when the
+  // reader scrolls up, returns to the top, or reaches for the edge handle.
+  var TUCK_AFTER = 64;   // px scrolled before tucking is allowed at all
+  var TUCK_DELTA = 5;    // ignore tiny scroll jitter
+  var lastScrollY = 0;
+  var scrollTicking = false;
+
+  function setTucked(tucked) {
+    var rail = document.getElementById('ksbRail');
+    if (!rail) return;
+    if (tucked && rail.classList.contains('expanded')) collapse();
+    rail.classList.toggle('tucked', tucked);
+    document.body.classList.toggle('ksb-tucked', tucked);
+  }
+
+  function onScroll() {
+    if (scrollTicking) return;
+    scrollTicking = true;
+    window.requestAnimationFrame(function () {
+      scrollTicking = false;
+      var y = window.scrollY || window.pageYOffset || 0;
+      if (y <= TUCK_AFTER) {
+        setTucked(false);
+      } else if (y > lastScrollY + TUCK_DELTA) {
+        setTucked(true);            // scrolling down: get out of the way
+      } else if (y < lastScrollY - TUCK_DELTA) {
+        setTucked(false);           // scrolling back up: come back
+      }
+      lastScrollY = y;
+    });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+
   // After navigating from the expanded panel, the panel gets out of the way
   // on its own as soon as the pointer moves onto the page, so the content
   // goes full width. The CSS width/padding transitions animate the close.
@@ -136,6 +171,19 @@
     trigger.innerHTML = '<span></span><span></span><span></span>';
     document.body.appendChild(trigger);
 
+    // Edge handle: only visible once the rail has tucked itself away.
+    var edge = document.getElementById('ksbEdge');
+    if (edge) edge.remove();
+    edge = document.createElement('button');
+    edge.type = 'button';
+    edge.id = 'ksbEdge';
+    edge.className = 'ksb-edge';
+    edge.setAttribute('aria-label', 'Show navigation');
+    document.body.appendChild(edge);
+    edge.addEventListener('pointerenter', function () { setTucked(false); });
+    edge.addEventListener('click', function () { setTucked(false); });
+
+    lastScrollY = window.scrollY || window.pageYOffset || 0;
     applyExpandedState(isExpandedPref());
 
     document.getElementById('ksbToggle').addEventListener('click', function () {

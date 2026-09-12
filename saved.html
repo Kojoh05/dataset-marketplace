@@ -30,6 +30,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="supabase-config.js"></script>
 <script src="config.js"></script>
+<script src="icons.js"></script>
 <script>
   var LIVE = !!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase);
   var SUPA = LIVE ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY) : null;
@@ -41,16 +42,16 @@
   function escape(s){ return String(s || '').replace(/[<>&"]/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]; }); }
 
   async function load(){
-    if (!LIVE) { empty('🔌', 'Preview mode', 'Connect Supabase to see your bookmarks.'); return; }
+    if (!LIVE) { empty(kIcon('plug'), 'Preview mode', 'Connect Supabase to see your bookmarks.'); return; }
     var s = await SUPA.auth.getSession();
-    if (!s.data.session) { empty('🔒', 'Sign in required', 'Please <a href="auth.html">log in</a> to see your saved datasets.'); return; }
+    if (!s.data.session) { empty(kIcon('lock'), 'Sign in required', 'Please <a href="auth.html">log in</a> to see your saved datasets.'); return; }
     var res = await SUPA.from('bookmarks').select('dataset_id, created_at, datasets(title, short_description, slug, price)').order('created_at', { ascending: false });
-    if (res.error) { empty('⚠️', 'Could not load', res.error.message); return; }
+    if (res.error) { empty(kIcon('alert'), 'Could not load', res.error.message); return; }
     var rows = (res.data || []).filter(function(r){ return r.datasets; });
-    if (!rows.length) { empty('🔖', 'No bookmarks yet', 'When you find a dataset you like, tap the bookmark icon on it and it will appear here.'); return; }
+    if (!rows.length) { empty(kIcon('bookmark'), 'No bookmarks yet', 'When you find a dataset you like, tap the bookmark icon on it and it will appear here.'); return; }
     el.innerHTML = '<div class="ds-list">' + rows.map(function(r){
       var d = r.datasets;
-      return '<div class="ds-item"><div class="ds-item-info"><div class="ds-item-title">' + escape(d.title) + '</div><div class="ds-item-sub">' + escape(d.short_description || '') + '</div></div><div class="ds-item-meta"><span class="ds-item-price">' + (d.price ? '₹' + d.price : 'Free') + '</span><button class="ds-item-bookmark on" data-id="' + escape(r.dataset_id) + '" title="Remove bookmark">★</button></div></div>';
+      return '<div class="ds-item"><div class="ds-item-info"><div class="ds-item-title">' + escape(d.title) + '</div><div class="ds-item-sub">' + escape(d.short_description || '') + '</div></div><div class="ds-item-meta"><span class="ds-item-price">' + (d.price ? '₹' + d.price : 'Free') + '</span><button class="ds-item-bookmark on" data-id="' + escape(r.dataset_id) + '" title="Remove bookmark">' + kIcon('bookmark', 18) + '</button></div></div>';
     }).join('') + '</div>';
     el.querySelectorAll('.ds-item-bookmark').forEach(function(b){
       b.addEventListener('click', async function(){

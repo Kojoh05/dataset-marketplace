@@ -39,11 +39,57 @@
   flex-direction: column;
   overflow-x: hidden;
   overflow-y: auto;
-  transition: width var(--ksb-duration) var(--ksb-ease);
+  transition: width var(--ksb-duration) var(--ksb-ease),
+              transform var(--ksb-duration) var(--ksb-ease),
+              opacity var(--ksb-duration) var(--ksb-ease);
 }
 
 .ksb-rail.expanded {
   width: var(--ksb-expanded);
+}
+
+/* Tucked: the rail slides off the left edge while the reader scrolls, so
+   nothing hovers over the page. It comes back on scroll up, at the top of
+   the page, or when the pointer reaches the edge handle. */
+.ksb-rail.tucked {
+  transform: translateX(calc(-100% - 14px));
+  opacity: 0;
+  pointer-events: none; /* never swallow clicks while it's off-screen */
+}
+
+/* The sliver left behind when the rail is tucked: a quiet little grab
+   handle at the left edge, with a generous invisible hit area. */
+.ksb-edge {
+  position: fixed;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 72px;
+  z-index: 895;
+  display: none;
+  align-items: center;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+}
+.ksb-edge::before {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 44px;
+  margin-left: 2px;
+  border-radius: 0 4px 4px 0;
+  background: var(--line, #E4E0D6);
+  transition: height var(--ksb-duration) var(--ksb-ease), background 0.15s ease;
+}
+.ksb-edge:hover::before {
+  height: 72px;
+  background: var(--muted, #7A7772);
+}
+body.ksb-tucked .ksb-edge {
+  display: flex;
 }
 
 /* ---------- Top bar ---------- */
@@ -238,6 +284,16 @@
   height: 1.5px;
   background: var(--text, #1C1A1E);
   border-radius: 2px;
+}
+.ksb-mobile-trigger {
+  transition: transform var(--ksb-duration) var(--ksb-ease),
+              opacity var(--ksb-duration) var(--ksb-ease);
+}
+/* The floating mobile button rides away with the rail while scrolling. */
+body.ksb-tucked .ksb-mobile-trigger {
+  transform: translateX(calc(-100% - 16px));
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* Content offset so the fixed rail never overlaps page content. It grows

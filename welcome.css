@@ -73,7 +73,9 @@ body{overflow-x:hidden;}
   background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
   padding:1.5rem;
 }
-.w-feature-icon{font-size:1.5rem; margin-bottom:0.75rem;}
+.w-feature-icon{
+  display:flex; margin-bottom:0.85rem; color:var(--text);
+}
 .w-feature h3{font-size:1rem; font-weight:700; margin-bottom:0.5rem;}
 .w-feature p{font-size:0.875rem; line-height:1.55; color:var(--muted);}
 
