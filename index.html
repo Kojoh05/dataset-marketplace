@@ -22,6 +22,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="nav.css">
+<link rel="stylesheet" href="kojoh-ui.css">
 <script src="nav.js"></script>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
@@ -143,7 +144,7 @@
   <p class="page-sub" id="foldersSub">Each folder is a job track. Open one to see what's inside.</p>
 
   <div class="folder-grid" id="jobFolders">
-    <a class="folder f-analyst" href="search.html">
+    <a class="folder f-analyst" href="folder.html?slug=data-analyst" data-folder="data-analyst">
       <div class="folder-tab"><span class="folder-count">4 datasets</span></div>
       <div class="folder-body">
         <span class="folder-title">Data analyst</span>
@@ -151,7 +152,7 @@
         <span class="folder-link">View datasets &rarr;</span>
       </div>
     </a>
-    <a class="folder f-engineer" href="#categories">
+    <a class="folder f-engineer" href="#categories" data-folder="data-engineer">
       <div class="folder-tab"><span class="folder-count">3 datasets</span></div>
       <div class="folder-body">
         <span class="folder-title">Data engineer</span>
@@ -159,7 +160,7 @@
         <span class="folder-link">View datasets &rarr;</span>
       </div>
     </a>
-    <a class="folder f-product" href="#categories">
+    <a class="folder f-product" href="#categories" data-folder="product-analyst">
       <div class="folder-tab"><span class="folder-count">3 datasets</span></div>
       <div class="folder-body">
         <span class="folder-title">Product analyst</span>
@@ -167,7 +168,7 @@
         <span class="folder-link">View datasets &rarr;</span>
       </div>
     </a>
-    <a class="folder f-qa" href="#categories">
+    <a class="folder f-qa" href="#categories" data-folder="quality-analyst">
       <div class="folder-tab"><span class="folder-count">3 datasets</span></div>
       <div class="folder-body">
         <span class="folder-title">Quality analyst</span>
@@ -318,5 +319,34 @@
 <script src="config.js"></script>
 <script src="profile.js"></script>
 <script src="script.js"></script>
+<script>
+// Live folder counts, replaces the hardcoded numbers on the folder cards.
+(function(){
+  if (!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase)) return;
+  var SUPA = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+  Promise.all([
+    SUPA.from('folders').select('id, slug'),
+    SUPA.from('datasets').select('folder_id')
+  ]).then(function(r){
+    var folders = (r[0] && r[0].data) || [];
+    var sets = (r[1] && r[1].data) || [];
+    var byId = {};
+    sets.forEach(function(d){ byId[d.folder_id] = (byId[d.folder_id] || 0) + 1; });
+    var bySlug = {};
+    folders.forEach(function(f){ bySlug[f.slug] = byId[f.id] || 0; });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-folder]'), function(card){
+      var slug = card.getAttribute('data-folder');
+      var el = card.querySelector('.folder-count');
+      if (!el) return;
+      var n = bySlug[slug];
+      if (!n) { el.textContent = 'Coming soon'; return; }
+      el.textContent = n + (n === 1 ? ' dataset' : ' datasets');
+      if (card.getAttribute('href') === '#categories') {
+        card.setAttribute('href', 'folder.html?slug=' + encodeURIComponent(slug));
+      }
+    });
+  });
+})();
+</script>
 </body>
 </html>

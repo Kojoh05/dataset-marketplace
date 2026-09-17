@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>KOJOH | Folder</title>
+<script src="theme.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="pages.css">
+<link rel="stylesheet" href="nav.css">
+<link rel="stylesheet" href="kojoh-ui.css">
+<script src="nav.js"></script>
+</head>
+<body>
+
+<header class="page-header">
+  <span class="page-title" id="fdPageTitle">Folder</span>
+</header>
+
+<main class="page-wrap">
+  <div id="fdRoot">
+    <div class="empty-state"><div class="empty-state-icon"></div><h3>Loading</h3><p>One moment.</p></div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="supabase-config.js"></script>
+<script src="config.js"></script>
+<script src="icons.js"></script>
+<script>
+(function(){
+  var LIVE = !!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase);
+  var SUPA = LIVE ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY) : null;
+  var root = document.getElementById('fdRoot');
+
+  function esc(s){
+    return String(s === null || s === undefined ? '' : s)
+      .replace(/[<>&"]/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]; });
+  }
+  function cap(s){ return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+  function empty(icon, title, body){
+    root.innerHTML = '<div class="empty-state"><div class="empty-state-icon">' + icon + '</div><h3>' + esc(title) + '</h3><p>' + body + '</p></div>';
+  }
+
+  async function load(){
+    var slug = new URLSearchParams(window.location.search).get('slug') || 'data-analyst';
+    if (!LIVE) { empty(kIcon('plug'), 'Preview mode', 'Connect Supabase to browse folders.'); return; }
+
+    var fRes = await SUPA.from('folders').select('*').eq('slug', slug).maybeSingle();
+    if (fRes.error) { empty(kIcon('alert'), 'Could not load', esc(fRes.error.message)); return; }
+    if (!fRes.data) { empty(kIcon('search'), 'Folder not found', 'That track does not exist yet. <a href="index.html#categories">Back to all folders</a>.'); return; }
+    var folder = fRes.data;
+
+    document.getElementById('fdPageTitle').textContent = folder.title;
+    document.title = 'KOJOH | ' + folder.title;
+
+    var dRes = await SUPA.from('datasets')
+      .select('slug, title, short_description, difficulty, price, is_free, preview_rows')
+      .eq('folder_id', folder.id);
+    if (dRes.error) { empty(kIcon('alert'), 'Could not load datasets', esc(dRes.error.message)); return; }
+    var rows = dRes.data || [];
+
+    var html = '';
+    html += '<div class="page-lead"><h1>' + esc(folder.title) + '</h1>';
+    html += '<p>' + esc(folder.description || '') + '</p></div>';
+
+    html += '<div class="k-chiprow">';
+    html += '<span class="k-chip k-chip-brand">' + rows.length + (rows.length === 1 ? ' dataset' : ' datasets') + '</span>';
+    html += '<span class="k-chip">Every one is a real business problem</span>';
+    html += '</div>';
+
+    if (!rows.length) {
+      html += '<div class="empty-state"><div class="empty-state-icon">' + kIcon('folder') + '</div>'
+           +  '<h3>Nothing in here yet</h3><p>This track is still being built. Check back soon.</p></div>';
+      root.innerHTML = html;
+      return;
+    }
+
+    html += '<div class="k-dsgrid">';
+    rows.forEach(function(d){
+      var pv = d.preview_rows || null;
+      var price = d.is_free ? 'Free' : ('&#8377;' + Number(d.price).toFixed(0));
+      html += '<a class="k-dscard" href="dataset.html?slug=' + encodeURIComponent(d.slug) + '">';
+      html += '  <div class="k-dscard-top">';
+      if (d.difficulty) html += '<span class="k-chip k-chip-brand">' + esc(cap(d.difficulty)) + '</span>';
+      if (pv && pv.total_rows) {
+        html += '<span class="k-chip">' + Number(pv.total_rows).toLocaleString('en-IN') + ' rows</span>';
+        html += '<span class="k-chip">' + pv.columns.length + ' cols</span>';
+      }
+      html += '  </div>';
+      html += '  <h3 class="k-dscard-title">' + esc(d.title) + '</h3>';
+      html += '  <p class="k-dscard-desc">' + esc(d.short_description || '') + '</p>';
+      html += '  <div class="k-dscard-foot"><span class="k-dscard-price">' + price + '</span>';
+      html += '  <span class="k-dscard-go">Open project &rarr;</span></div>';
+      html += '</a>';
+    });
+    html += '</div>';
+
+    root.innerHTML = html;
+  }
+
+  window.kReady(load);
+})();
+</script>
+</body>
+</html>

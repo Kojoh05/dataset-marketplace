@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="pages.css">
 <link rel="stylesheet" href="nav.css">
+<link rel="stylesheet" href="kojoh-ui.css">
 <script src="nav.js"></script>
 </head>
 <body>
@@ -19,11 +20,31 @@
   <span class="page-title" id="dsPageTitle">Dataset</span>
 </header>
 
-<main class="page-wrap">
+<main class="page-wrap ds-wide">
   <div id="dsRoot">
-    <div class="empty-state"><div class="empty-state-icon"></div><h3>Loading…</h3><p>One moment.</p></div>
+    <div class="empty-state"><div class="empty-state-icon"></div><h3>Loading</h3><p>One moment.</p></div>
   </div>
 </main>
+
+<div class="k-modal" id="tableModal" hidden>
+  <div class="k-modal-card">
+    <div class="k-modal-head">
+      <div class="k-modal-headtext">
+        <div class="k-modal-title" id="tmTitle">Data table</div>
+        <div class="k-modal-sub" id="tmRange">Preparing the file</div>
+      </div>
+      <button class="k-modal-close" id="tmClose" type="button" aria-label="Close">&#215;</button>
+    </div>
+    <div class="k-modal-body" id="tmBody">
+      <div class="k-modal-loading">Loading the data file, this can take a few seconds the first time.</div>
+    </div>
+    <div class="k-modal-foot">
+      <button class="k-btn" id="tmPrev" type="button">Previous</button>
+      <span class="k-modal-page" id="tmPage"></span>
+      <button class="k-btn k-btn-brand" id="tmNext" type="button">Next</button>
+    </div>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="supabase-config.js"></script>
@@ -35,102 +56,409 @@
   var SUPA = LIVE ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY) : null;
   var root = document.getElementById('dsRoot');
 
-  function escape(s){ return String(s || '').replace(/[<>&"]/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]; }); }
+  var STATE = { ds: null, session: null, lic: null, csvRows: null, page: 0, pageSize: 500 };
+
+  function esc(s){
+    return String(s === null || s === undefined ? '' : s)
+      .replace(/[<>&"]/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]; });
+  }
+  function cap(s){ return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
   function empty(icon, title, body){
-    root.innerHTML = '<div class="empty-state"><div class="empty-state-icon">' + icon + '</div><h3>' + escape(title) + '</h3><p>' + body + '</p></div>';
+    root.innerHTML = '<div class="empty-state"><div class="empty-state-icon">' + icon + '</div><h3>' + esc(title) + '</h3><p>' + body + '</p></div>';
   }
   function paragraphs(text){
-    return (text || '').split(/\n\s*\n/).map(function(p){ return '<p>' + escape(p) + '</p>'; }).join('');
+    return String(text || '').split(/\n\s*\n/).map(function(p){ return '<p>' + esc(p) + '</p>'; }).join('');
+  }
+  function inlineCode(text){
+    return esc(text).replace(/`([^`]+)`/g, '<code>$1</code>');
+  }
+  function money(ds){
+    return ds.is_free ? 'Free' : ('&#8377;' + Number(ds.price).toFixed(0));
   }
 
+  // ---------------------------------------------------------------- loading
   async function load(){
     var slug = new URLSearchParams(window.location.search).get('slug');
     if (!slug) { empty(kIcon('alert'), 'No dataset specified', 'This link is missing its dataset.'); return; }
     if (!LIVE) { empty(kIcon('plug'), 'Preview mode', 'Connect Supabase to view live datasets.'); return; }
 
     var dsRes = await SUPA.from('datasets').select('*').eq('slug', slug).maybeSingle();
-    if (dsRes.error) { empty(kIcon('alert'), 'Could not load', escape(dsRes.error.message)); return; }
-    var ds = dsRes.data;
-    if (!ds) { empty(kIcon('search'), 'Not found', 'This dataset doesn\'t exist or isn\'t published yet.'); return; }
+    if (dsRes.error) { empty(kIcon('alert'), 'Could not load', esc(dsRes.error.message)); return; }
+    if (!dsRes.data) { empty(kIcon('search'), 'Not found', 'This dataset does not exist or is not published yet.'); return; }
+    STATE.ds = dsRes.data;
 
-    document.getElementById('dsPageTitle').textContent = ds.title;
-    document.title = 'KOJOH | ' + ds.title;
+    document.getElementById('dsPageTitle').textContent = STATE.ds.title;
+    document.title = 'KOJOH | ' + STATE.ds.title;
 
-    var tagsRes = await SUPA.from('dataset_tags').select('tags(name)').eq('dataset_id', ds.id);
+    var sessRes = await SUPA.auth.getSession();
+    STATE.session = sessRes.data && sessRes.data.session;
+
+    if (STATE.session) {
+      var licRes = await SUPA.from('dataset_licenses')
+        .select('license_code, tier, task_pack')
+        .eq('dataset_id', STATE.ds.id).eq('claimed_by', STATE.session.user.id).maybeSingle();
+      if (!licRes.error) STATE.lic = licRes.data;
+    }
+
+    var tagsRes = await SUPA.from('dataset_tags').select('tags(name)').eq('dataset_id', STATE.ds.id);
     var tags = (tagsRes.data || []).map(function(r){ return r.tags && r.tags.name; }).filter(Boolean);
 
-    var schemaRes = await SUPA.from('dataset_schema').select('column_name, description').eq('dataset_id', ds.id).order('sort_order').limit(8);
-    var schemaCountRes = await SUPA.from('dataset_schema').select('id', { count: 'exact', head: true }).eq('dataset_id', ds.id);
-    var totalCols = schemaCountRes.count || (schemaRes.data || []).length;
+    var schemaRes = await SUPA.from('dataset_schema')
+      .select('column_name, description').eq('dataset_id', STATE.ds.id).order('sort_order');
 
-    var priceLabel = ds.is_free ? 'Free' : ('₹' + Number(ds.price).toFixed(0));
+    render(tags, schemaRes.data || []);
+  }
 
+  // ---------------------------------------------------------------- render
+  function render(tags, schema){
+    var ds = STATE.ds;
+    var owned = !!STATE.lic;
+    var preview = ds.preview_rows || null;
     var html = '';
-    html += '<div class="page-lead"><h1>' + escape(ds.title) + '</h1><p>' + escape(ds.short_description || '') + '</p></div>';
 
-    html += '<div class="page-card">';
-    html += '<div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem;">';
-    if (ds.difficulty) html += '<span class="ds-item-cat" style="background:var(--bg); border:1px solid var(--line); border-radius:999px; padding:0.25rem 0.7rem;">' + escape(cap(ds.difficulty)) + '</span>';
-    tags.forEach(function(t){ html += '<span class="ds-item-cat" style="background:var(--bg); border:1px solid var(--line); border-radius:999px; padding:0.25rem 0.7rem;">' + escape(t) + '</span>'; });
-    html += '</div>';
-    html += paragraphs(ds.long_description);
+    html += '<div class="page-lead"><h1>' + esc(ds.title) + '</h1>';
+    html += '<p>' + esc(ds.short_description || '') + '</p></div>';
+
+    html += '<div class="k-chiprow">';
+    if (ds.difficulty) html += '<span class="k-chip k-chip-brand">' + esc(cap(ds.difficulty)) + '</span>';
+    if (preview && preview.total_rows) {
+      html += '<span class="k-chip">' + Number(preview.total_rows).toLocaleString('en-IN') + ' rows</span>';
+      html += '<span class="k-chip">' + preview.columns.length + ' columns</span>';
+    }
+    tags.forEach(function(t){ html += '<span class="k-chip">' + esc(t) + '</span>'; });
     html += '</div>';
 
-    if (schemaRes.data && schemaRes.data.length) {
-      html += '<div class="page-card"><h2>What\'s in it</h2><p>' + totalCols + ' columns, including:</p>';
-      html += '<div class="link-list" style="margin-top:0.75rem;">';
-      schemaRes.data.forEach(function(c){
-        html += '<div class="link-row" style="cursor:default;"><div class="link-row-body"><div class="link-row-title">' + escape(c.column_name) + '</div><div class="link-row-sub">' + escape(c.description || '') + '</div></div></div>';
+    // --- the story, free
+    html += '<div class="page-card k-card-soft"><h2>The story</h2>' + paragraphs(ds.long_description) + '</div>';
+
+    // --- the columns, free
+    if (schema.length) {
+      html += '<div class="page-card"><h2>What is in it</h2>';
+      html += '<p class="k-sub">' + schema.length + ' columns. Here is every one of them.</p>';
+      html += '<div class="k-collist" id="dsColList">';
+      schema.forEach(function(c, i){
+        html += '<div class="k-col' + (i >= 10 ? ' k-col-extra' : '') + '">'
+             +  '<span class="k-col-name">' + esc(c.column_name) + '</span>'
+             +  '<span class="k-col-desc">' + esc(c.description || '') + '</span>'
+             +  '</div>';
       });
       html += '</div>';
-      if (totalCols > schemaRes.data.length) html += '<p style="margin-top:0.5rem;">+ ' + (totalCols - schemaRes.data.length) + ' more columns in the full data dictionary.</p>';
+      if (schema.length > 10) {
+        html += '<button class="k-btn k-btn-quiet" id="dsColToggle" type="button">Show all ' + schema.length + ' columns</button>';
+      }
       html += '</div>';
     }
 
-    html += '<div class="page-card" id="dsCta"><h2>' + priceLabel + '</h2><p id="dsCtaNote">Checking your access…</p></div>';
+    // --- the 5 row preview, free
+    if (preview && preview.rows && preview.rows.length) {
+      html += '<div class="page-card"><h2>Sample of the real data</h2>';
+      html += '<p class="k-sub">The first ' + preview.rows.length + ' rows, exactly as they come out of the dealership ERP. '
+           +  'Yes, the dates, the prices and the names are inconsistent. That is the job.</p>';
+      html += previewTable(preview);
+      html += '<p class="k-sub k-sub-tight">Showing ' + preview.rows.length + ' of '
+           +  Number(preview.total_rows).toLocaleString('en-IN') + ' rows.</p>';
+      html += '</div>';
+    }
+
+    // --- the paid part
+    html += owned ? ownedSection(ds) : lockedSection(ds);
 
     root.innerHTML = html;
-    setupCta(ds);
+    wire();
   }
 
-  function cap(s){ return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
-
-  async function setupCta(ds){
-    var cta = document.getElementById('dsCta');
-    var note = document.getElementById('dsCtaNote');
-    var sessRes = await SUPA.auth.getSession();
-    var session = sessRes.data && sessRes.data.session;
-    if (!session) {
-      note.innerHTML = 'Beta pricing — free while we test the full purchase flow. <a href="auth.html">Log in</a> to get it.';
-      return;
-    }
-    var licRes = await SUPA.from('dataset_licenses').select('license_code').eq('dataset_id', ds.id).eq('claimed_by', session.user.id).maybeSingle();
-    if (licRes.data) {
-      note.innerHTML = 'You own this dataset.';
-      var btn = document.createElement('a');
-      btn.className = 'page-submit'; btn.style.marginTop = '1rem'; btn.style.display = 'inline-block'; btn.style.textDecoration = 'none';
-      btn.href = 'challenge.html?slug=' + encodeURIComponent(ds.slug);
-      btn.textContent = 'Open your challenge →';
-      cta.appendChild(btn);
-      return;
-    }
-    note.innerHTML = 'Beta pricing — free while we test the full purchase flow.';
-    var btn = document.createElement('button');
-    btn.className = 'page-submit'; btn.style.marginTop = '1rem';
-    btn.textContent = 'Buy now';
-    btn.addEventListener('click', function(){
-      btn.disabled = true; btn.textContent = 'Setting up your license…';
-      SUPA.rpc('purchase_dataset', { p_dataset_id: ds.id, p_tier: 'standard' }).then(function(res){
-        if (res.error) {
-          btn.disabled = false; btn.textContent = 'Buy now';
-          note.innerHTML = '<span style="color:#C62828;">' + escape(res.error.message) + '</span>';
-          return;
-        }
-        window.location.href = 'challenge.html?slug=' + encodeURIComponent(ds.slug);
+  function previewTable(preview){
+    var h = '<div class="k-tablewrap k-tablewrap-short"><table class="k-table"><thead><tr>';
+    preview.columns.forEach(function(c){ h += '<th>' + esc(c) + '</th>'; });
+    h += '</tr></thead><tbody>';
+    preview.rows.forEach(function(r){
+      h += '<tr>';
+      preview.columns.forEach(function(_, i){
+        var v = r[i];
+        h += (v === undefined || v === null || String(v).trim() === '')
+          ? '<td class="k-cell-empty">blank</td>'
+          : '<td>' + esc(v) + '</td>';
       });
+      h += '</tr>';
     });
-    cta.appendChild(btn);
+    return h + '</tbody></table></div>';
   }
+
+  // ---------------------------------------------------------------- locked
+  function lockedSection(ds){
+    var lp = ds.locked_preview || { summary: '', phases: [], total_tasks: 0, premium_count: 0 };
+    var inner = '';
+
+    inner += '<div class="page-card"><h2>The project</h2><p>' + esc(lp.summary || '') + '</p></div>';
+
+    (lp.phases || []).forEach(function(p){
+      inner += '<div class="page-card"><h2>' + esc(p.title) + '</h2>';
+      inner += '<p class="k-sub">' + esc(p.blurb || '') + '</p>';
+      inner += '<div class="k-tasklist">';
+      (p.sample || []).forEach(function(t, i){
+        inner += '<div class="k-task"><span class="k-task-id">' + (i + 1) + '</span><span>' + inlineCode(t) + '</span></div>';
+      });
+      var rest = Math.max(0, (p.count || 0) - (p.sample || []).length);
+      for (var i = 0; i < Math.min(rest, 4); i++) {
+        inner += '<div class="k-task k-task-ghost"><span class="k-task-id"></span><span></span></div>';
+      }
+      inner += '</div></div>';
+    });
+
+    var h = '';
+    h += '<div class="k-locksec">';
+    h += '  <div class="k-lockblur" aria-hidden="true">' + inner + '</div>';
+    h += '  <div class="k-lockover">';
+    h += '    <div class="k-lockicon">'
+      +  '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+      +  '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>';
+    h += '    <h3 class="k-lockhead">' + (lp.total_tasks || 0) + ' challenges, locked</h3>';
+    h += '    <p class="k-lockbody">Unlock to get your own personalised task pack, the full project summary, '
+      +  'the raw data files, project.md, and the in browser table viewer. '
+      +  'Every buyer works the identical task set in their own shuffled order.</p>';
+    h += '    <div class="k-lockprice">' + money(ds) + '</div>';
+    h += '    <button class="k-btn k-btn-brand k-btn-lg" id="dsUnlock" type="button">Unlock this project</button>';
+    h += '    <p class="k-locknote" id="dsUnlockNote">Beta pricing, free while the purchase flow is being tested.</p>';
+    h += '  </div>';
+    h += '</div>';
+    return h;
+  }
+
+  // ---------------------------------------------------------------- owned
+  function ownedSection(ds){
+    var lic = STATE.lic;
+    var pack = lic.task_pack || { phases: [] };
+    var h = '';
+
+    h += '<div class="page-card k-card-brand">';
+    h += '  <h2>You own this project</h2>';
+    h += '  <p class="k-sub">License <strong>' + esc(lic.license_code) + '</strong>, '
+      +  (lic.tier === 'premium' ? 'Premium tier with 5 bonus hard challenges.' : 'Standard tier.') + '</p>';
+    h += '  <div class="k-btnrow">';
+    h += '    <button class="k-btn k-btn-brand" id="dsOpenTable" type="button">Open the data table</button>';
+    h += '    <a class="k-btn" href="challenge.html?slug=' + encodeURIComponent(ds.slug) + '">Open your challenge page</a>';
+    h += '  </div>';
+    h += '</div>';
+
+    h += '<div class="page-card"><h2>Your files</h2>';
+    h += '  <p class="k-sub">Download links are generated fresh each time and stay valid for one hour.</p>';
+    h += '  <div class="k-filelist" id="dsFiles">Loading your files</div>';
+    h += '</div>';
+
+    (pack.phases || []).forEach(function(p){
+      h += '<div class="page-card"><h2>' + esc(p.title) + '</h2><div class="k-tasklist">';
+      (p.tasks || []).forEach(function(t){
+        h += '<div class="k-task"><span class="k-task-id">' + esc(t.id) + '</span><span>' + inlineCode(t.text) + '</span></div>';
+      });
+      h += '</div></div>';
+    });
+
+    if (pack.premium && pack.premium.length) {
+      h += '<div class="page-card k-card-brand"><h2>Premium bonus, 5 hard challenges</h2><div class="k-tasklist">';
+      pack.premium.forEach(function(t){
+        h += '<div class="k-task"><span class="k-task-id">' + esc(t.id) + '</span><span>' + inlineCode(t.text) + '</span></div>';
+      });
+      h += '</div></div>';
+    }
+
+    return h;
+  }
+
+  // ---------------------------------------------------------------- wiring
+  function wire(){
+    var toggle = document.getElementById('dsColToggle');
+    if (toggle) {
+      toggle.addEventListener('click', function(){
+        var list = document.getElementById('dsColList');
+        var open = list.classList.toggle('k-collist-open');
+        toggle.textContent = open ? 'Show fewer columns' : 'Show all columns';
+      });
+    }
+
+    var unlock = document.getElementById('dsUnlock');
+    if (unlock) unlock.addEventListener('click', doUnlock);
+
+    var openTable = document.getElementById('dsOpenTable');
+    if (openTable) openTable.addEventListener('click', openModal);
+
+    if (STATE.lic) loadFiles();
+  }
+
+  async function doUnlock(){
+    var btn = document.getElementById('dsUnlock');
+    var note = document.getElementById('dsUnlockNote');
+
+    if (!STATE.session) {
+      note.innerHTML = 'Please <a href="auth.html">log in</a> first, then come back to this page to unlock.';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Setting up your license';
+
+    var res = await SUPA.rpc('purchase_dataset', { p_dataset_id: STATE.ds.id, p_tier: 'standard' });
+    if (res.error) {
+      btn.disabled = false;
+      btn.textContent = 'Unlock this project';
+      note.innerHTML = '<span class="k-err">' + esc(res.error.message) + '</span>';
+      return;
+    }
+
+    var licRes = await SUPA.from('dataset_licenses')
+      .select('license_code, tier, task_pack')
+      .eq('dataset_id', STATE.ds.id).eq('claimed_by', STATE.session.user.id).maybeSingle();
+
+    if (licRes.error || !licRes.data) {
+      btn.disabled = false;
+      btn.textContent = 'Unlock this project';
+      note.innerHTML = '<span class="k-err">Unlocked, but the license did not come back. Reload the page.</span>';
+      return;
+    }
+
+    STATE.lic = licRes.data;
+    var sec = document.querySelector('.k-locksec');
+    var wrap = document.createElement('div');
+    wrap.innerHTML = ownedSection(STATE.ds);
+    sec.replaceWith.apply(sec, Array.prototype.slice.call(wrap.children));
+    wire();
+    window.scrollTo({ top: window.scrollY, behavior: 'instant' });
+  }
+
+  async function loadFiles(){
+    var box = document.getElementById('dsFiles');
+    if (!box) return;
+    var path = STATE.ds.storage_path || STATE.ds.slug;
+    var listRes = await SUPA.storage.from('datasets').list(path);
+    if (listRes.error || !listRes.data || !listRes.data.length) {
+      box.innerHTML = '<p class="k-sub">No files uploaded to storage yet.</p>';
+      return;
+    }
+    var links = await Promise.all(listRes.data.map(async function(f){
+      var signed = await SUPA.storage.from('datasets').createSignedUrl(path + '/' + f.name, 3600);
+      if (signed.error) return '';
+      var kb = f.metadata && f.metadata.size ? Math.round(f.metadata.size / 1024) : null;
+      return '<a class="k-file" href="' + signed.data.signedUrl + '" download>'
+           + '<span class="k-file-name">' + esc(f.name) + '</span>'
+           + '<span class="k-file-meta">' + (kb ? (kb > 1024 ? (kb/1024).toFixed(1) + ' MB' : kb + ' KB') : 'Download') + '</span>'
+           + '</a>';
+    }));
+    box.innerHTML = links.filter(Boolean).join('') || '<p class="k-sub">No files available.</p>';
+  }
+
+  // ---------------------------------------------------------------- table modal
+  var modal = document.getElementById('tableModal');
+
+  function openModal(){
+    modal.hidden = false;
+    document.body.classList.add('k-noscroll');
+    if (STATE.csvRows) { renderPage(); return; }
+    fetchCsv();
+  }
+  function closeModal(){
+    modal.hidden = true;
+    document.body.classList.remove('k-noscroll');
+  }
+
+  async function fetchCsv(){
+    var body = document.getElementById('tmBody');
+    var path = STATE.ds.storage_path || STATE.ds.slug;
+    body.innerHTML = '<div class="k-modal-loading">Fetching the data file</div>';
+
+    var listRes = await SUPA.storage.from('datasets').list(path);
+    if (listRes.error || !listRes.data) {
+      body.innerHTML = '<div class="k-modal-loading">Could not reach storage.</div>';
+      return;
+    }
+    var csv = listRes.data.filter(function(f){ return /\.csv$/i.test(f.name); })[0];
+    if (!csv) {
+      body.innerHTML = '<div class="k-modal-loading">No CSV file found in storage for this dataset.</div>';
+      return;
+    }
+
+    var signed = await SUPA.storage.from('datasets').createSignedUrl(path + '/' + csv.name, 3600);
+    if (signed.error) {
+      body.innerHTML = '<div class="k-modal-loading">Could not create a download link.</div>';
+      return;
+    }
+
+    body.innerHTML = '<div class="k-modal-loading">Downloading and parsing, this only happens once.</div>';
+    try {
+      var text = await (await fetch(signed.data.signedUrl)).text();
+      var rows = parseCsv(text);
+      STATE.csvRows = rows;
+      STATE.page = 0;
+      document.getElementById('tmTitle').textContent = csv.name;
+      renderPage();
+    } catch (e) {
+      body.innerHTML = '<div class="k-modal-loading">Could not read the file. ' + esc(e.message) + '</div>';
+    }
+  }
+
+  function parseCsv(text){
+    var rows = [], row = [], cur = '', i = 0, inQ = false, n = text.length;
+    while (i < n){
+      var c = text.charAt(i);
+      if (inQ){
+        if (c === '"'){
+          if (text.charAt(i+1) === '"'){ cur += '"'; i += 2; continue; }
+          inQ = false; i++; continue;
+        }
+        cur += c; i++; continue;
+      }
+      if (c === '"'){ inQ = true; i++; continue; }
+      if (c === ','){ row.push(cur); cur = ''; i++; continue; }
+      if (c === '\r'){ i++; continue; }
+      if (c === '\n'){ row.push(cur); rows.push(row); row = []; cur = ''; i++; continue; }
+      cur += c; i++;
+    }
+    if (cur.length || row.length){ row.push(cur); rows.push(row); }
+    return rows;
+  }
+
+  function renderPage(){
+    var all = STATE.csvRows;
+    if (!all || all.length < 2) return;
+    var header = all[0];
+    var data = all.slice(1).filter(function(r){ return r.length > 1 || (r[0] && r[0].trim()); });
+    var size = STATE.pageSize;
+    var pages = Math.max(1, Math.ceil(data.length / size));
+    if (STATE.page >= pages) STATE.page = pages - 1;
+    if (STATE.page < 0) STATE.page = 0;
+
+    var start = STATE.page * size;
+    var slice = data.slice(start, start + size);
+
+    var h = '<div class="k-tablewrap"><table class="k-table k-table-num"><thead><tr><th>#</th>';
+    header.forEach(function(c){ h += '<th>' + esc(c) + '</th>'; });
+    h += '</tr></thead><tbody>';
+    slice.forEach(function(r, idx){
+      h += '<tr><td class="k-rownum">' + (start + idx + 1) + '</td>';
+      header.forEach(function(_, i){
+        var v = r[i];
+        h += (v === undefined || v === null || String(v).trim() === '')
+          ? '<td class="k-cell-empty"></td>'
+          : '<td>' + esc(v) + '</td>';
+      });
+      h += '</tr>';
+    });
+    h += '</tbody></table></div>';
+
+    document.getElementById('tmBody').innerHTML = h;
+    document.getElementById('tmRange').textContent =
+      'Rows ' + (start + 1).toLocaleString('en-IN') + ' to ' +
+      Math.min(start + size, data.length).toLocaleString('en-IN') +
+      ' of ' + data.length.toLocaleString('en-IN');
+    document.getElementById('tmPage').textContent = 'Page ' + (STATE.page + 1) + ' of ' + pages;
+    document.getElementById('tmPrev').disabled = STATE.page === 0;
+    document.getElementById('tmNext').disabled = STATE.page >= pages - 1;
+    document.getElementById('tmBody').scrollTop = 0;
+  }
+
+  document.getElementById('tmClose').addEventListener('click', closeModal);
+  document.getElementById('tmPrev').addEventListener('click', function(){ STATE.page--; renderPage(); });
+  document.getElementById('tmNext').addEventListener('click', function(){ STATE.page++; renderPage(); });
+  modal.addEventListener('click', function(e){ if (e.target === modal) closeModal(); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && !modal.hidden) closeModal(); });
 
   window.kReady(load);
 })();

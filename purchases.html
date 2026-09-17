@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="pages.css">
 <link rel="stylesheet" href="nav.css">
+<link rel="stylesheet" href="kojoh-ui.css">
 <style>
   .ds-item{flex-wrap:wrap;}
   .ds-item-actions{display:flex; align-items:center; gap:0.5rem; flex-shrink:0;}
@@ -20,7 +21,7 @@
     background:var(--bg); color:var(--text); text-decoration:none; display:inline-block;
   }
   .ds-item-btn:hover{background:var(--card);}
-  .ds-item-btn.primary{background:var(--text); color:var(--bg); border-color:var(--text);}
+  .ds-item-btn.primary{background:var(--brand); color:#FFFFFF; border-color:var(--brand);}
   .ds-files{
     width:100%; margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid var(--line);
     display:none; flex-direction:column; gap:0.4rem;
@@ -39,7 +40,7 @@
 <main class="page-wrap">
   <div class="page-lead">
     <h1>Your library</h1>
-    <p>Everything you've bought lives here — open your personalized challenge, or re-download any file you own, any time.</p>
+    <p>Everything you've bought lives here. Open your personalized challenge, or re-download any file you own, any time.</p>
   </div>
 
   <div id="purchaseResults"></div>
@@ -67,7 +68,7 @@
     wrap.innerHTML = 'Loading files…';
     var listRes = await SUPA.storage.from('datasets').list(storagePath);
     if (listRes.error || !listRes.data || !listRes.data.length) {
-      wrap.innerHTML = 'No files available yet — check back soon.';
+      wrap.innerHTML = 'No files available yet, check back soon.';
       return;
     }
     var links = await Promise.all(listRes.data.map(async function(f){
@@ -85,7 +86,7 @@
     var res = await SUPA.from('purchases').select('dataset_id, price_paid, purchased_at, datasets(title, short_description, slug, storage_path)').order('purchased_at', { ascending: false });
     if (res.error) { empty(kIcon('alert'), 'Could not load', res.error.message); return; }
     var rows = (res.data || []).filter(function(r){ return r.datasets; });
-    if (!rows.length) { empty(kIcon('bag'), 'No purchases yet', 'Once you buy a dataset it lives here — your files, and your personal challenge, ready any time. <a href="search.html">Browse datasets</a>.'); return; }
+    if (!rows.length) { empty(kIcon('bag'), 'No purchases yet', 'Once you buy a dataset it lives here, with your files and your personal challenge ready any time. <a href="search.html">Browse datasets</a>.'); return; }
     el.innerHTML = '<div class="ds-list">' + rows.map(function(r, i){
       var d = r.datasets;
       var paid = r.price_paid ? ('₹' + r.price_paid + ' paid') : 'Free (beta)';
