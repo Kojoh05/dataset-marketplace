@@ -344,3 +344,112 @@
   .k-lockprice{font-size:1.625rem;}
   .k-collist{grid-template-columns:1fr;}
 }
+
+/* ------------------------------------------------------------ dataset head */
+.k-dshead{margin:0 0 1.4rem;}
+.k-dstitle{
+  font-family:'Space Grotesk', sans-serif;
+  font-size:clamp(1.65rem, 4.2vw, 2.55rem); font-weight:700; line-height:1.12;
+  letter-spacing:-0.02em; color:var(--text); margin:0 0 0.6rem;
+  min-height:1.12em;
+}
+.k-dstitle.k-typing::after{
+  content:''; display:inline-block; width:0.06em; height:0.88em;
+  background:currentColor; margin-left:0.06em; vertical-align:-0.08em;
+  animation:kCaret 0.75s step-end infinite;
+}
+@keyframes kCaret{0%,100%{opacity:1;} 50%{opacity:0;}}
+.k-dslead{color:var(--muted); font-size:0.95rem; line-height:1.62; max-width:52rem; margin:0 0 1.15rem;}
+
+/* ------------------------------------------------------------ action row */
+.k-actions{display:flex; flex-wrap:wrap; gap:0.55rem; align-items:center;}
+.k-act{
+  display:inline-flex; align-items:center; gap:0.45rem;
+  font-family:inherit; font-size:0.8125rem; font-weight:600;
+  padding:0.5rem 0.9rem; border-radius:999px; cursor:pointer;
+  border:1px solid var(--line); background:var(--card); color:var(--text);
+  transition:border-color 0.15s ease, background 0.15s ease, transform 0.12s ease;
+}
+.k-act:hover{border-color:var(--brand);}
+.k-act:active{transform:scale(0.97);}
+.k-act svg{flex:none;}
+.k-act.on{background:var(--brand); border-color:var(--brand); color:var(--bg);}
+.k-act-count{
+  font-variant-numeric:tabular-nums; font-size:0.75rem;
+  padding-left:0.45rem; margin-left:0.1rem;
+  border-left:1px solid var(--line); color:var(--muted);
+}
+.k-act.on .k-act-count{border-left-color:rgba(255,255,255,0.25); color:inherit; opacity:0.75;}
+.k-act-primary{background:var(--brand); border-color:var(--brand); color:var(--bg);}
+.k-act-primary:hover{opacity:0.88; border-color:var(--brand);}
+.k-act[disabled]{opacity:0.5; cursor:default;}
+.k-act-pop{animation:kPop 0.32s cubic-bezier(.2,1.5,.4,1);}
+@keyframes kPop{0%{transform:scale(1);} 45%{transform:scale(1.14);} 100%{transform:scale(1);}}
+
+/* ------------------------------------------------------------ tabs */
+.k-tabs{
+  display:flex; gap:0.15rem; margin:1.6rem 0 1.5rem;
+  border-bottom:1px solid var(--line); overflow-x:auto;
+}
+.k-tab{
+  font-family:inherit; font-size:0.875rem; font-weight:600; white-space:nowrap;
+  padding:0.7rem 1.05rem; background:none; border:none; cursor:pointer;
+  color:var(--muted); border-bottom:2px solid transparent; margin-bottom:-1px;
+  display:inline-flex; align-items:center; gap:0.4rem;
+  transition:color 0.15s ease, border-color 0.15s ease;
+}
+.k-tab:hover{color:var(--text);}
+.k-tab.on{color:var(--text); border-bottom-color:var(--brand);}
+.k-tab-lock{opacity:0.55;}
+.k-tabpanel[hidden]{display:none;}
+.k-tabpanel{animation:kFade 0.22s ease both;}
+@keyframes kFade{from{opacity:0; transform:translateY(5px);} to{opacity:1; transform:none;}}
+
+/* ------------------------------------------------------------ data card layout */
+.k-split{display:grid; grid-template-columns:minmax(0,1fr) 16.5rem; gap:1.25rem; align-items:start;}
+@media (max-width:900px){ .k-split{grid-template-columns:1fr;} }
+.k-aside{display:flex; flex-direction:column; gap:1rem; position:sticky; top:1rem;}
+@media (max-width:900px){ .k-aside{position:static;} }
+.k-asidecard{
+  border:1px solid var(--line); border-radius:14px; background:var(--card); padding:1.05rem 1.1rem;
+}
+.k-asidecard h3{
+  font-size:0.6875rem; font-weight:700; letter-spacing:0.09em; text-transform:uppercase;
+  color:var(--muted); margin:0 0 0.75rem;
+}
+.k-fact{display:flex; justify-content:space-between; gap:0.75rem; padding:0.4rem 0; font-size:0.8125rem;}
+.k-fact + .k-fact{border-top:1px solid var(--line);}
+.k-fact-k{color:var(--muted);}
+.k-fact-v{font-weight:600; color:var(--text); font-variant-numeric:tabular-nums;}
+
+/* ------------------------------------------------------------ tools */
+.k-tools{display:flex; flex-direction:column; gap:0.7rem;}
+.k-tool{display:flex; gap:0.7rem; align-items:flex-start;}
+.k-tool-mark{
+  flex:none; width:1.9rem; height:1.9rem; border-radius:8px;
+  border:1px solid var(--line); background:var(--bg);
+  display:grid; place-items:center; font-size:0.625rem; font-weight:700;
+  letter-spacing:0.02em; color:var(--text);
+}
+.k-tool-name{font-size:0.8125rem; font-weight:600; color:var(--text); display:block;}
+.k-tool-use{font-size:0.75rem; color:var(--muted); line-height:1.5;}
+
+/* ------------------------------------------------------------ copy prompt */
+.k-promptbar{
+  display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;
+  border:1px dashed var(--line); border-radius:12px; padding:0.9rem 1rem; margin-top:0.9rem;
+}
+.k-promptbar p{margin:0; font-size:0.8125rem; color:var(--muted); line-height:1.55; max-width:32rem;}
+.k-phase-tools{
+  display:flex; flex-wrap:wrap; gap:0.35rem; margin:0 0 0.8rem;
+}
+.k-ptool{
+  font-size:0.6875rem; font-weight:600; letter-spacing:0.02em;
+  padding:0.2rem 0.55rem; border-radius:6px;
+  border:1px solid var(--line); background:var(--bg); color:var(--muted);
+}
+
+@media (prefers-reduced-motion:reduce){
+  .k-dstitle.k-typing::after{animation:none;}
+  .k-tabpanel, .k-act-pop{animation:none;}
+}

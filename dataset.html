@@ -17,7 +17,7 @@
 <body>
 
 <header class="page-header">
-  <span class="page-title" id="dsPageTitle">Dataset</span>
+  <span class="page-title">Dataset</span>
 </header>
 
 <main class="page-wrap ds-wide">
@@ -35,8 +35,8 @@
         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
       </svg>
     </div>
-    <h3 class="k-dialog-title">Sign in to continue</h3>
-    <p class="k-dialog-text">Your challenge pack is generated against your account, so you need to be signed in before you unlock this project.</p>
+    <h3 class="k-dialog-title" id="authTitle">Sign in to continue</h3>
+    <p class="k-dialog-text" id="authText">Your challenge pack is generated against your account, so you need to be signed in before you unlock this project.</p>
     <div class="k-dialog-actions">
       <button class="k-btn k-btn-brand k-btn-lg k-btn-block" id="authGoLogin" type="button">Log in</button>
       <button class="k-btn k-btn-block" id="authGoSignup" type="button">Create an account</button>
@@ -65,6 +65,21 @@
       <button class="k-btn k-btn-brand k-btn-lg k-btn-block" id="payGo" type="button">Pay and unlock</button>
     </div>
     <p class="k-dialog-note" id="payNote">Beta pricing. Nothing is charged and no card details are collected while the purchase flow is being tested.</p>
+  </div>
+</div>
+
+<!-- downloads -->
+<div class="k-modal" id="filesModal" hidden>
+  <div class="k-dialog">
+    <button class="k-modal-close" id="filesClose" type="button" aria-label="Close">&#215;</button>
+    <div class="k-dialog-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+      </svg>
+    </div>
+    <h3 class="k-dialog-title">Your files</h3>
+    <p class="k-dialog-text">Links are generated fresh each time and stay valid for one hour.</p>
+    <div class="k-filelist" id="filesList">Loading your files</div>
   </div>
 </div>
 
@@ -100,7 +115,24 @@
   var root = document.getElementById('dsRoot');
 
   var FREE_COLUMNS = 6;
-  var STATE = { ds:null, session:null, lic:null, tags:[], schema:[], csvRows:null, page:0, pageSize:500 };
+  var STATE = {
+    ds:null, session:null, lic:null, tags:[], schema:[],
+    csvRows:null, page:0, pageSize:500,
+    hypes:0, hyped:false, marked:false, tab:'data', typed:false
+  };
+
+  // Tools we recognise from a dataset tag, and what each one is for here.
+  var TOOLS = {
+    'python':   { mark:'PY',  name:'Python',   use:'Load the export, clean the mess, then do the grouped maths.' },
+    'pandas':   { mark:'PD',  name:'pandas',   use:'The reshaping and the joins once the file is in memory.' },
+    'sql':      { mark:'SQL', name:'SQL',      use:'Filters, joins and grouped queries over the same table.' },
+    'excel':    { mark:'XL',  name:'Excel',    use:'Pivots, and a second opinion on the totals you calculate.' },
+    'power bi': { mark:'BI',  name:'Power BI', use:'The dashboard and the measures on top of the clean table.' },
+    'powerbi':  { mark:'BI',  name:'Power BI', use:'The dashboard and the measures on top of the clean table.' },
+    'tableau':  { mark:'TB',  name:'Tableau',  use:'The visual layer once the numbers are settled.' },
+    'r':        { mark:'R',   name:'R',        use:'The statistics, if that is the language you think in.' },
+    'looker':   { mark:'LK',  name:'Looker',   use:'The modelled metrics layer over the cleaned data.' }
+  };
 
   function esc(s){
     return String(s === null || s === undefined ? '' : s)
@@ -120,6 +152,18 @@
   function money(ds){
     return ds.is_free ? 'Free' : ('&#8377;' + Number(ds.price).toFixed(0));
   }
+  function reduced(){
+    return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }
+  function icon(path, size){
+    return '<svg width="' + (size || 15) + '" height="' + (size || 15) + '" viewBox="0 0 24 24" fill="none" '
+      + 'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + path + '</svg>';
+  }
+  var I_HYPE = '<path d="M13 2L3 14h8l-1 8 10-12h-8z"/>';
+  var I_MARK = '<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>';
+  var I_DOWN = '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>';
+  var I_LOCK = '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>';
+  var I_COPY = '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>';
 
   // ---------------------------------------------------------------- loading
   async function load(){
@@ -132,7 +176,6 @@
     if (!dsRes.data) { empty(kIcon('search'), 'Not found', 'This dataset does not exist or is not published yet.'); return; }
     STATE.ds = dsRes.data;
 
-    document.getElementById('dsPageTitle').textContent = STATE.ds.title;
     window.kojohSeo({
       title: STATE.ds.seo_title || ('KOJOH | ' + STATE.ds.title),
       description: STATE.ds.seo_description || STATE.ds.short_description,
@@ -159,7 +202,312 @@
       .select('column_name, description').eq('dataset_id', STATE.ds.id).order('sort_order');
     STATE.schema = schemaRes.data || [];
 
+    await loadSocial();
     render();
+  }
+
+  // Hype count, my own hype and my bookmark. Tolerant of a missing table so
+  // the page still renders if the migration has not been run yet.
+  async function loadSocial(){
+    var id = STATE.ds.id;
+    var countRes = await SUPA.from('hypes').select('user_id', { count:'exact', head:true }).eq('dataset_id', id);
+    STATE.hypes = countRes.error ? 0 : (countRes.count || 0);
+
+    if (!STATE.session) return;
+    var uid = STATE.session.user.id;
+
+    var mine = await SUPA.from('hypes').select('user_id').eq('dataset_id', id).eq('user_id', uid).maybeSingle();
+    STATE.hyped = !mine.error && !!mine.data;
+
+    var mark = await SUPA.from('bookmarks').select('user_id').eq('dataset_id', id).eq('user_id', uid).maybeSingle();
+    STATE.marked = !mark.error && !!mark.data;
+  }
+
+  // ---------------------------------------------------------------- render
+  function render(){
+    var ds = STATE.ds;
+    var owned = !!STATE.lic;
+    var html = '';
+
+    // one title, typed in on the first render only
+    html += '<div class="k-dshead">';
+    html += '  <h1 class="k-dstitle" id="dsTitle">' + (STATE.typed ? esc(ds.title) : '') + '</h1>';
+    html += '  <p class="k-dslead">' + esc(ds.short_description || '') + '</p>';
+    html += '  <div class="k-actions">';
+    html += '    <button class="k-act' + (STATE.hyped ? ' on' : '') + '" id="dsHype" type="button" '
+         +  'aria-pressed="' + (STATE.hyped ? 'true' : 'false') + '">'
+         +  icon(I_HYPE) + '<span>' + (STATE.hyped ? 'Hyped' : 'Hype') + '</span>'
+         +  '<span class="k-act-count" id="dsHypeCount">' + nf(STATE.hypes) + '</span></button>';
+    html += '    <button class="k-act' + (STATE.marked ? ' on' : '') + '" id="dsMark" type="button" '
+         +  'aria-pressed="' + (STATE.marked ? 'true' : 'false') + '">'
+         +  icon(I_MARK) + '<span>' + (STATE.marked ? 'Saved' : 'Bookmark') + '</span></button>';
+    html += '    <button class="k-act ' + (owned ? 'k-act-primary' : '') + '" id="dsDownload" type="button">'
+         +  icon(owned ? I_DOWN : I_LOCK) + '<span>' + (owned ? 'Download' : 'Download, locked') + '</span></button>';
+    html += '  </div>';
+    html += '</div>';
+
+    html += '<div class="k-tabs" role="tablist">';
+    html += tabBtn('data', 'Data card', false);
+    html += tabBtn('summary', 'Summary', !owned);
+    html += tabBtn('challenge', 'Challenge', !owned);
+    html += '</div>';
+
+    html += '<div class="k-tabpanel" id="panel-data"' + (STATE.tab === 'data' ? '' : ' hidden') + '>' + dataCard() + '</div>';
+    html += '<div class="k-tabpanel" id="panel-summary"' + (STATE.tab === 'summary' ? '' : ' hidden') + '>' + summaryPanel() + '</div>';
+    html += '<div class="k-tabpanel" id="panel-challenge"' + (STATE.tab === 'challenge' ? '' : ' hidden') + '>' + challengePanel() + '</div>';
+
+    root.innerHTML = html;
+    wire();
+  }
+
+  function tabBtn(key, label, locked){
+    return '<button class="k-tab' + (STATE.tab === key ? ' on' : '') + '" data-tab="' + key + '" '
+      + 'role="tab" type="button" aria-selected="' + (STATE.tab === key ? 'true' : 'false') + '">'
+      + esc(label) + (locked ? '<span class="k-tab-lock">' + icon(I_LOCK, 12) + '</span>' : '') + '</button>';
+  }
+
+  // ---------------------------------------------------------------- tab 1, data card
+  function dataCard(){
+    var ds = STATE.ds;
+    var owned = !!STATE.lic;
+    var preview = ds.preview_rows || null;
+    var main = '', aside = '';
+
+    main += buildHero(preview);
+    main += '<div class="page-card k-card-soft"><h2>The story</h2>' + paragraphs(ds.long_description) + '</div>';
+
+    if (preview && preview.rows && preview.rows.length) {
+      main += '<div class="page-card"><h2>Sample of the real data</h2>';
+      main += '<p class="k-sub">The first ' + preview.rows.length + ' rows, exactly as they come out of the dealership ERP. '
+           +  'Yes, the dates, the prices and the names are inconsistent. That is the job.</p>';
+      main += previewTable(preview, false);
+      main += '<p class="k-sub k-sub-tight">Showing ' + preview.rows.length + ' of ' + nf(preview.total_rows) + ' rows, and '
+           +  FREE_COLUMNS + ' of ' + preview.columns.length + ' columns. The rest come with the project.</p>';
+      main += '</div>';
+    }
+
+    if (STATE.schema.length) {
+      var total = STATE.schema.length;
+      var shown = STATE.schema.slice(0, FREE_COLUMNS);
+      var hidden = total - shown.length;
+      main += '<div class="page-card"><h2>What is in it</h2>';
+      main += '<p class="k-sub">' + total + ' columns. Here are the first ' + shown.length + '.</p>';
+      main += '<div class="k-collist">';
+      shown.forEach(function(c){
+        main += '<div class="k-col"><span class="k-col-name">' + esc(c.column_name) + '</span>'
+             +  '<span class="k-col-desc">' + esc(c.description || '') + '</span></div>';
+      });
+      main += '</div>';
+      if (hidden > 0) {
+        main += '<div class="k-col-locked">' + icon(I_LOCK)
+             +  '<span>The remaining ' + hidden + ' columns, and what each one is hiding, unlock with the project.</span></div>';
+      }
+      main += '</div>';
+    }
+
+    var tools = toolsFor(STATE.tags);
+    aside += '<div class="k-asidecard"><h3>At a glance</h3>';
+    if (ds.difficulty) aside += fact('Difficulty', esc(cap(ds.difficulty)));
+    if (preview && preview.total_rows) {
+      aside += fact('Rows', nf(preview.total_rows));
+      aside += fact('Columns', String(preview.columns.length));
+    }
+    aside += fact('Price', owned ? 'Owned' : money(ds));
+    aside += '</div>';
+
+    if (tools.length) {
+      aside += '<div class="k-asidecard"><h3>Tools for this one</h3><div class="k-tools">';
+      tools.forEach(function(t){
+        aside += '<div class="k-tool"><span class="k-tool-mark">' + esc(t.mark) + '</span>'
+              +  '<span><span class="k-tool-name">' + esc(t.name) + '</span>'
+              +  '<span class="k-tool-use">' + esc(t.use) + '</span></span></div>';
+      });
+      aside += '</div></div>';
+    }
+
+    var topics = STATE.tags.filter(function(t){ return !TOOLS[String(t).toLowerCase()]; });
+    if (topics.length) {
+      aside += '<div class="k-asidecard"><h3>Tags</h3><div class="k-chiprow" style="margin:0;">';
+      topics.forEach(function(t){ aside += '<span class="k-chip">' + esc(t) + '</span>'; });
+      aside += '</div></div>';
+    }
+
+    return '<div class="k-split"><div>' + main + '</div><aside class="k-aside">' + aside + '</aside></div>';
+  }
+
+  function fact(k, v){
+    return '<div class="k-fact"><span class="k-fact-k">' + esc(k) + '</span>'
+      + '<span class="k-fact-v">' + v + '</span></div>';
+  }
+
+  function toolsFor(tags){
+    var out = [], seen = {};
+    tags.forEach(function(t){
+      var hit = TOOLS[String(t).toLowerCase()];
+      if (hit && !seen[hit.name]) { seen[hit.name] = 1; out.push(hit); }
+    });
+    return out;
+  }
+
+  // ---------------------------------------------------------------- tab 2, summary
+  function summaryPanel(){
+    var ds = STATE.ds;
+    if (!STATE.lic) {
+      var lp = ds.locked_preview || { summary:'', phases:[], total_tasks:0 };
+      var blurred = '<div class="page-card"><h2>The project</h2><p>' + esc(lp.summary || '') + '</p></div>'
+        + '<div class="page-card"><h2>Every column</h2><p>' + (STATE.schema.length || 41)
+        + ' columns with a plain english note on each one, including the ones that look identical and are not.</p></div>'
+        + '<div class="page-card"><h2>The whole table</h2><p>All rows, paged 500 at a time, right here in the browser.</p></div>';
+      return lockWrap(blurred, 'The full summary, locked',
+        'Unlock to read the detailed brief, see every column, open the whole table in the browser, '
+        + 'and copy a ready made prompt into your own AI so it coaches you through the project.');
+    }
+
+    var preview = ds.preview_rows || null;
+    var lp = ds.locked_preview || {};
+    var h = '';
+
+    h += '<div class="page-card k-card-brand"><h2>You own this project</h2>';
+    h += '<p class="k-sub">License <strong>' + esc(STATE.lic.license_code) + '</strong>, '
+      +  (STATE.lic.tier === 'premium' ? 'Premium tier with 5 bonus hard challenges.' : 'Standard tier.') + '</p>';
+    h += '<div class="k-btnrow">';
+    h += '  <button class="k-btn k-btn-brand" id="dsOpenTable" type="button">Open the whole table</button>';
+    h += '  <button class="k-btn" id="dsFilesBtn" type="button">Download your files</button>';
+    h += '</div></div>';
+
+    h += '<div class="page-card"><h2>The brief</h2>' + paragraphs(lp.summary || ds.long_description) + '</div>';
+
+    h += '<div class="page-card"><h2>Coach yourself through it</h2>';
+    h += '<p class="k-sub">Copy this into ChatGPT, Claude or whatever you use. It sets up the whole project '
+      +  'and tells the model to guide you rather than hand you the answer.</p>';
+    h += '<div class="k-promptbar"><p>The prompt carries the story, the column list and every challenge in your pack.</p>'
+      +  '<button class="k-btn k-btn-brand" id="dsCopyPrompt" type="button">' + icon(I_COPY) + ' Copy prompt</button></div>';
+    h += '</div>';
+
+    if (STATE.schema.length) {
+      h += '<div class="page-card"><h2>Every column, all ' + STATE.schema.length + ' of them</h2><div class="k-collist k-collist-open">';
+      STATE.schema.forEach(function(c){
+        h += '<div class="k-col"><span class="k-col-name">' + esc(c.column_name) + '</span>'
+          +  '<span class="k-col-desc">' + esc(c.description || '') + '</span></div>';
+      });
+      h += '</div></div>';
+    }
+
+    if (preview && preview.rows && preview.rows.length) {
+      h += '<div class="page-card"><h2>Full preview, every column</h2>';
+      h += '<p class="k-sub">The same first ' + preview.rows.length + ' rows, nothing held back this time.</p>';
+      h += previewTable(preview, true);
+      h += '</div>';
+    }
+
+    return h;
+  }
+
+  // ---------------------------------------------------------------- tab 3, challenge
+  function challengePanel(){
+    var ds = STATE.ds;
+    if (!STATE.lic) {
+      var lp = ds.locked_preview || { phases:[], total_tasks:0 };
+      var inner = '';
+      (lp.phases || []).forEach(function(p){
+        inner += '<div class="page-card"><h2>' + esc(p.title) + '</h2>';
+        inner += '<p class="k-sub">' + esc(p.blurb || '') + '</p><div class="k-tasklist">';
+        (p.sample || []).forEach(function(t, i){
+          inner += '<div class="k-task"><span class="k-task-id">' + (i + 1) + '</span><span>' + inlineCode(t) + '</span></div>';
+        });
+        var rest = Math.max(0, (p.count || 0) - (p.sample || []).length);
+        for (var i = 0; i < Math.min(rest, 4); i++) {
+          inner += '<div class="k-task k-task-ghost"><span class="k-task-id"></span><span></span></div>';
+        }
+        inner += '</div></div>';
+      });
+      return lockWrap(inner, (lp.total_tasks || 0) + ' challenges, locked',
+        'Unlock to get your own personalised task pack. Every buyer works the identical task set '
+        + 'in their own shuffled order, so no two people can copy each other.');
+    }
+
+    var pack = STATE.lic.task_pack || { phases: [] };
+    var h = '';
+    h += '<div class="page-card k-card-soft"><h2>How to work it</h2>'
+      +  '<p>Each phase below names the tool it is meant for. Do them in order, the later phases assume '
+      +  'the cleaning from the earlier ones is already done. Your task numbers are yours alone.</p></div>';
+
+    (pack.phases || []).forEach(function(p){
+      var tools = phaseTools(p);
+      h += '<div class="page-card"><h2>' + esc(p.title) + '</h2>';
+      if (tools.length) {
+        h += '<div class="k-phase-tools">';
+        tools.forEach(function(t){ h += '<span class="k-ptool">' + esc(t) + '</span>'; });
+        h += '</div>';
+      }
+      h += '<div class="k-tasklist">';
+      (p.tasks || []).forEach(function(t){
+        h += '<div class="k-task"><span class="k-task-id">' + esc(t.id) + '</span><span>' + inlineCode(t.text) + '</span></div>';
+      });
+      h += '</div></div>';
+    });
+
+    if (pack.premium && pack.premium.length) {
+      h += '<div class="page-card k-card-brand"><h2>Premium bonus, 5 hard challenges</h2><div class="k-tasklist">';
+      pack.premium.forEach(function(t){
+        h += '<div class="k-task"><span class="k-task-id">' + esc(t.id) + '</span><span>' + inlineCode(t.text) + '</span></div>';
+      });
+      h += '</div></div>';
+    }
+
+    h += '<div class="page-card"><h2>Track your progress</h2>'
+      +  '<p class="k-sub">The challenge page keeps a tick box against every task.</p>'
+      +  '<div class="k-btnrow"><a class="k-btn k-btn-brand" href="challenge.html?slug='
+      +  encodeURIComponent(ds.slug) + '">Open your challenge page</a></div></div>';
+
+    return h;
+  }
+
+  // Which tools a phase calls for, read out of the task wording itself.
+  function phaseTools(p){
+    var text = ((p.title || '') + ' ' + (p.tasks || []).map(function(t){ return t.text || ''; }).join(' ')).toLowerCase();
+    var found = [], seen = {};
+    Object.keys(TOOLS).forEach(function(k){
+      if (text.indexOf(k) === -1) return;
+      var name = TOOLS[k].name;
+      if (!seen[name]) { seen[name] = 1; found.push(name); }
+    });
+    if (!found.length) found = toolsFor(STATE.tags).map(function(t){ return t.name; });
+    return found;
+  }
+
+  function lockWrap(inner, head, body){
+    var h = '<div class="k-locksec">';
+    h += '  <div class="k-lockblur" aria-hidden="true">' + inner + '</div>';
+    h += '  <div class="k-lockover">';
+    h += '    <div class="k-lockicon">' + icon(I_LOCK, 30) + '</div>';
+    h += '    <h3 class="k-lockhead">' + esc(head) + '</h3>';
+    h += '    <p class="k-lockbody">' + esc(body) + '</p>';
+    h += '    <div class="k-lockprice">' + money(STATE.ds) + '</div>';
+    h += '    <button class="k-btn k-btn-brand k-btn-lg k-unlock" type="button">Unlock this project</button>';
+    h += '    <p class="k-locknote">Beta pricing, free while the purchase flow is being tested.</p>';
+    h += '  </div></div>';
+    return h;
+  }
+
+  function previewTable(preview, full){
+    var cols = full ? preview.columns : preview.columns.slice(0, FREE_COLUMNS);
+    var h = '<div class="k-tablewrap k-tablewrap-short"><table class="k-table"><thead><tr>';
+    cols.forEach(function(c){ h += '<th>' + esc(c) + '</th>'; });
+    if (!full && preview.columns.length > cols.length) h += '<th>&#8230;</th>';
+    h += '</tr></thead><tbody>';
+    preview.rows.forEach(function(r){
+      h += '<tr>';
+      cols.forEach(function(_, i){
+        var v = r[i];
+        h += (v === undefined || v === null || String(v).trim() === '')
+          ? '<td class="k-cell-empty">blank</td>'
+          : '<td>' + esc(v) + '</td>';
+      });
+      if (!full && preview.columns.length > cols.length) h += '<td class="k-cell-empty">locked</td>';
+      h += '</tr>';
+    });
+    return h + '</tbody></table></div>';
   }
 
   // ---------------------------------------------------------------- hero
@@ -176,13 +524,11 @@
     var s = '';
     s += '<svg class="k-hero-svg" viewBox="0 0 800 132" preserveAspectRatio="none" role="img" aria-label="Decorative animation of a raw data export loading row by row">';
     s += '<g fill="currentColor">';
-
     s += '<g class="k-hero-row" style="animation-delay:0s">';
     for (var c = 0; c < COLS; c++) {
       s += '<rect x="' + (X0 + c * SLOT).toFixed(1) + '" y="6" width="' + (SLOT * 0.86 * headW[c]).toFixed(1) + '" height="10" rx="3" opacity="0.92"/>';
     }
     s += '</g>';
-
     for (var r = 0; r < ROWS; r++) {
       var y = 30 + r * 19;
       s += '<g class="k-hero-row" style="animation-delay:' + (0.18 + r * 0.13).toFixed(2) + 's">';
@@ -196,7 +542,6 @@
       }
       s += '</g>';
     }
-
     s += '<rect class="k-hero-caret" x="' + (X0 + 0.5 * SLOT).toFixed(1) + '" y="125" width="2" height="2" rx="1" opacity="0.9"/>';
     s += '</g></svg>';
 
@@ -210,218 +555,213 @@
            '<span>' + right + '</span></div></div>';
   }
 
-  // ---------------------------------------------------------------- render
-  function render(){
+  // ---------------------------------------------------------------- the AI prompt
+  function buildPrompt(){
     var ds = STATE.ds;
-    var owned = !!STATE.lic;
-    var preview = ds.preview_rows || null;
-    var html = '';
+    if (ds.ai_prompt && ds.ai_prompt.trim()) return ds.ai_prompt.trim();
 
-    html += '<div class="page-lead"><h1>' + esc(ds.title) + '</h1>';
-    html += '<p>' + esc(ds.short_description || '') + '</p></div>';
-
-    html += buildHero(preview);
-
-    html += '<div class="k-chiprow">';
-    if (ds.difficulty) html += '<span class="k-chip k-chip-brand">' + esc(cap(ds.difficulty)) + '</span>';
-    if (preview && preview.total_rows) {
-      html += '<span class="k-chip" data-count="' + preview.total_rows + '" data-suffix=" rows">0 rows</span>';
-      html += '<span class="k-chip" data-count="' + preview.columns.length + '" data-suffix=" columns">0 columns</span>';
-    }
-    STATE.tags.forEach(function(t){ html += '<span class="k-chip">' + esc(t) + '</span>'; });
-    html += '</div>';
-
-    html += '<div class="page-card k-card-soft k-reveal"><h2>The story</h2>' + paragraphs(ds.long_description) + '</div>';
-
+    var preview = ds.preview_rows || {};
+    var L = [];
+    L.push('I am working through a hands on data project called "' + ds.title + '".');
+    L.push('');
+    L.push('THE SITUATION');
+    L.push(String(ds.long_description || ds.short_description || '').replace(/\n{2,}/g, '\n'));
+    L.push('');
+    L.push('THE DATA');
+    L.push('One CSV file, ' + (preview.total_rows ? nf(preview.total_rows) + ' rows' : 'several thousand rows')
+      + ' and ' + (STATE.schema.length || (preview.columns || []).length) + ' columns. It is a raw export, so expect '
+      + 'inconsistent dates, prices stored as text, duplicated names and blank cells.');
     if (STATE.schema.length) {
-      var total = STATE.schema.length;
-      var shown = owned ? STATE.schema : STATE.schema.slice(0, FREE_COLUMNS);
-      var hidden = total - shown.length;
-
-      html += '<div class="page-card k-reveal"><h2>What is in it</h2>';
-      html += '<p class="k-sub">' + total + ' columns' + (owned ? '. Here is every one of them.' : '. Here are the first ' + shown.length + '.') + '</p>';
-      html += '<div class="k-collist">';
-      shown.forEach(function(c){
-        html += '<div class="k-col">'
-             +  '<span class="k-col-name">' + esc(c.column_name) + '</span>'
-             +  '<span class="k-col-desc">' + esc(c.description || '') + '</span>'
-             +  '</div>';
+      L.push('');
+      L.push('The columns are:');
+      STATE.schema.forEach(function(c){
+        L.push('- ' + c.column_name + (c.description ? ': ' + c.description : ''));
       });
-      html += '</div>';
-      if (hidden > 0) {
-        html += '<div class="k-col-locked">'
-             +  '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
-             +  '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'
-             +  '<span>The remaining ' + hidden + ' columns, and what each one is hiding, unlock with the project.</span>'
-             +  '</div>';
+    }
+
+    var pack = (STATE.lic && STATE.lic.task_pack) || {};
+    if (pack.phases && pack.phases.length) {
+      L.push('');
+      L.push('WHAT I HAVE TO DELIVER');
+      pack.phases.forEach(function(p){
+        L.push('');
+        L.push(p.title + ':');
+        (p.tasks || []).forEach(function(t){ L.push('  ' + t.id + '. ' + t.text); });
+      });
+      if (pack.premium && pack.premium.length) {
+        L.push('');
+        L.push('Bonus, harder:');
+        pack.premium.forEach(function(t){ L.push('  ' + t.id + '. ' + t.text); });
       }
-      html += '</div>';
     }
 
-    if (preview && preview.rows && preview.rows.length) {
-      html += '<div class="page-card k-reveal"><h2>Sample of the real data</h2>';
-      html += '<p class="k-sub">The first ' + preview.rows.length + ' rows, exactly as they come out of the dealership ERP. '
-           +  'Yes, the dates, the prices and the names are inconsistent. That is the job.</p>';
-      html += previewTable(preview, owned);
-      html += '<p class="k-sub k-sub-tight">Showing ' + preview.rows.length + ' of ' + nf(preview.total_rows) + ' rows'
-           +  (owned ? '.' : ', and ' + FREE_COLUMNS + ' of ' + preview.columns.length + ' columns.') + '</p>';
-      html += '</div>';
+    var tools = toolsFor(STATE.tags).map(function(t){ return t.name; });
+    if (tools.length) {
+      L.push('');
+      L.push('I am doing this in ' + tools.join(' and ') + '.');
     }
 
-    html += owned ? ownedSection(ds) : lockedSection(ds);
-
-    root.innerHTML = html;
-    wire();
-  }
-
-  function previewTable(preview, owned){
-    var cols = owned ? preview.columns : preview.columns.slice(0, FREE_COLUMNS);
-    var h = '<div class="k-tablewrap k-tablewrap-short"><table class="k-table"><thead><tr>';
-    cols.forEach(function(c){ h += '<th>' + esc(c) + '</th>'; });
-    if (!owned && preview.columns.length > cols.length) h += '<th>&#8230;</th>';
-    h += '</tr></thead><tbody>';
-    preview.rows.forEach(function(r){
-      h += '<tr>';
-      cols.forEach(function(_, i){
-        var v = r[i];
-        h += (v === undefined || v === null || String(v).trim() === '')
-          ? '<td class="k-cell-empty">blank</td>'
-          : '<td>' + esc(v) + '</td>';
-      });
-      if (!owned && preview.columns.length > cols.length) h += '<td class="k-cell-empty">locked</td>';
-      h += '</tr>';
-    });
-    return h + '</tbody></table></div>';
-  }
-
-  // ---------------------------------------------------------------- locked
-  function lockedSection(ds){
-    var lp = ds.locked_preview || { summary:'', phases:[], total_tasks:0, premium_count:0 };
-    var inner = '';
-
-    inner += '<div class="page-card"><h2>The project</h2><p>' + esc(lp.summary || '') + '</p></div>';
-
-    (lp.phases || []).forEach(function(p){
-      inner += '<div class="page-card"><h2>' + esc(p.title) + '</h2>';
-      inner += '<p class="k-sub">' + esc(p.blurb || '') + '</p>';
-      inner += '<div class="k-tasklist">';
-      (p.sample || []).forEach(function(t, i){
-        inner += '<div class="k-task"><span class="k-task-id">' + (i + 1) + '</span><span>' + inlineCode(t) + '</span></div>';
-      });
-      var rest = Math.max(0, (p.count || 0) - (p.sample || []).length);
-      for (var i = 0; i < Math.min(rest, 4); i++) {
-        inner += '<div class="k-task k-task-ghost"><span class="k-task-id"></span><span></span></div>';
-      }
-      inner += '</div></div>';
-    });
-
-    var h = '';
-    h += '<div class="k-locksec">';
-    h += '  <div class="k-lockblur" aria-hidden="true">' + inner + '</div>';
-    h += '  <div class="k-lockover">';
-    h += '    <div class="k-lockicon">'
-      +  '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
-      +  '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>';
-    h += '    <h3 class="k-lockhead">' + (lp.total_tasks || 0) + ' challenges, locked</h3>';
-    h += '    <p class="k-lockbody">Unlock to get your own personalised task pack, the full project summary, '
-      +  'every column, the raw data files, project.md, and the in browser table viewer. '
-      +  'Every buyer works the identical task set in their own shuffled order.</p>';
-    h += '    <div class="k-lockprice">' + money(ds) + '</div>';
-    h += '    <button class="k-btn k-btn-brand k-btn-lg" id="dsUnlock" type="button">Unlock this project</button>';
-    h += '    <p class="k-locknote" id="dsUnlockNote">Beta pricing, free while the purchase flow is being tested.</p>';
-    h += '  </div>';
-    h += '</div>';
-    return h;
-  }
-
-  // ---------------------------------------------------------------- owned
-  function ownedSection(ds){
-    var lic = STATE.lic;
-    var pack = lic.task_pack || { phases: [] };
-    var h = '';
-
-    h += '<div class="page-card k-card-brand k-reveal">';
-    h += '  <h2>You own this project</h2>';
-    h += '  <p class="k-sub">License <strong>' + esc(lic.license_code) + '</strong>, '
-      +  (lic.tier === 'premium' ? 'Premium tier with 5 bonus hard challenges.' : 'Standard tier.') + '</p>';
-    h += '  <div class="k-btnrow">';
-    h += '    <button class="k-btn k-btn-brand" id="dsOpenTable" type="button">Open the data table</button>';
-    h += '    <a class="k-btn" href="challenge.html?slug=' + encodeURIComponent(ds.slug) + '">Open your challenge page</a>';
-    h += '  </div>';
-    h += '</div>';
-
-    h += '<div class="page-card k-reveal"><h2>Your files</h2>';
-    h += '  <p class="k-sub">Download links are generated fresh each time and stay valid for one hour.</p>';
-    h += '  <div class="k-filelist" id="dsFiles">Loading your files</div>';
-    h += '</div>';
-
-    (pack.phases || []).forEach(function(p){
-      h += '<div class="page-card k-reveal"><h2>' + esc(p.title) + '</h2><div class="k-tasklist">';
-      (p.tasks || []).forEach(function(t){
-        h += '<div class="k-task"><span class="k-task-id">' + esc(t.id) + '</span><span>' + inlineCode(t.text) + '</span></div>';
-      });
-      h += '</div></div>';
-    });
-
-    if (pack.premium && pack.premium.length) {
-      h += '<div class="page-card k-card-brand k-reveal"><h2>Premium bonus, 5 hard challenges</h2><div class="k-tasklist">';
-      pack.premium.forEach(function(t){
-        h += '<div class="k-task"><span class="k-task-id">' + esc(t.id) + '</span><span>' + inlineCode(t.text) + '</span></div>';
-      });
-      h += '</div></div>';
-    }
-
-    return h;
+    L.push('');
+    L.push('HOW I WANT YOU TO HELP');
+    L.push('Do not write the finished solution for me. I am doing this to learn, so:');
+    L.push('1. Ask me which task I am on and what I have already tried before you answer.');
+    L.push('2. Point me at the right approach and the specific trap in that step, rather than pasting code.');
+    L.push('3. When I do share code, review it and tell me what breaks at scale or on the dirty rows.');
+    L.push('4. Push back when my logic is wrong, and say plainly when a number I report looks impossible.');
+    L.push('5. At the end of each phase, ask me to explain my result in one sentence, the way I would to a manager.');
+    L.push('');
+    L.push('Start by asking me which phase I am beginning with.');
+    return L.join('\n');
   }
 
   // ---------------------------------------------------------------- wiring
   function wire(){
-    var unlock = document.getElementById('dsUnlock');
-    if (unlock) unlock.addEventListener('click', onUnlockClick);
+    typeTitle();
 
-    var openTable = document.getElementById('dsOpenTable');
-    if (openTable) openTable.addEventListener('click', openModal);
-
-    if (STATE.lic) loadFiles();
-
-    runCounters();
-    observeReveal();
-  }
-
-  function runCounters(){
-    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    Array.prototype.forEach.call(document.querySelectorAll('[data-count]'), function(el){
-      var target = Number(el.getAttribute('data-count')) || 0;
-      var suffix = el.getAttribute('data-suffix') || '';
-      if (reduce) { el.textContent = nf(target) + suffix; return; }
-      var start = performance.now(), dur = 900;
-      function step(now){
-        var p = Math.min(1, (now - start) / dur);
-        var eased = 1 - Math.pow(1 - p, 3);
-        el.textContent = nf(Math.round(target * eased)) + suffix;
-        if (p < 1) requestAnimationFrame(step);
-      }
-      requestAnimationFrame(step);
+    Array.prototype.forEach.call(document.querySelectorAll('.k-tab'), function(b){
+      b.addEventListener('click', function(){ switchTab(b.getAttribute('data-tab')); });
     });
+    Array.prototype.forEach.call(document.querySelectorAll('.k-unlock'), function(b){
+      b.addEventListener('click', onUnlockClick);
+    });
+
+    document.getElementById('dsHype').addEventListener('click', toggleHype);
+    document.getElementById('dsMark').addEventListener('click', toggleMark);
+    document.getElementById('dsDownload').addEventListener('click', onDownload);
+
+    var t = document.getElementById('dsOpenTable');
+    if (t) t.addEventListener('click', openModal);
+    var f = document.getElementById('dsFilesBtn');
+    if (f) f.addEventListener('click', onDownload);
+    var c = document.getElementById('dsCopyPrompt');
+    if (c) c.addEventListener('click', copyPrompt);
   }
 
-  function observeReveal(){
-    var items = document.querySelectorAll('.k-reveal');
-    if (!('IntersectionObserver' in window)) {
-      Array.prototype.forEach.call(items, function(el){ el.classList.add('k-in'); });
+  function typeTitle(){
+    var el = document.getElementById('dsTitle');
+    if (!el || STATE.typed) return;
+    STATE.typed = true;
+    var text = STATE.ds.title;
+    if (reduced()) { el.textContent = text; return; }
+    el.textContent = '';
+    el.classList.add('k-typing');
+    var i = 0, speed = Math.max(16, Math.min(40, 1500 / Math.max(1, text.length)));
+    (function step(){
+      el.textContent = text.slice(0, ++i);
+      if (i < text.length) { setTimeout(step, speed); return; }
+      setTimeout(function(){ el.classList.remove('k-typing'); }, 650);
+    })();
+  }
+
+  function switchTab(key){
+    if (STATE.tab === key) return;
+    STATE.tab = key;
+    Array.prototype.forEach.call(document.querySelectorAll('.k-tab'), function(b){
+      var on = b.getAttribute('data-tab') === key;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    ['data', 'summary', 'challenge'].forEach(function(k){
+      document.getElementById('panel-' + k).hidden = (k !== key);
+    });
+    window.scrollTo({ top: 0, behavior: reduced() ? 'auto' : 'smooth' });
+  }
+
+  // ---------------------------------------------------------------- hype and bookmark
+  async function toggleHype(){
+    if (!STATE.session) {
+      askSignIn('Sign in to hype this', 'Hypes are counted once per account, so we need to know who you are.');
       return;
     }
-    var io = new IntersectionObserver(function(entries){
-      entries.forEach(function(e){
-        if (e.isIntersecting) { e.target.classList.add('k-in'); io.unobserve(e.target); }
-      });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
-    Array.prototype.forEach.call(items, function(el){ io.observe(el); });
+    var btn = document.getElementById('dsHype');
+    var uid = STATE.session.user.id;
+    btn.disabled = true;
+
+    if (STATE.hyped) {
+      var d = await SUPA.from('hypes').delete().eq('dataset_id', STATE.ds.id).eq('user_id', uid);
+      if (!d.error) { STATE.hyped = false; STATE.hypes = Math.max(0, STATE.hypes - 1); }
+    } else {
+      var a = await SUPA.from('hypes').insert({ dataset_id: STATE.ds.id, user_id: uid });
+      if (!a.error) { STATE.hyped = true; STATE.hypes++; }
+    }
+
+    btn.disabled = false;
+    btn.classList.toggle('on', STATE.hyped);
+    btn.setAttribute('aria-pressed', STATE.hyped ? 'true' : 'false');
+    btn.querySelector('span').textContent = STATE.hyped ? 'Hyped' : 'Hype';
+    document.getElementById('dsHypeCount').textContent = nf(STATE.hypes);
+    if (STATE.hyped && !reduced()) {
+      btn.classList.remove('k-act-pop');
+      void btn.offsetWidth;
+      btn.classList.add('k-act-pop');
+    }
+  }
+
+  async function toggleMark(){
+    if (!STATE.session) {
+      askSignIn('Sign in to bookmark', 'Bookmarks are tied to your account so they follow you across devices.');
+      return;
+    }
+    var btn = document.getElementById('dsMark');
+    var uid = STATE.session.user.id;
+    btn.disabled = true;
+
+    if (STATE.marked) {
+      var d = await SUPA.from('bookmarks').delete().eq('dataset_id', STATE.ds.id).eq('user_id', uid);
+      if (!d.error) STATE.marked = false;
+    } else {
+      var a = await SUPA.from('bookmarks').insert({ dataset_id: STATE.ds.id, user_id: uid });
+      if (!a.error) STATE.marked = true;
+    }
+
+    btn.disabled = false;
+    btn.classList.toggle('on', STATE.marked);
+    btn.setAttribute('aria-pressed', STATE.marked ? 'true' : 'false');
+    btn.querySelector('span').textContent = STATE.marked ? 'Saved' : 'Bookmark';
+  }
+
+  function askSignIn(title, text){
+    document.getElementById('authTitle').textContent = title;
+    document.getElementById('authText').textContent = text;
+    openDialog('authModal');
+  }
+
+  // ---------------------------------------------------------------- copy prompt
+  function copyPrompt(){
+    var btn = document.getElementById('dsCopyPrompt');
+    var text = buildPrompt();
+    var done = function(ok){
+      btn.innerHTML = ok ? 'Copied' : 'Could not copy';
+      setTimeout(function(){ btn.innerHTML = icon(I_COPY) + ' Copy prompt'; }, 1800);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function(){ done(true); }, function(){ fallbackCopy(text, done); });
+      return;
+    }
+    fallbackCopy(text, done);
+  }
+
+  function fallbackCopy(text, done){
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+    done(ok);
   }
 
   // ---------------------------------------------------------------- unlock chain
   function onUnlockClick(){
-    if (!STATE.session) { openDialog('authModal'); return; }
+    if (!STATE.session) {
+      askSignIn('Sign in to continue',
+        'Your challenge pack is generated against your account, so you need to be signed in before you unlock this project.');
+      return;
+    }
     var ds = STATE.ds;
     document.getElementById('payItem').textContent = ds.title;
     document.getElementById('payItemPrice').innerHTML = money(ds);
@@ -480,21 +820,24 @@
     btn.textContent = 'Pay and unlock';
     note.textContent = 'Beta pricing. Nothing is charged and no card details are collected while the purchase flow is being tested.';
     closeDialog('payModal');
+    STATE.tab = 'summary';
     render();
-    var owned = document.querySelector('.k-card-brand');
-    if (owned) owned.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
   // ---------------------------------------------------------------- files
-  async function loadFiles(){
-    var box = document.getElementById('dsFiles');
-    if (!box) return;
+  async function onDownload(){
+    if (!STATE.lic) { onUnlockClick(); return; }
+    openDialog('filesModal');
+    var box = document.getElementById('filesList');
+    box.innerHTML = 'Preparing your links';
+
     var path = STATE.ds.storage_path || STATE.ds.slug;
     var listRes = await SUPA.storage.from('datasets').list(path);
     if (listRes.error || !listRes.data || !listRes.data.length) {
-      box.innerHTML = '<p class="k-sub">No files uploaded to storage yet.</p>';
+      box.innerHTML = '<p class="k-sub">No files have been uploaded for this dataset yet.</p>';
       return;
     }
+
     var links = await Promise.all(listRes.data.map(async function(f){
       var signed = await SUPA.storage.from('datasets').createSignedUrl(path + '/' + f.name, 3600);
       if (signed.error) return '';
@@ -508,8 +851,6 @@
   }
 
   // ---------------------------------------------------------------- table modal
-  var modal = document.getElementById('tableModal');
-
   function openModal(){
     openDialog('tableModal');
     if (STATE.csvRows) { renderPage(); return; }
@@ -614,6 +955,7 @@
   document.getElementById('tmNext').addEventListener('click', function(){ STATE.page++; renderPage(); });
   document.getElementById('authClose').addEventListener('click', function(){ closeDialog('authModal'); });
   document.getElementById('payClose').addEventListener('click', function(){ closeDialog('payModal'); });
+  document.getElementById('filesClose').addEventListener('click', function(){ closeDialog('filesModal'); });
   document.getElementById('authGoLogin').addEventListener('click', function(){ goAuth('login'); });
   document.getElementById('authGoSignup').addEventListener('click', function(){ goAuth('signup'); });
   document.getElementById('payGo').addEventListener('click', doPurchase);
