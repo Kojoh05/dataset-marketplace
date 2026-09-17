@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>KOJOH | Your challenge</title>
+<script src="theme.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="pages.css">
+<link rel="stylesheet" href="nav.css">
+<style>
+  .chal-phase-tasks{display:flex; flex-direction:column; gap:0.6rem; margin-top:0.9rem;}
+  .chal-task{
+    display:flex; align-items:flex-start; gap:0.65rem;
+    padding:0.7rem 0.85rem; background:var(--bg); border:1px solid var(--line);
+    border-radius:0.65rem; transition:opacity 0.15s ease;
+  }
+  .chal-task.done{opacity:0.5;}
+  .chal-task-check{
+    flex-shrink:0; width:1.1rem; height:1.1rem; margin-top:0.15rem;
+    accent-color:var(--text); cursor:pointer;
+  }
+  .chal-task-body{flex:1; font-size:0.875rem; line-height:1.55;}
+  .chal-task-id{
+    display:inline-block; font-family:'Space Grotesk',sans-serif; font-weight:700;
+    font-size:0.6875rem; letter-spacing:0.02em; color:var(--muted);
+    background:var(--card); border:1px solid var(--line); border-radius:5px;
+    padding:0.05rem 0.4rem; margin-right:0.5rem; vertical-align:middle;
+  }
+  .chal-task.done .chal-task-body{text-decoration:line-through;}
+  .chal-progress-bar{
+    height:8px; border-radius:999px; background:var(--bg); border:1px solid var(--line);
+    overflow:hidden; margin-top:0.75rem;
+  }
+  .chal-progress-fill{height:100%; background:var(--text); transition:width 0.25s ease; width:0%;}
+  .chal-badge{
+    display:inline-block; font-size:0.75rem; font-weight:600; padding:0.2rem 0.65rem;
+    border-radius:999px; border:1px solid var(--line); background:var(--bg); margin-right:0.4rem;
+  }
+  .chal-badge.premium{background:var(--text); color:var(--bg); border-color:var(--text);}
+</style>
+<script src="nav.js"></script>
+</head>
+<body>
+
+<header class="page-header">
+  <span class="page-title">Your challenge</span>
+</header>
+
+<main class="page-wrap">
+  <div id="chalRoot">
+    <div class="empty-state"><div class="empty-state-icon"></div><h3>Loading…</h3><p>One moment.</p></div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="supabase-config.js"></script>
+<script src="config.js"></script>
+<script src="icons.js"></script>
+<script>
+(function(){
+  var LIVE = !!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase);
+  var SUPA = LIVE ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY) : null;
+  var root = document.getElementById('chalRoot');
+
+  function escape(s){ return String(s || '').replace(/[<>&"]/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]; }); }
+  function empty(icon, title, body){
+    root.innerHTML = '<div class="empty-state"><div class="empty-state-icon">' + icon + '</div><h3>' + escape(title) + '</h3><p>' + body + '</p></div>';
+  }
+
+  function progressKey(licenseCode){ return 'kojoh-progress-' + licenseCode; }
+  function loadProgress(licenseCode){
+    try { return JSON.parse(localStorage.getItem(progressKey(licenseCode)) || '{}'); }
+    catch (e) { return {}; }
+  }
+  function saveProgress(licenseCode, done){
+    try { localStorage.setItem(progressKey(licenseCode), JSON.stringify(done)); } catch (e) {}
+  }
+
+  function renderPhase(title, tasks, done){
+    var html = '<div class="page-card"><h2>' + escape(title) + '</h2><div class="chal-phase-tasks">';
+    tasks.forEach(function(t){
+      var checked = !!done[t.id];
+      html += '<label class="chal-task' + (checked ? ' done' : '') + '" data-task="' + t.id + '">'
+            + '<input type="checkbox" class="chal-task-check"' + (checked ? ' checked' : '') + '>'
+            + '<span class="chal-task-body"><span class="chal-task-id">' + t.id + '</span>' + escape(t.text).replace(/`([^`]+)`/g, '<code>$1</code>') + '</span>'
+            + '</label>';
+    });
+    html += '</div></div>';
+    return html;
+  }
+
+  function updateProgressBar(allTasks, done){
+    var total = allTasks.length;
+    var checked = allTasks.filter(function(t){ return done[t.id]; }).length;
+    var bar = document.getElementById('chalProgressFill');
+    var label = document.getElementById('chalProgressLabel');
+    if (bar) bar.style.width = (total ? (100 * checked / total) : 0) + '%';
+    if (label) label.textContent = checked + ' / ' + total + ' tasks checked off';
+  }
+
+  async function load(){
+    var slug = new URLSearchParams(window.location.search).get('slug');
+    if (!slug) { empty(kIcon('alert'), 'No dataset specified', 'This link is missing its dataset.'); return; }
+    if (!LIVE) { empty(kIcon('plug'), 'Preview mode', 'Connect Supabase to view your challenge.'); return; }
+
+    var sessRes = await SUPA.auth.getSession();
+    var session = sessRes.data && sessRes.data.session;
+    if (!session) { empty(kIcon('lock'), 'Sign in required', 'Please <a href="auth.html">log in</a> to see your challenge.'); return; }
+
+    var dsRes = await SUPA.from('datasets').select('id, title, slug').eq('slug', slug).maybeSingle();
+    if (dsRes.error || !dsRes.data) { empty(kIcon('search'), 'Not found', 'This dataset doesn\'t exist.'); return; }
+    var ds = dsRes.data;
+
+    var licRes = await SUPA.from('dataset_licenses').select('license_code, tier, task_pack')
+      .eq('dataset_id', ds.id).eq('claimed_by', session.user.id).maybeSingle();
+    if (licRes.error) { empty(kIcon('alert'), 'Could not load', escape(licRes.error.message)); return; }
+    if (!licRes.data) {
+      empty(kIcon('bag'), 'You don\'t own this yet',
+        'Head to the <a href="dataset.html?slug=' + encodeURIComponent(slug) + '">dataset page</a> to get it first.');
+      return;
+    }
+
+    var lic = licRes.data;
+    var pack = lic.task_pack;
+    var done = loadProgress(lic.license_code);
+    var allTasks = [];
+    pack.phases.forEach(function(p){ allTasks = allTasks.concat(p.tasks); });
+    if (pack.premium) allTasks = allTasks.concat(pack.premium);
+
+    var html = '';
+    html += '<div class="page-lead"><h1>' + escape(ds.title) + '</h1>';
+    html += '<p><span class="chal-badge">' + escape(lic.license_code) + '</span>';
+    html += '<span class="chal-badge' + (lic.tier === 'premium' ? ' premium' : '') + '">' + (lic.tier === 'premium' ? 'Premium' : 'Standard') + '</span></p>';
+    html += '<p>This is your personal task order — every buyer gets the identical task set, only the sequence differs. '
+          + 'You\'re not required to use the specific tool a phase implies (Python/SQL/dashboard); those name the skill being tested, not a mandated tool.</p></div>';
+
+    html += '<div class="page-card"><h2>Your progress</h2><div class="chal-progress-bar"><div class="chal-progress-fill" id="chalProgressFill"></div></div>'
+          + '<p id="chalProgressLabel" style="margin-top:0.5rem;"></p></div>';
+
+    pack.phases.forEach(function(p){ html += renderPhase(p.title, p.tasks, done); });
+    if (pack.premium) html += renderPhase('Premium Bonus — 5 Hard Challenges', pack.premium, done);
+
+    html += '<div class="page-card"><p>Need the raw files? They\'re in <a href="purchases.html">Your Library</a>.</p></div>';
+
+    root.innerHTML = html;
+    updateProgressBar(allTasks, done);
+
+    root.addEventListener('change', function(e){
+      if (!e.target.classList.contains('chal-task-check')) return;
+      var row = e.target.closest('.chal-task');
+      var id = row.getAttribute('data-task');
+      done[id] = e.target.checked;
+      row.classList.toggle('done', e.target.checked);
+      saveProgress(lic.license_code, done);
+      updateProgressBar(allTasks, done);
+    });
+  }
+
+  window.kReady(load);
+})();
+</script>
+</body>
+</html>

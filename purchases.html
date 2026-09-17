@@ -11,6 +11,23 @@
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="pages.css">
 <link rel="stylesheet" href="nav.css">
+<style>
+  .ds-item{flex-wrap:wrap;}
+  .ds-item-actions{display:flex; align-items:center; gap:0.5rem; flex-shrink:0;}
+  .ds-item-btn{
+    font-family:inherit; font-size:0.8125rem; font-weight:600; cursor:pointer;
+    padding:0.45rem 0.85rem; border-radius:999px; border:1px solid var(--line);
+    background:var(--bg); color:var(--text); text-decoration:none; display:inline-block;
+  }
+  .ds-item-btn:hover{background:var(--card);}
+  .ds-item-btn.primary{background:var(--text); color:var(--bg); border-color:var(--text);}
+  .ds-files{
+    width:100%; margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid var(--line);
+    display:none; flex-direction:column; gap:0.4rem;
+  }
+  .ds-files.open{display:flex;}
+  .ds-files a{font-size:0.8125rem; color:var(--text);}
+</style>
 <script src="nav.js"></script>
 </head>
 <body>
@@ -21,8 +38,8 @@
 
 <main class="page-wrap">
   <div class="page-lead">
-    <h1>Purchased datasets</h1>
-    <p>Everything you've bought lives here. Click through to re-download any file you own.</p>
+    <h1>Your library</h1>
+    <p>Everything you've bought lives here — open your personalized challenge, or re-download any file you own, any time.</p>
   </div>
 
   <div id="purchaseResults"></div>
@@ -42,18 +59,44 @@
   }
   function escape(s){ return String(s || '').replace(/[<>&"]/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]; }); }
 
+  async function toggleFiles(btn, slug, storagePath){
+    var wrap = btn.closest('.ds-item').querySelector('.ds-files');
+    var isOpen = wrap.classList.toggle('open');
+    if (!isOpen || wrap.dataset.loaded) return;
+    wrap.dataset.loaded = '1';
+    wrap.innerHTML = 'Loading files…';
+    var listRes = await SUPA.storage.from('datasets').list(storagePath);
+    if (listRes.error || !listRes.data || !listRes.data.length) {
+      wrap.innerHTML = 'No files available yet — check back soon.';
+      return;
+    }
+    var links = await Promise.all(listRes.data.map(async function(f){
+      var signed = await SUPA.storage.from('datasets').createSignedUrl(storagePath + '/' + f.name, 3600);
+      if (signed.error) return '';
+      return '<a href="' + signed.data.signedUrl + '" download>' + kIcon('folder', 14) + ' ' + escape(f.name) + '</a>';
+    }));
+    wrap.innerHTML = links.filter(Boolean).join('');
+  }
+
   async function load(){
     if (!LIVE) { empty(kIcon('plug'), 'Preview mode', 'Connect Supabase to see your purchases.'); return; }
     var s = await SUPA.auth.getSession();
     if (!s.data.session) { empty(kIcon('lock'), 'Sign in required', 'Please <a href="auth.html">log in</a> to see your purchases.'); return; }
-    var res = await SUPA.from('purchases').select('dataset_id, price_paid, purchased_at, datasets(title, short_description, slug)').order('purchased_at', { ascending: false });
+    var res = await SUPA.from('purchases').select('dataset_id, price_paid, purchased_at, datasets(title, short_description, slug, storage_path)').order('purchased_at', { ascending: false });
     if (res.error) { empty(kIcon('alert'), 'Could not load', res.error.message); return; }
     var rows = (res.data || []).filter(function(r){ return r.datasets; });
-    if (!rows.length) { empty(kIcon('bag'), 'No purchases yet', 'Free datasets don\'t count here. This page shows paid datasets you own. Once you buy one it lives here for re-download.'); return; }
-    el.innerHTML = '<div class="ds-list">' + rows.map(function(r){
+    if (!rows.length) { empty(kIcon('bag'), 'No purchases yet', 'Once you buy a dataset it lives here — your files, and your personal challenge, ready any time. <a href="search.html">Browse datasets</a>.'); return; }
+    el.innerHTML = '<div class="ds-list">' + rows.map(function(r, i){
       var d = r.datasets;
-      var paid = r.price_paid ? '₹' + r.price_paid + ' paid' : 'Free';
-      return '<div class="ds-item"><div class="ds-item-info"><div class="ds-item-title">' + escape(d.title) + '</div><div class="ds-item-sub">' + escape(d.short_description || '') + ' · ' + paid + '</div></div></div>';
+      var paid = r.price_paid ? ('₹' + r.price_paid + ' paid') : 'Free (beta)';
+      return '<div class="ds-item">'
+        + '<div class="ds-item-info"><div class="ds-item-title">' + escape(d.title) + '</div><div class="ds-item-sub">' + escape(d.short_description || '') + ' · ' + paid + '</div></div>'
+        + '<div class="ds-item-actions">'
+        +   '<a class="ds-item-btn primary" href="challenge.html?slug=' + encodeURIComponent(d.slug) + '">Open challenge</a>'
+        +   '<button class="ds-item-btn" data-slug="' + escape(d.slug) + '" data-path="' + escape(d.storage_path || d.slug) + '" onclick="toggleFiles(this, this.dataset.slug, this.dataset.path)">Files</button>'
+        + '</div>'
+        + '<div class="ds-files" id="dsFiles' + i + '"></div>'
+        + '</div>';
     }).join('') + '</div>';
   }
   window.kReady(load);

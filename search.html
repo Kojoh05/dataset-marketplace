@@ -53,7 +53,10 @@
   function renderResults(rows){
     if (!rows || !rows.length) { emptyState('Nothing matched that query yet. The catalog is still being seeded, so try a broader term.'); return; }
     results.innerHTML = '<div class="ds-list">' + rows.map(function(r){
-      return '<div class="ds-item"><div class="ds-item-info"><div class="ds-item-title">' + escape(r.title) + '</div><div class="ds-item-sub">' + escape(r.short_description || '') + '</div></div></div>';
+      return '<a class="ds-item" href="dataset.html?slug=' + encodeURIComponent(r.slug) + '" style="text-decoration:none; color:inherit;">'
+        + '<div class="ds-item-info"><div class="ds-item-title">' + escape(r.title) + '</div><div class="ds-item-sub">' + escape(r.short_description || '') + '</div></div>'
+        + '<span class="ds-item-price">View &rarr;</span>'
+        + '</a>';
     }).join('') + '</div>';
   }
   function escape(s){ return String(s || '').replace(/[<>&"]/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]; }); }

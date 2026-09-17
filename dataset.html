@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>KOJOH | Dataset</title>
+<script src="theme.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="pages.css">
+<link rel="stylesheet" href="nav.css">
+<script src="nav.js"></script>
+</head>
+<body>
+
+<header class="page-header">
+  <span class="page-title" id="dsPageTitle">Dataset</span>
+</header>
+
+<main class="page-wrap">
+  <div id="dsRoot">
+    <div class="empty-state"><div class="empty-state-icon"></div><h3>Loading…</h3><p>One moment.</p></div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="supabase-config.js"></script>
+<script src="config.js"></script>
+<script src="icons.js"></script>
+<script>
+(function(){
+  var LIVE = !!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase);
+  var SUPA = LIVE ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY) : null;
+  var root = document.getElementById('dsRoot');
+
+  function escape(s){ return String(s || '').replace(/[<>&"]/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]; }); }
+  function empty(icon, title, body){
+    root.innerHTML = '<div class="empty-state"><div class="empty-state-icon">' + icon + '</div><h3>' + escape(title) + '</h3><p>' + body + '</p></div>';
+  }
+  function paragraphs(text){
+    return (text || '').split(/\n\s*\n/).map(function(p){ return '<p>' + escape(p) + '</p>'; }).join('');
+  }
+
+  async function load(){
+    var slug = new URLSearchParams(window.location.search).get('slug');
+    if (!slug) { empty(kIcon('alert'), 'No dataset specified', 'This link is missing its dataset.'); return; }
+    if (!LIVE) { empty(kIcon('plug'), 'Preview mode', 'Connect Supabase to view live datasets.'); return; }
+
+    var dsRes = await SUPA.from('datasets').select('*').eq('slug', slug).maybeSingle();
+    if (dsRes.error) { empty(kIcon('alert'), 'Could not load', escape(dsRes.error.message)); return; }
+    var ds = dsRes.data;
+    if (!ds) { empty(kIcon('search'), 'Not found', 'This dataset doesn\'t exist or isn\'t published yet.'); return; }
+
+    document.getElementById('dsPageTitle').textContent = ds.title;
+    document.title = 'KOJOH | ' + ds.title;
+
+    var tagsRes = await SUPA.from('dataset_tags').select('tags(name)').eq('dataset_id', ds.id);
+    var tags = (tagsRes.data || []).map(function(r){ return r.tags && r.tags.name; }).filter(Boolean);
+
+    var schemaRes = await SUPA.from('dataset_schema').select('column_name, description').eq('dataset_id', ds.id).order('sort_order').limit(8);
+    var schemaCountRes = await SUPA.from('dataset_schema').select('id', { count: 'exact', head: true }).eq('dataset_id', ds.id);
+    var totalCols = schemaCountRes.count || (schemaRes.data || []).length;
+
+    var priceLabel = ds.is_free ? 'Free' : ('₹' + Number(ds.price).toFixed(0));
+
+    var html = '';
+    html += '<div class="page-lead"><h1>' + escape(ds.title) + '</h1><p>' + escape(ds.short_description || '') + '</p></div>';
+
+    html += '<div class="page-card">';
+    html += '<div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem;">';
+    if (ds.difficulty) html += '<span class="ds-item-cat" style="background:var(--bg); border:1px solid var(--line); border-radius:999px; padding:0.25rem 0.7rem;">' + escape(cap(ds.difficulty)) + '</span>';
+    tags.forEach(function(t){ html += '<span class="ds-item-cat" style="background:var(--bg); border:1px solid var(--line); border-radius:999px; padding:0.25rem 0.7rem;">' + escape(t) + '</span>'; });
+    html += '</div>';
+    html += paragraphs(ds.long_description);
+    html += '</div>';
+
+    if (schemaRes.data && schemaRes.data.length) {
+      html += '<div class="page-card"><h2>What\'s in it</h2><p>' + totalCols + ' columns, including:</p>';
+      html += '<div class="link-list" style="margin-top:0.75rem;">';
+      schemaRes.data.forEach(function(c){
+        html += '<div class="link-row" style="cursor:default;"><div class="link-row-body"><div class="link-row-title">' + escape(c.column_name) + '</div><div class="link-row-sub">' + escape(c.description || '') + '</div></div></div>';
+      });
+      html += '</div>';
+      if (totalCols > schemaRes.data.length) html += '<p style="margin-top:0.5rem;">+ ' + (totalCols - schemaRes.data.length) + ' more columns in the full data dictionary.</p>';
+      html += '</div>';
+    }
+
+    html += '<div class="page-card" id="dsCta"><h2>' + priceLabel + '</h2><p id="dsCtaNote">Checking your access…</p></div>';
+
+    root.innerHTML = html;
+    setupCta(ds);
+  }
+
+  function cap(s){ return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+
+  async function setupCta(ds){
+    var cta = document.getElementById('dsCta');
+    var note = document.getElementById('dsCtaNote');
+    var sessRes = await SUPA.auth.getSession();
+    var session = sessRes.data && sessRes.data.session;
+    if (!session) {
+      note.innerHTML = 'Beta pricing — free while we test the full purchase flow. <a href="auth.html">Log in</a> to get it.';
+      return;
+    }
+    var licRes = await SUPA.from('dataset_licenses').select('license_code').eq('dataset_id', ds.id).eq('claimed_by', session.user.id).maybeSingle();
+    if (licRes.data) {
+      note.innerHTML = 'You own this dataset.';
+      var btn = document.createElement('a');
+      btn.className = 'page-submit'; btn.style.marginTop = '1rem'; btn.style.display = 'inline-block'; btn.style.textDecoration = 'none';
+      btn.href = 'challenge.html?slug=' + encodeURIComponent(ds.slug);
+      btn.textContent = 'Open your challenge →';
+      cta.appendChild(btn);
+      return;
+    }
+    note.innerHTML = 'Beta pricing — free while we test the full purchase flow.';
+    var btn = document.createElement('button');
+    btn.className = 'page-submit'; btn.style.marginTop = '1rem';
+    btn.textContent = 'Buy now';
+    btn.addEventListener('click', function(){
+      btn.disabled = true; btn.textContent = 'Setting up your license…';
+      SUPA.rpc('purchase_dataset', { p_dataset_id: ds.id, p_tier: 'standard' }).then(function(res){
+        if (res.error) {
+          btn.disabled = false; btn.textContent = 'Buy now';
+          note.innerHTML = '<span style="color:#C62828;">' + escape(res.error.message) + '</span>';
+          return;
+        }
+        window.location.href = 'challenge.html?slug=' + encodeURIComponent(ds.slug);
+      });
+    });
+    cta.appendChild(btn);
+  }
+
+  window.kReady(load);
+})();
+</script>
+</body>
+</html>
