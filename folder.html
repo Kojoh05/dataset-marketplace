@@ -41,8 +41,47 @@
       .replace(/[<>&"]/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]; });
   }
   function cap(s){ return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+  function nf(n){ return Number(n).toLocaleString('en-IN'); }
   function empty(icon, title, body){
     root.innerHTML = '<div class="empty-state"><div class="empty-state-icon">' + icon + '</div><h3>' + esc(title) + '</h3><p>' + body + '</p></div>';
+  }
+
+  function buildHero(count){
+    var COLS = 6, W = 800, X0 = 4, SLOT = (W - X0 * 2) / COLS;
+    var heights = [26, 44, 34, 58, 40, 50];
+    var s = '<svg class="k-hero-svg" viewBox="0 0 800 96" preserveAspectRatio="none" role="img" aria-label="Decorative animation of stacked project folders">';
+    s += '<g fill="currentColor">';
+    for (var c = 0; c < COLS; c++) {
+      var x = X0 + c * SLOT;
+      var w = SLOT * 0.78;
+      var tabW = w * 0.42;
+      var bodyH = heights[c];
+      var y = 86 - bodyH;
+      s += '<g class="k-hero-row" style="animation-delay:' + (c * 0.11).toFixed(2) + 's">';
+      s += '<rect x="' + x.toFixed(1) + '" y="' + (y - 7) + '" width="' + tabW.toFixed(1) + '" height="8" rx="2.5" opacity="' + (c === 0 ? '0.85' : '0.22') + '"/>';
+      s += '<rect x="' + x.toFixed(1) + '" y="' + y + '" width="' + w.toFixed(1) + '" height="' + bodyH + '" rx="4" opacity="' + (c === 0 ? '0.85' : '0.18') + '"/>';
+      s += '</g>';
+    }
+    s += '<rect class="k-hero-caret" x="' + (X0 + 5.6 * SLOT).toFixed(1) + '" y="88" width="2" height="2" rx="1" opacity="0.9"/>';
+    s += '</g></svg>';
+    return '<div class="k-hero">' + s +
+           '<div class="k-hero-sweep"></div>' +
+           '<div class="k-hero-foot"><span class="k-hero-live"><span class="k-hero-livedot"></span>Job track</span>' +
+           '<span>' + count + (count === 1 ? ' project' : ' projects') + ' inside</span></div></div>';
+  }
+
+  function observeReveal(){
+    var items = document.querySelectorAll('.k-reveal');
+    if (!('IntersectionObserver' in window)) {
+      Array.prototype.forEach.call(items, function(el){ el.classList.add('k-in'); });
+      return;
+    }
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting) { e.target.classList.add('k-in'); io.unobserve(e.target); }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+    Array.prototype.forEach.call(items, function(el){ io.observe(el); });
   }
 
   async function load(){
@@ -57,15 +96,15 @@
     document.getElementById('fdPageTitle').textContent = folder.title;
     document.title = 'KOJOH | ' + folder.title;
 
-    var dRes = await SUPA.from('datasets')
-      .select('*')
-      .eq('folder_id', folder.id);
+    var dRes = await SUPA.from('datasets').select('*').eq('folder_id', folder.id);
     if (dRes.error) { empty(kIcon('alert'), 'Could not load datasets', esc(dRes.error.message)); return; }
     var rows = dRes.data || [];
 
     var html = '';
     html += '<div class="page-lead"><h1>' + esc(folder.title) + '</h1>';
     html += '<p>' + esc(folder.description || '') + '</p></div>';
+
+    html += buildHero(rows.length);
 
     html += '<div class="k-chiprow">';
     html += '<span class="k-chip k-chip-brand">' + rows.length + (rows.length === 1 ? ' dataset' : ' datasets') + '</span>';
@@ -83,11 +122,11 @@
     rows.forEach(function(d){
       var pv = d.preview_rows || null;
       var price = d.is_free ? 'Free' : ('&#8377;' + Number(d.price).toFixed(0));
-      html += '<a class="k-dscard" href="dataset.html?slug=' + encodeURIComponent(d.slug) + '">';
+      html += '<a class="k-dscard k-reveal" href="dataset.html?slug=' + encodeURIComponent(d.slug) + '">';
       html += '  <div class="k-dscard-top">';
       if (d.difficulty) html += '<span class="k-chip k-chip-brand">' + esc(cap(d.difficulty)) + '</span>';
       if (pv && pv.total_rows) {
-        html += '<span class="k-chip">' + Number(pv.total_rows).toLocaleString('en-IN') + ' rows</span>';
+        html += '<span class="k-chip">' + nf(pv.total_rows) + ' rows</span>';
         html += '<span class="k-chip">' + pv.columns.length + ' cols</span>';
       }
       html += '  </div>';
@@ -100,6 +139,7 @@
     html += '</div>';
 
     root.innerHTML = html;
+    observeReveal();
   }
 
   window.kReady(load);

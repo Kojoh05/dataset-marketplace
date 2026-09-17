@@ -26,6 +26,49 @@
   </div>
 </main>
 
+<!-- sign in required -->
+<div class="k-modal" id="authModal" hidden>
+  <div class="k-dialog">
+    <button class="k-modal-close" id="authClose" type="button" aria-label="Close">&#215;</button>
+    <div class="k-dialog-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+      </svg>
+    </div>
+    <h3 class="k-dialog-title">Sign in to continue</h3>
+    <p class="k-dialog-text">Your challenge pack is generated against your account, so you need to be signed in before you unlock this project.</p>
+    <div class="k-dialog-actions">
+      <button class="k-btn k-btn-brand k-btn-lg k-btn-block" id="authGoLogin" type="button">Log in</button>
+      <button class="k-btn k-btn-block" id="authGoSignup" type="button">Create an account</button>
+    </div>
+    <p class="k-dialog-note">It takes under a minute, and you land back on this page afterwards.</p>
+  </div>
+</div>
+
+<!-- payment -->
+<div class="k-modal" id="payModal" hidden>
+  <div class="k-dialog">
+    <button class="k-modal-close" id="payClose" type="button" aria-label="Close">&#215;</button>
+    <div class="k-dialog-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>
+      </svg>
+    </div>
+    <h3 class="k-dialog-title">Confirm your order</h3>
+    <div class="k-order">
+      <div class="k-order-row"><span id="payItem">Dataset</span><span id="payItemPrice"></span></div>
+      <div class="k-order-row"><span>License</span><span>1 of 100, personalised</span></div>
+      <div class="k-order-row"><span>Includes</span><span>Data, project.md, challenges</span></div>
+      <div class="k-order-row k-order-total"><span>Total</span><span id="payTotal"></span></div>
+    </div>
+    <div class="k-dialog-actions">
+      <button class="k-btn k-btn-brand k-btn-lg k-btn-block" id="payGo" type="button">Pay and unlock</button>
+    </div>
+    <p class="k-dialog-note" id="payNote">Beta pricing. Nothing is charged and no card details are collected while the purchase flow is being tested.</p>
+  </div>
+</div>
+
+<!-- data table -->
 <div class="k-modal" id="tableModal" hidden>
   <div class="k-modal-card">
     <div class="k-modal-head">
@@ -56,13 +99,15 @@
   var SUPA = LIVE ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY) : null;
   var root = document.getElementById('dsRoot');
 
-  var STATE = { ds: null, session: null, lic: null, csvRows: null, page: 0, pageSize: 500 };
+  var FREE_COLUMNS = 6;
+  var STATE = { ds:null, session:null, lic:null, tags:[], schema:[], csvRows:null, page:0, pageSize:500 };
 
   function esc(s){
     return String(s === null || s === undefined ? '' : s)
       .replace(/[<>&"]/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]; });
   }
   function cap(s){ return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+  function nf(n){ return Number(n).toLocaleString('en-IN'); }
   function empty(icon, title, body){
     root.innerHTML = '<div class="empty-state"><div class="empty-state-icon">' + icon + '</div><h3>' + esc(title) + '</h3><p>' + body + '</p></div>';
   }
@@ -101,16 +146,65 @@
     }
 
     var tagsRes = await SUPA.from('dataset_tags').select('tags(name)').eq('dataset_id', STATE.ds.id);
-    var tags = (tagsRes.data || []).map(function(r){ return r.tags && r.tags.name; }).filter(Boolean);
+    STATE.tags = (tagsRes.data || []).map(function(r){ return r.tags && r.tags.name; }).filter(Boolean);
 
     var schemaRes = await SUPA.from('dataset_schema')
       .select('column_name, description').eq('dataset_id', STATE.ds.id).order('sort_order');
+    STATE.schema = schemaRes.data || [];
 
-    render(tags, schemaRes.data || []);
+    render();
+  }
+
+  // ---------------------------------------------------------------- hero
+  function buildHero(preview){
+    var COLS = 9, ROWS = 5, W = 800, X0 = 4, SLOT = (W - X0 * 2) / COLS;
+    var headW = [0.88, 0.62, 0.95, 0.70, 0.80, 0.52, 0.90, 0.66, 0.74];
+    var cellW = [
+      [0.80, 0.55, 0.90, 0.00, 0.72, 0.48, 0.85, 0.60, 0.68],
+      [0.62, 0.84, 0.50, 0.76, 0.00, 0.58, 0.70, 0.44, 0.88],
+      [0.90, 0.46, 0.78, 0.66, 0.82, 0.00, 0.54, 0.72, 0.60],
+      [0.55, 0.70, 0.86, 0.52, 0.64, 0.80, 0.00, 0.58, 0.76],
+      [0.74, 0.58, 0.66, 0.88, 0.50, 0.68, 0.82, 0.62, 0.00]
+    ];
+    var s = '';
+    s += '<svg class="k-hero-svg" viewBox="0 0 800 132" preserveAspectRatio="none" role="img" aria-label="Decorative animation of a raw data export loading row by row">';
+    s += '<g fill="currentColor">';
+
+    s += '<g class="k-hero-row" style="animation-delay:0s">';
+    for (var c = 0; c < COLS; c++) {
+      s += '<rect x="' + (X0 + c * SLOT).toFixed(1) + '" y="6" width="' + (SLOT * 0.86 * headW[c]).toFixed(1) + '" height="10" rx="3" opacity="0.92"/>';
+    }
+    s += '</g>';
+
+    for (var r = 0; r < ROWS; r++) {
+      var y = 30 + r * 19;
+      s += '<g class="k-hero-row" style="animation-delay:' + (0.18 + r * 0.13).toFixed(2) + 's">';
+      for (var c2 = 0; c2 < COLS; c2++) {
+        var f = cellW[r][c2];
+        if (f === 0) {
+          s += '<rect x="' + (X0 + c2 * SLOT).toFixed(1) + '" y="' + (y + 3) + '" width="' + (SLOT * 0.22).toFixed(1) + '" height="3" rx="1.5" opacity="0.14"/>';
+        } else {
+          s += '<rect x="' + (X0 + c2 * SLOT).toFixed(1) + '" y="' + y + '" width="' + (SLOT * 0.86 * f).toFixed(1) + '" height="9" rx="3" opacity="0.2"/>';
+        }
+      }
+      s += '</g>';
+    }
+
+    s += '<rect class="k-hero-caret" x="' + (X0 + 0.5 * SLOT).toFixed(1) + '" y="125" width="2" height="2" rx="1" opacity="0.9"/>';
+    s += '</g></svg>';
+
+    var right = preview && preview.total_rows
+      ? nf(preview.total_rows) + ' rows &#183; ' + preview.columns.length + ' columns'
+      : 'raw export';
+
+    return '<div class="k-hero">' + s +
+           '<div class="k-hero-sweep"></div>' +
+           '<div class="k-hero-foot"><span class="k-hero-live"><span class="k-hero-livedot"></span>Raw ERP export</span>' +
+           '<span>' + right + '</span></div></div>';
   }
 
   // ---------------------------------------------------------------- render
-  function render(tags, schema){
+  function render(){
     var ds = STATE.ds;
     var owned = !!STATE.lic;
     var preview = ds.preview_rows || null;
@@ -119,66 +213,75 @@
     html += '<div class="page-lead"><h1>' + esc(ds.title) + '</h1>';
     html += '<p>' + esc(ds.short_description || '') + '</p></div>';
 
+    html += buildHero(preview);
+
     html += '<div class="k-chiprow">';
     if (ds.difficulty) html += '<span class="k-chip k-chip-brand">' + esc(cap(ds.difficulty)) + '</span>';
     if (preview && preview.total_rows) {
-      html += '<span class="k-chip">' + Number(preview.total_rows).toLocaleString('en-IN') + ' rows</span>';
-      html += '<span class="k-chip">' + preview.columns.length + ' columns</span>';
+      html += '<span class="k-chip" data-count="' + preview.total_rows + '" data-suffix=" rows">0 rows</span>';
+      html += '<span class="k-chip" data-count="' + preview.columns.length + '" data-suffix=" columns">0 columns</span>';
     }
-    tags.forEach(function(t){ html += '<span class="k-chip">' + esc(t) + '</span>'; });
+    STATE.tags.forEach(function(t){ html += '<span class="k-chip">' + esc(t) + '</span>'; });
     html += '</div>';
 
-    // --- the story, free
-    html += '<div class="page-card k-card-soft"><h2>The story</h2>' + paragraphs(ds.long_description) + '</div>';
+    html += '<div class="page-card k-card-soft k-reveal"><h2>The story</h2>' + paragraphs(ds.long_description) + '</div>';
 
-    // --- the columns, free
-    if (schema.length) {
-      html += '<div class="page-card"><h2>What is in it</h2>';
-      html += '<p class="k-sub">' + schema.length + ' columns. Here is every one of them.</p>';
-      html += '<div class="k-collist" id="dsColList">';
-      schema.forEach(function(c, i){
-        html += '<div class="k-col' + (i >= 10 ? ' k-col-extra' : '') + '">'
+    if (STATE.schema.length) {
+      var total = STATE.schema.length;
+      var shown = owned ? STATE.schema : STATE.schema.slice(0, FREE_COLUMNS);
+      var hidden = total - shown.length;
+
+      html += '<div class="page-card k-reveal"><h2>What is in it</h2>';
+      html += '<p class="k-sub">' + total + ' columns' + (owned ? '. Here is every one of them.' : '. Here are the first ' + shown.length + '.') + '</p>';
+      html += '<div class="k-collist">';
+      shown.forEach(function(c){
+        html += '<div class="k-col">'
              +  '<span class="k-col-name">' + esc(c.column_name) + '</span>'
              +  '<span class="k-col-desc">' + esc(c.description || '') + '</span>'
              +  '</div>';
       });
       html += '</div>';
-      if (schema.length > 10) {
-        html += '<button class="k-btn k-btn-quiet" id="dsColToggle" type="button">Show all ' + schema.length + ' columns</button>';
+      if (hidden > 0) {
+        html += '<div class="k-col-locked">'
+             +  '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+             +  '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'
+             +  '<span>The remaining ' + hidden + ' columns, and what each one is hiding, unlock with the project.</span>'
+             +  '</div>';
       }
       html += '</div>';
     }
 
-    // --- the 5 row preview, free
     if (preview && preview.rows && preview.rows.length) {
-      html += '<div class="page-card"><h2>Sample of the real data</h2>';
+      html += '<div class="page-card k-reveal"><h2>Sample of the real data</h2>';
       html += '<p class="k-sub">The first ' + preview.rows.length + ' rows, exactly as they come out of the dealership ERP. '
            +  'Yes, the dates, the prices and the names are inconsistent. That is the job.</p>';
-      html += previewTable(preview);
-      html += '<p class="k-sub k-sub-tight">Showing ' + preview.rows.length + ' of '
-           +  Number(preview.total_rows).toLocaleString('en-IN') + ' rows.</p>';
+      html += previewTable(preview, owned);
+      html += '<p class="k-sub k-sub-tight">Showing ' + preview.rows.length + ' of ' + nf(preview.total_rows) + ' rows'
+           +  (owned ? '.' : ', and ' + FREE_COLUMNS + ' of ' + preview.columns.length + ' columns.') + '</p>';
       html += '</div>';
     }
 
-    // --- the paid part
     html += owned ? ownedSection(ds) : lockedSection(ds);
 
     root.innerHTML = html;
     wire();
   }
 
-  function previewTable(preview){
+  function previewTable(preview, owned){
+    var cols = owned ? preview.columns : preview.columns.slice(0, FREE_COLUMNS);
     var h = '<div class="k-tablewrap k-tablewrap-short"><table class="k-table"><thead><tr>';
-    preview.columns.forEach(function(c){ h += '<th>' + esc(c) + '</th>'; });
+    cols.forEach(function(c){ h += '<th>' + esc(c) + '</th>'; });
+    if (!owned && preview.columns.length > cols.length) h += '<th>&#8230;</th>';
     h += '</tr></thead><tbody>';
     preview.rows.forEach(function(r){
       h += '<tr>';
-      preview.columns.forEach(function(_, i){
+      cols.forEach(function(_, i){
         var v = r[i];
         h += (v === undefined || v === null || String(v).trim() === '')
           ? '<td class="k-cell-empty">blank</td>'
           : '<td>' + esc(v) + '</td>';
       });
+      if (!owned && preview.columns.length > cols.length) h += '<td class="k-cell-empty">locked</td>';
       h += '</tr>';
     });
     return h + '</tbody></table></div>';
@@ -186,7 +289,7 @@
 
   // ---------------------------------------------------------------- locked
   function lockedSection(ds){
-    var lp = ds.locked_preview || { summary: '', phases: [], total_tasks: 0, premium_count: 0 };
+    var lp = ds.locked_preview || { summary:'', phases:[], total_tasks:0, premium_count:0 };
     var inner = '';
 
     inner += '<div class="page-card"><h2>The project</h2><p>' + esc(lp.summary || '') + '</p></div>';
@@ -214,7 +317,7 @@
       +  '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>';
     h += '    <h3 class="k-lockhead">' + (lp.total_tasks || 0) + ' challenges, locked</h3>';
     h += '    <p class="k-lockbody">Unlock to get your own personalised task pack, the full project summary, '
-      +  'the raw data files, project.md, and the in browser table viewer. '
+      +  'every column, the raw data files, project.md, and the in browser table viewer. '
       +  'Every buyer works the identical task set in their own shuffled order.</p>';
     h += '    <div class="k-lockprice">' + money(ds) + '</div>';
     h += '    <button class="k-btn k-btn-brand k-btn-lg" id="dsUnlock" type="button">Unlock this project</button>';
@@ -230,7 +333,7 @@
     var pack = lic.task_pack || { phases: [] };
     var h = '';
 
-    h += '<div class="page-card k-card-brand">';
+    h += '<div class="page-card k-card-brand k-reveal">';
     h += '  <h2>You own this project</h2>';
     h += '  <p class="k-sub">License <strong>' + esc(lic.license_code) + '</strong>, '
       +  (lic.tier === 'premium' ? 'Premium tier with 5 bonus hard challenges.' : 'Standard tier.') + '</p>';
@@ -240,13 +343,13 @@
     h += '  </div>';
     h += '</div>';
 
-    h += '<div class="page-card"><h2>Your files</h2>';
+    h += '<div class="page-card k-reveal"><h2>Your files</h2>';
     h += '  <p class="k-sub">Download links are generated fresh each time and stay valid for one hour.</p>';
     h += '  <div class="k-filelist" id="dsFiles">Loading your files</div>';
     h += '</div>';
 
     (pack.phases || []).forEach(function(p){
-      h += '<div class="page-card"><h2>' + esc(p.title) + '</h2><div class="k-tasklist">';
+      h += '<div class="page-card k-reveal"><h2>' + esc(p.title) + '</h2><div class="k-tasklist">';
       (p.tasks || []).forEach(function(t){
         h += '<div class="k-task"><span class="k-task-id">' + esc(t.id) + '</span><span>' + inlineCode(t.text) + '</span></div>';
       });
@@ -254,7 +357,7 @@
     });
 
     if (pack.premium && pack.premium.length) {
-      h += '<div class="page-card k-card-brand"><h2>Premium bonus, 5 hard challenges</h2><div class="k-tasklist">';
+      h += '<div class="page-card k-card-brand k-reveal"><h2>Premium bonus, 5 hard challenges</h2><div class="k-tasklist">';
       pack.premium.forEach(function(t){
         h += '<div class="k-task"><span class="k-task-id">' + esc(t.id) + '</span><span>' + inlineCode(t.text) + '</span></div>';
       });
@@ -266,40 +369,90 @@
 
   // ---------------------------------------------------------------- wiring
   function wire(){
-    var toggle = document.getElementById('dsColToggle');
-    if (toggle) {
-      toggle.addEventListener('click', function(){
-        var list = document.getElementById('dsColList');
-        var open = list.classList.toggle('k-collist-open');
-        toggle.textContent = open ? 'Show fewer columns' : 'Show all columns';
-      });
-    }
-
     var unlock = document.getElementById('dsUnlock');
-    if (unlock) unlock.addEventListener('click', doUnlock);
+    if (unlock) unlock.addEventListener('click', onUnlockClick);
 
     var openTable = document.getElementById('dsOpenTable');
     if (openTable) openTable.addEventListener('click', openModal);
 
     if (STATE.lic) loadFiles();
+
+    runCounters();
+    observeReveal();
   }
 
-  async function doUnlock(){
-    var btn = document.getElementById('dsUnlock');
-    var note = document.getElementById('dsUnlockNote');
+  function runCounters(){
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-count]'), function(el){
+      var target = Number(el.getAttribute('data-count')) || 0;
+      var suffix = el.getAttribute('data-suffix') || '';
+      if (reduce) { el.textContent = nf(target) + suffix; return; }
+      var start = performance.now(), dur = 900;
+      function step(now){
+        var p = Math.min(1, (now - start) / dur);
+        var eased = 1 - Math.pow(1 - p, 3);
+        el.textContent = nf(Math.round(target * eased)) + suffix;
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    });
+  }
 
-    if (!STATE.session) {
-      note.innerHTML = 'Please <a href="auth.html">log in</a> first, then come back to this page to unlock.';
+  function observeReveal(){
+    var items = document.querySelectorAll('.k-reveal');
+    if (!('IntersectionObserver' in window)) {
+      Array.prototype.forEach.call(items, function(el){ el.classList.add('k-in'); });
       return;
     }
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting) { e.target.classList.add('k-in'); io.unobserve(e.target); }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+    Array.prototype.forEach.call(items, function(el){ io.observe(el); });
+  }
 
+  // ---------------------------------------------------------------- unlock chain
+  function onUnlockClick(){
+    if (!STATE.session) { openDialog('authModal'); return; }
+    var ds = STATE.ds;
+    document.getElementById('payItem').textContent = ds.title;
+    document.getElementById('payItemPrice').innerHTML = money(ds);
+    document.getElementById('payTotal').innerHTML = ds.is_free
+      ? 'Free'
+      : '<span class="k-strike">' + money(ds) + '</span>&#8377;0';
+    openDialog('payModal');
+  }
+
+  function openDialog(id){
+    document.getElementById(id).hidden = false;
+    document.body.classList.add('k-noscroll');
+  }
+  function closeDialog(id){
+    document.getElementById(id).hidden = true;
+    if (document.querySelectorAll('.k-modal:not([hidden])').length === 0) {
+      document.body.classList.remove('k-noscroll');
+    }
+  }
+
+  function goAuth(tab){
+    try {
+      sessionStorage.setItem('kojoh_after_auth', window.location.pathname + window.location.search);
+      sessionStorage.setItem('kojoh_auth_tab', tab);
+    } catch (e) {}
+    window.location.href = 'auth.html';
+  }
+
+  async function doPurchase(){
+    var btn = document.getElementById('payGo');
+    var note = document.getElementById('payNote');
     btn.disabled = true;
-    btn.textContent = 'Setting up your license';
+    btn.innerHTML = '<span class="k-spin"></span>Setting up your license';
 
     var res = await SUPA.rpc('purchase_dataset', { p_dataset_id: STATE.ds.id, p_tier: 'standard' });
     if (res.error) {
       btn.disabled = false;
-      btn.textContent = 'Unlock this project';
+      btn.textContent = 'Pay and unlock';
       note.innerHTML = '<span class="k-err">' + esc(res.error.message) + '</span>';
       return;
     }
@@ -310,20 +463,22 @@
 
     if (licRes.error || !licRes.data) {
       btn.disabled = false;
-      btn.textContent = 'Unlock this project';
+      btn.textContent = 'Pay and unlock';
       note.innerHTML = '<span class="k-err">Unlocked, but the license did not come back. Reload the page.</span>';
       return;
     }
 
     STATE.lic = licRes.data;
-    var sec = document.querySelector('.k-locksec');
-    var wrap = document.createElement('div');
-    wrap.innerHTML = ownedSection(STATE.ds);
-    sec.replaceWith.apply(sec, Array.prototype.slice.call(wrap.children));
-    wire();
-    window.scrollTo({ top: window.scrollY, behavior: 'instant' });
+    btn.disabled = false;
+    btn.textContent = 'Pay and unlock';
+    note.textContent = 'Beta pricing. Nothing is charged and no card details are collected while the purchase flow is being tested.';
+    closeDialog('payModal');
+    render();
+    var owned = document.querySelector('.k-card-brand');
+    if (owned) owned.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
+  // ---------------------------------------------------------------- files
   async function loadFiles(){
     var box = document.getElementById('dsFiles');
     if (!box) return;
@@ -349,14 +504,9 @@
   var modal = document.getElementById('tableModal');
 
   function openModal(){
-    modal.hidden = false;
-    document.body.classList.add('k-noscroll');
+    openDialog('tableModal');
     if (STATE.csvRows) { renderPage(); return; }
     fetchCsv();
-  }
-  function closeModal(){
-    modal.hidden = true;
-    document.body.classList.remove('k-noscroll');
   }
 
   async function fetchCsv(){
@@ -384,8 +534,7 @@
     body.innerHTML = '<div class="k-modal-loading">Downloading and parsing, this only happens once.</div>';
     try {
       var text = await (await fetch(signed.data.signedUrl)).text();
-      var rows = parseCsv(text);
-      STATE.csvRows = rows;
+      STATE.csvRows = parseCsv(text);
       STATE.page = 0;
       document.getElementById('tmTitle').textContent = csv.name;
       renderPage();
@@ -445,20 +594,30 @@
 
     document.getElementById('tmBody').innerHTML = h;
     document.getElementById('tmRange').textContent =
-      'Rows ' + (start + 1).toLocaleString('en-IN') + ' to ' +
-      Math.min(start + size, data.length).toLocaleString('en-IN') +
-      ' of ' + data.length.toLocaleString('en-IN');
+      'Rows ' + nf(start + 1) + ' to ' + nf(Math.min(start + size, data.length)) + ' of ' + nf(data.length);
     document.getElementById('tmPage').textContent = 'Page ' + (STATE.page + 1) + ' of ' + pages;
     document.getElementById('tmPrev').disabled = STATE.page === 0;
     document.getElementById('tmNext').disabled = STATE.page >= pages - 1;
     document.getElementById('tmBody').scrollTop = 0;
   }
 
-  document.getElementById('tmClose').addEventListener('click', closeModal);
+  // ---------------------------------------------------------------- modal events
+  document.getElementById('tmClose').addEventListener('click', function(){ closeDialog('tableModal'); });
   document.getElementById('tmPrev').addEventListener('click', function(){ STATE.page--; renderPage(); });
   document.getElementById('tmNext').addEventListener('click', function(){ STATE.page++; renderPage(); });
-  modal.addEventListener('click', function(e){ if (e.target === modal) closeModal(); });
-  document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && !modal.hidden) closeModal(); });
+  document.getElementById('authClose').addEventListener('click', function(){ closeDialog('authModal'); });
+  document.getElementById('payClose').addEventListener('click', function(){ closeDialog('payModal'); });
+  document.getElementById('authGoLogin').addEventListener('click', function(){ goAuth('login'); });
+  document.getElementById('authGoSignup').addEventListener('click', function(){ goAuth('signup'); });
+  document.getElementById('payGo').addEventListener('click', doPurchase);
+
+  Array.prototype.forEach.call(document.querySelectorAll('.k-modal'), function(m){
+    m.addEventListener('click', function(e){ if (e.target === m) closeDialog(m.id); });
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key !== 'Escape') return;
+    Array.prototype.forEach.call(document.querySelectorAll('.k-modal:not([hidden])'), function(m){ closeDialog(m.id); });
+  });
 
   window.kReady(load);
 })();

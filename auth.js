@@ -19,6 +19,27 @@ var selectedGender = null;
 var selectedProfessions = [];
 
 // ---------- Tabs ----------
+// Where to land after a successful sign in. A page can ask to be returned to
+// by putting its path in sessionStorage before sending the visitor here.
+function kojohAfterAuth(){
+  try{
+    var next = sessionStorage.getItem('kojoh_after_auth');
+    if (next) { sessionStorage.removeItem('kojoh_after_auth'); return next; }
+  }catch(e){}
+  return 'index.html';
+}
+
+// Open the tab the sending page asked for.
+try{
+  var kojohTab = sessionStorage.getItem('kojoh_auth_tab');
+  if (kojohTab) {
+    sessionStorage.removeItem('kojoh_auth_tab');
+    document.addEventListener('DOMContentLoaded', function(){
+      try{ switchTab(kojohTab); }catch(e){}
+    });
+  }
+}catch(e){}
+
 function switchTab(which){
   document.getElementById('tabLogin').classList.toggle('active', which === 'login');
   document.getElementById('tabSignup').classList.toggle('active', which === 'signup');
@@ -340,7 +361,7 @@ function handleSignup(){
       }).then(function(){
         if (googleMode) {
           try{ sessionStorage.setItem('kojoh_skip_welcome', '1'); }catch(e){}
-          window.location.href = 'index.html';
+          window.location.href = kojohAfterAuth();
         }
       });
     })
@@ -369,7 +390,7 @@ function handleLogin(){
     SUPA.auth.signInWithPassword({ email: email, password: password }).then(function(res){
       if (res.error) { errEl.textContent = res.error.message; return; }
       try{ sessionStorage.setItem('kojoh_skip_welcome', '1'); }catch(e){}
-      window.location.href = 'index.html';
+      window.location.href = kojohAfterAuth();
     });
   };
 

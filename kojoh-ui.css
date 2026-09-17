@@ -1,34 +1,32 @@
 /* ============================================================
    KOJOH UI, marketplace pages
-   Palette: teal #28A683, mint #E9F7F2, olive #444C45
+   Monochrome. Accent is the text colour itself.
    ============================================================ */
 
 :root{
-  --brand:#28A683;
-  --brand-ink:#12705A;
-  --brand-soft:#E9F7F2;
-  --brand-line:#BFE3D6;
-  --brand-deep:#444C45;
+  --brand:#1C1A1E;
+  --brand-ink:#1C1A1E;
+  --brand-soft:#EFECE4;
+  --brand-line:#DFDACE;
 }
 [data-theme="dark"]{
-  --brand:#35BE94;
-  --brand-ink:#8FE0C6;
-  --brand-soft:#17241F;
-  --brand-line:#27443A;
-  --brand-deep:#C6CFC6;
+  --brand:#EDEBE6;
+  --brand-ink:#EDEBE6;
+  --brand-soft:#232127;
+  --brand-line:#34313A;
 }
 
 .ds-wide{max-width:64rem;}
 
 /* ------------------------------------------------------------ chips */
-.k-chiprow{display:flex; flex-wrap:wrap; gap:0.45rem; margin:0 0 1.25rem;}
+.k-chiprow{display:flex; flex-wrap:wrap; gap:0.45rem; margin:0 0 1.5rem;}
 .k-chip{
   font-size:0.75rem; font-weight:600; letter-spacing:0.01em;
   padding:0.28rem 0.7rem; border-radius:999px;
   border:1px solid var(--line); background:var(--card); color:var(--muted);
 }
 .k-chip-brand{
-  background:var(--brand-soft); border-color:var(--brand-line); color:var(--brand-ink);
+  background:var(--brand); border-color:var(--brand); color:var(--bg);
 }
 
 /* ------------------------------------------------------------ text bits */
@@ -38,14 +36,56 @@
 [data-theme="dark"] .k-err{color:#FF8A80;}
 
 /* ------------------------------------------------------------ cards */
-.k-card-soft{
-  background:var(--brand-soft);
-  border-color:var(--brand-line);
+.k-card-soft{background:var(--brand-soft); border-color:var(--brand-line);}
+.k-card-brand{background:var(--brand-soft); border-color:var(--brand-line); border-left:3px solid var(--brand);}
+
+/* ------------------------------------------------------------ animated header strip */
+.k-hero{
+  position:relative; overflow:hidden;
+  margin:0 0 1.5rem; padding:1.15rem 1.35rem;
+  border:1px solid var(--line); border-radius:var(--radius); background:var(--card);
 }
-.k-card-brand{
-  background:var(--brand-soft);
-  border-color:var(--brand-line);
-  border-left:3px solid var(--brand);
+.k-hero-svg{display:block; width:100%; height:auto; color:var(--text);}
+.k-hero-row{
+  transform-box:fill-box; transform-origin:left center;
+  animation:kRowIn 0.55s cubic-bezier(.2,.8,.2,1) both;
+}
+@keyframes kRowIn{
+  from{transform:scaleX(0); opacity:0;}
+  to{transform:scaleX(1); opacity:1;}
+}
+.k-hero-caret{animation:kBlink 1.15s steps(1, end) infinite;}
+@keyframes kBlink{0%,49%{opacity:1;} 50%,100%{opacity:0;}}
+.k-hero-sweep{
+  position:absolute; top:0; bottom:0; width:38%;
+  background:linear-gradient(90deg, transparent, rgba(0,0,0,0.055), transparent);
+  transform:translateX(-120%);
+  animation:kSweep 6.5s cubic-bezier(.4,0,.2,1) infinite 2s;
+  pointer-events:none;
+}
+[data-theme="dark"] .k-hero-sweep{
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,0.055), transparent);
+}
+@keyframes kSweep{0%{transform:translateX(-120%);} 55%,100%{transform:translateX(320%);}}
+.k-hero-foot{
+  display:flex; align-items:center; justify-content:space-between; gap:1rem;
+  margin-top:0.7rem; font-size:0.6875rem; letter-spacing:0.06em; text-transform:uppercase;
+  color:var(--muted); font-family:'Space Grotesk',sans-serif; font-weight:600;
+}
+.k-hero-live{display:inline-flex; align-items:center; gap:0.4rem;}
+.k-hero-livedot{
+  width:0.4rem; height:0.4rem; border-radius:50%; background:var(--brand);
+  animation:kLive 1.8s ease-in-out infinite;
+}
+@keyframes kLive{0%,100%{opacity:1; transform:scale(1);} 50%{opacity:0.3; transform:scale(0.7);}}
+
+/* ------------------------------------------------------------ scroll reveal */
+.k-reveal{opacity:0; transform:translateY(14px); transition:opacity 0.5s ease, transform 0.5s ease;}
+.k-reveal.k-in{opacity:1; transform:none;}
+
+@media (prefers-reduced-motion:reduce){
+  .k-hero-row, .k-hero-caret, .k-hero-sweep, .k-hero-livedot{animation:none;}
+  .k-reveal{opacity:1; transform:none; transition:none;}
 }
 
 /* ------------------------------------------------------------ buttons */
@@ -53,15 +93,16 @@
   font-family:inherit; font-size:0.8125rem; font-weight:600; cursor:pointer;
   padding:0.55rem 1rem; border-radius:999px;
   border:1px solid var(--line); background:var(--card); color:var(--text);
-  text-decoration:none; display:inline-block; line-height:1.3;
+  text-decoration:none; display:inline-block; line-height:1.3; text-align:center;
   transition:background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
 }
-.k-btn:hover{border-color:var(--brand); color:var(--brand-ink);}
+.k-btn:hover{border-color:var(--brand);}
 .k-btn:disabled{opacity:0.4; cursor:default;}
-.k-btn:disabled:hover{border-color:var(--line); color:var(--text);}
-.k-btn-brand{background:var(--brand); border-color:var(--brand); color:#FFFFFF;}
-.k-btn-brand:hover{background:var(--brand-ink); border-color:var(--brand-ink); color:#FFFFFF;}
+.k-btn:disabled:hover{border-color:var(--line);}
+.k-btn-brand{background:var(--brand); border-color:var(--brand); color:var(--bg);}
+.k-btn-brand:hover{background:var(--brand); border-color:var(--brand); opacity:0.86;}
 .k-btn-lg{font-size:0.9375rem; padding:0.75rem 1.6rem;}
+.k-btn-block{display:block; width:100%;}
 .k-btn-quiet{background:transparent; border-style:dashed; color:var(--muted); margin-top:0.75rem;}
 .k-btnrow{display:flex; flex-wrap:wrap; gap:0.55rem; margin-top:1rem;}
 
@@ -75,9 +116,16 @@
 .k-collist-open .k-col-extra{display:block;}
 .k-col-name{
   display:block; font-family:'Space Grotesk',sans-serif; font-weight:700;
-  font-size:0.8125rem; color:var(--brand-ink);
+  font-size:0.8125rem; color:var(--text);
 }
 .k-col-desc{display:block; font-size:0.75rem; color:var(--muted); margin-top:1px; line-height:1.45;}
+.k-col-locked{
+  display:flex; align-items:center; gap:0.5rem;
+  margin-top:0.85rem; padding:0.7rem 0.85rem;
+  border:1px dashed var(--line); border-radius:0.6rem;
+  font-size:0.8125rem; color:var(--muted); background:var(--brand-soft);
+}
+.k-col-locked svg{flex-shrink:0;}
 
 /* ------------------------------------------------------------ data tables */
 .k-tablewrap{
@@ -88,7 +136,7 @@
 .k-table{border-collapse:collapse; font-size:0.75rem; white-space:nowrap; width:max-content; min-width:100%;}
 .k-table th{
   position:sticky; top:0; z-index:2;
-  background:var(--brand-soft); color:var(--brand-ink);
+  background:var(--brand-soft); color:var(--text);
   font-family:'Space Grotesk',sans-serif; font-weight:700; text-align:left;
   padding:0.55rem 0.7rem; border-bottom:1px solid var(--brand-line);
 }
@@ -113,7 +161,7 @@
 }
 .k-task-id{
   flex-shrink:0; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:0.6875rem;
-  color:var(--brand-ink); background:var(--brand-soft); border:1px solid var(--brand-line);
+  color:var(--text); background:var(--brand-soft); border:1px solid var(--brand-line);
   border-radius:5px; padding:0.1rem 0.42rem; margin-top:0.12rem; min-width:1.6rem; text-align:center;
 }
 .k-task code{
@@ -134,16 +182,16 @@
   position:absolute; inset:0;
   display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
   gap:0.7rem; text-align:center; padding:3.5rem 1.5rem 2rem;
-  background:linear-gradient(180deg, rgba(244,241,234,0.72) 0%, rgba(233,247,242,0.94) 45%, rgba(233,247,242,0.99) 100%);
+  background:linear-gradient(180deg, rgba(244,241,234,0.7) 0%, rgba(244,241,234,0.95) 45%, rgba(244,241,234,1) 100%);
 }
 [data-theme="dark"] .k-lockover{
-  background:linear-gradient(180deg, rgba(20,19,23,0.75) 0%, rgba(23,36,31,0.95) 45%, rgba(23,36,31,0.99) 100%);
+  background:linear-gradient(180deg, rgba(20,19,23,0.72) 0%, rgba(20,19,23,0.96) 45%, rgba(20,19,23,1) 100%);
 }
 .k-lockicon{
   width:3.4rem; height:3.4rem; border-radius:50%;
   display:flex; align-items:center; justify-content:center;
-  background:var(--brand); color:#FFFFFF;
-  box-shadow:0 6px 22px rgba(40,166,131,0.35);
+  background:var(--brand); color:var(--bg);
+  box-shadow:0 6px 22px rgba(0,0,0,0.18);
 }
 .k-lockhead{
   font-family:'Space Grotesk',sans-serif; font-size:1.375rem; font-weight:700;
@@ -152,10 +200,10 @@
 .k-lockbody{max-width:32rem; font-size:0.875rem; line-height:1.65; color:var(--muted); margin:0;}
 .k-lockprice{
   font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:700;
-  color:var(--brand-ink); margin:0.2rem 0 0.1rem;
+  color:var(--text); margin:0.2rem 0 0.1rem;
 }
 .k-locknote{font-size:0.75rem; color:var(--muted); margin:0.1rem 0 0; max-width:26rem;}
-.k-locknote a{color:var(--brand-ink); font-weight:600;}
+.k-locknote a{color:var(--text); font-weight:600;}
 
 /* ------------------------------------------------------------ file list */
 .k-filelist{display:flex; flex-direction:column; gap:0.4rem;}
@@ -179,7 +227,7 @@
 }
 .k-dscard:hover{
   border-color:var(--brand); transform:translateY(-2px);
-  box-shadow:0 10px 26px rgba(40,166,131,0.14);
+  box-shadow:0 10px 26px rgba(0,0,0,0.10);
 }
 .k-dscard-top{display:flex; flex-wrap:wrap; gap:0.35rem;}
 .k-dscard-title{
@@ -191,23 +239,28 @@
   display:flex; align-items:center; justify-content:space-between;
   padding-top:0.7rem; border-top:1px solid var(--line);
 }
-.k-dscard-price{font-family:'Space Grotesk',sans-serif; font-size:1.125rem; font-weight:700; color:var(--brand-ink);}
-.k-dscard-go{font-size:0.8125rem; font-weight:600; color:var(--brand);}
+.k-dscard-price{font-family:'Space Grotesk',sans-serif; font-size:1.125rem; font-weight:700; color:var(--text);}
+.k-dscard-go{font-size:0.8125rem; font-weight:600; color:var(--muted);}
 
-/* ------------------------------------------------------------ modal */
+/* ------------------------------------------------------------ modals */
 .k-noscroll{overflow:hidden;}
 .k-modal{
   position:fixed; inset:0; z-index:200;
   display:flex; align-items:center; justify-content:center; padding:1.25rem;
-  background:rgba(28,26,30,0.55); backdrop-filter:blur(3px);
+  background:rgba(20,19,23,0.55); backdrop-filter:blur(3px);
+  animation:kFade 0.18s ease both;
 }
 .k-modal[hidden]{display:none;}
+@keyframes kFade{from{opacity:0;} to{opacity:1;}}
+
 .k-modal-card{
   width:100%; max-width:74rem; height:min(86vh, 54rem);
   display:flex; flex-direction:column;
   background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
   overflow:hidden; box-shadow:0 24px 60px rgba(0,0,0,0.28);
+  animation:kPop 0.22s cubic-bezier(.2,.8,.2,1) both;
 }
+@keyframes kPop{from{opacity:0; transform:translateY(14px) scale(0.985);} to{opacity:1; transform:none;}}
 .k-modal-head{
   display:flex; align-items:flex-start; justify-content:space-between; gap:1rem;
   padding:1rem 1.25rem; border-bottom:1px solid var(--line); background:var(--brand-soft);
@@ -215,15 +268,15 @@
 .k-modal-headtext{min-width:0;}
 .k-modal-title{
   font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:0.9375rem;
-  color:var(--brand-ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
 .k-modal-sub{font-size:0.75rem; color:var(--muted); margin-top:2px;}
 .k-modal-close{
   flex-shrink:0; width:2rem; height:2rem; border-radius:50%; cursor:pointer;
-  border:1px solid var(--brand-line); background:var(--card); color:var(--text);
+  border:1px solid var(--line); background:var(--card); color:var(--text);
   font-size:1.25rem; line-height:1; font-family:inherit;
 }
-.k-modal-close:hover{background:var(--brand); border-color:var(--brand); color:#FFFFFF;}
+.k-modal-close:hover{background:var(--brand); border-color:var(--brand); color:var(--bg);}
 .k-modal-body{flex:1; overflow:auto; padding:0.75rem;}
 .k-modal-body .k-tablewrap{border:none; border-radius:0;}
 .k-modal-loading{padding:3rem 1rem; text-align:center; color:var(--muted); font-size:0.875rem;}
@@ -233,9 +286,60 @@
 }
 .k-modal-page{font-size:0.8125rem; font-weight:600; color:var(--muted); min-width:9rem; text-align:center;}
 
+/* small dialog, auth and payment */
+.k-dialog{
+  position:relative; width:100%; max-width:26rem;
+  background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+  padding:2rem 1.75rem 1.6rem; text-align:center;
+  box-shadow:0 24px 60px rgba(0,0,0,0.3);
+  animation:kPop 0.22s cubic-bezier(.2,.8,.2,1) both;
+}
+.k-dialog .k-modal-close{position:absolute; top:0.85rem; right:0.85rem;}
+.k-dialog-icon{
+  width:3rem; height:3rem; margin:0 auto 0.9rem; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--brand); color:var(--bg);
+}
+.k-dialog-title{
+  font-family:'Space Grotesk',sans-serif; font-size:1.25rem; font-weight:700;
+  margin:0 0 0.5rem; color:var(--text);
+}
+.k-dialog-text{font-size:0.875rem; line-height:1.6; color:var(--muted); margin:0 0 1.25rem;}
+.k-dialog-actions{display:flex; flex-direction:column; gap:0.5rem;}
+.k-dialog-note{font-size:0.75rem; color:var(--muted); margin:0.9rem 0 0; line-height:1.55;}
+
+/* order summary inside the payment dialog */
+.k-order{
+  text-align:left; border:1px solid var(--line); border-radius:0.7rem;
+  background:var(--bg); padding:0.9rem 1rem; margin:0 0 1.15rem;
+}
+.k-order-row{
+  display:flex; align-items:baseline; justify-content:space-between; gap:1rem;
+  font-size:0.8125rem; padding:0.3rem 0;
+}
+.k-order-row span:first-child{color:var(--muted); min-width:0;}
+.k-order-row span:last-child{font-weight:600; text-align:right;}
+.k-order-total{
+  border-top:1px solid var(--line); margin-top:0.45rem; padding-top:0.6rem;
+  font-family:'Space Grotesk',sans-serif;
+}
+.k-order-total span:first-child{color:var(--text); font-weight:700;}
+.k-order-total span:last-child{font-size:1.25rem; font-weight:700;}
+.k-strike{text-decoration:line-through; color:var(--muted); font-weight:400; margin-right:0.4rem;}
+
+/* spinner on the pay button */
+.k-spin{
+  display:inline-block; width:0.85rem; height:0.85rem; vertical-align:-2px; margin-right:0.45rem;
+  border:2px solid currentColor; border-right-color:transparent; border-radius:50%;
+  animation:kSpin 0.7s linear infinite;
+}
+@keyframes kSpin{to{transform:rotate(360deg);}}
+
 @media (max-width:640px){
   .k-modal{padding:0;}
   .k-modal-card{height:100vh; max-width:none; border-radius:0; border:none;}
+  .k-dialog{max-width:none; border-radius:var(--radius) var(--radius) 0 0; margin-top:auto;}
+  .k-modal:has(.k-dialog){align-items:flex-end; padding:0;}
   .k-lockover{padding:2.5rem 1.1rem 1.75rem;}
   .k-lockprice{font-size:1.625rem;}
   .k-collist{grid-template-columns:1fr;}
