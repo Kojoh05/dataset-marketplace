@@ -61,6 +61,20 @@
   }
   function escape(s){ return String(s || '').replace(/[<>&"]/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]; }); }
 
+
+  // Record what people look for, so the admin dashboard can show demand
+  // that the catalogue is not serving yet. Failures are ignored on purpose.
+  var logged = {};
+  function logSearch(q, count){
+    if (!LIVE || !q || q.length > 120 || logged[q]) return;
+    logged[q] = true;
+    SUPA.auth.getSession().then(function(r){
+      var uid = r.data && r.data.session ? r.data.session.user.id : null;
+      SUPA.from('search_log').insert({ query: q, results_count: count, user_id: uid })
+        .then(function(){}, function(){});
+    });
+  }
+
   initialState();
   searchInput.addEventListener('input', function(){
     var q = this.value.trim();
@@ -71,6 +85,7 @@
       SUPA.rpc('search_datasets', { query: q }).then(function(res){
         if (res.error) { emptyState('Search error: ' + res.error.message); return; }
         renderResults(res.data);
+        logSearch(q, (res.data || []).length);
       });
     }, 300);
   });

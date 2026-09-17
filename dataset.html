@@ -133,7 +133,14 @@
     STATE.ds = dsRes.data;
 
     document.getElementById('dsPageTitle').textContent = STATE.ds.title;
-    document.title = 'KOJOH | ' + STATE.ds.title;
+    window.kojohSeo({
+      title: STATE.ds.seo_title || ('KOJOH | ' + STATE.ds.title),
+      description: STATE.ds.seo_description || STATE.ds.short_description,
+      keywords: STATE.ds.seo_keywords,
+      image: STATE.ds.og_image_url,
+      canonical: STATE.ds.canonical_url,
+      type: 'product'
+    });
 
     var sessRes = await SUPA.auth.getSession();
     STATE.session = sessRes.data && sessRes.data.session;

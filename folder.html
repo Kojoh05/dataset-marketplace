@@ -94,7 +94,12 @@
     var folder = fRes.data;
 
     document.getElementById('fdPageTitle').textContent = folder.title;
-    document.title = 'KOJOH | ' + folder.title;
+    window.kojohSeo({
+      title: folder.seo_title || ('KOJOH | ' + folder.title),
+      description: folder.seo_description || folder.description,
+      keywords: folder.seo_keywords,
+      image: folder.og_image_url
+    });
 
     var dRes = await SUPA.from('datasets').select('*').eq('folder_id', folder.id);
     if (dRes.error) { empty(kIcon('alert'), 'Could not load datasets', esc(dRes.error.message)); return; }
