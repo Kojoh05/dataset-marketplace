@@ -58,7 +58,7 @@
     document.title = 'KOJOH | ' + folder.title;
 
     var dRes = await SUPA.from('datasets')
-      .select('slug, title, short_description, difficulty, price, is_free, preview_rows')
+      .select('*')
       .eq('folder_id', folder.id);
     if (dRes.error) { empty(kIcon('alert'), 'Could not load datasets', esc(dRes.error.message)); return; }
     var rows = dRes.data || [];
