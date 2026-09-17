@@ -17,6 +17,9 @@ set title = replace(replace(title, ' — ', ': '), '—', ','),
     short_description = replace(replace(short_description, ' — ', ', '), '—', ','),
     long_description = replace(replace(long_description, ' — ', ', '), '—', ',');
 
+update public.dataset_schema
+set description = replace(replace(description, ' — ', ', '), '—', ',');
+
 update public.folders
 set description = replace(replace(description, ' — ', ', '), '—', ',');
 
