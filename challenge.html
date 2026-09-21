@@ -12,37 +12,6 @@
 <link rel="stylesheet" href="pages.css">
 <link rel="stylesheet" href="nav.css">
 <link rel="stylesheet" href="kojoh-ui.css">
-<style>
-  .chal-phase-tasks{display:flex; flex-direction:column; gap:0.6rem; margin-top:0.9rem;}
-  .chal-task{
-    display:flex; align-items:flex-start; gap:0.65rem;
-    padding:0.7rem 0.85rem; background:var(--bg); border:1px solid var(--line);
-    border-radius:0.65rem; transition:opacity 0.15s ease;
-  }
-  .chal-task.done{opacity:0.5;}
-  .chal-task-check{
-    flex-shrink:0; width:1.1rem; height:1.1rem; margin-top:0.15rem;
-    accent-color:var(--brand); cursor:pointer;
-  }
-  .chal-task-body{flex:1; font-size:0.875rem; line-height:1.55;}
-  .chal-task-id{
-    display:inline-block; font-family:'Space Grotesk',sans-serif; font-weight:700;
-    font-size:0.6875rem; letter-spacing:0.02em; color:var(--muted);
-    background:var(--card); border:1px solid var(--line); border-radius:5px;
-    padding:0.05rem 0.4rem; margin-right:0.5rem; vertical-align:middle;
-  }
-  .chal-task.done .chal-task-body{text-decoration:line-through;}
-  .chal-progress-bar{
-    height:8px; border-radius:999px; background:var(--bg); border:1px solid var(--line);
-    overflow:hidden; margin-top:0.75rem;
-  }
-  .chal-progress-fill{height:100%; background:var(--brand); transition:width 0.25s ease; width:0%;}
-  .chal-badge{
-    display:inline-block; font-size:0.75rem; font-weight:600; padding:0.2rem 0.65rem;
-    border-radius:999px; border:1px solid var(--line); background:var(--bg); margin-right:0.4rem;
-  }
-  .chal-badge.premium{background:var(--brand); color:#FFFFFF; border-color:var(--brand);}
-</style>
 <script src="nav.js"></script>
 </head>
 <body>
@@ -140,7 +109,13 @@
           + 'You\'re not required to use the specific tool a phase implies (Python/SQL/dashboard); those name the skill being tested, not a mandated tool.</p></div>';
 
     html += '<div class="page-card"><h2>Your progress</h2><div class="chal-progress-bar"><div class="chal-progress-fill" id="chalProgressFill"></div></div>'
-          + '<p id="chalProgressLabel" style="margin-top:0.5rem;"></p></div>';
+          + '<p id="chalProgressLabel" style="margin-top:0.5rem;"></p>'
+          + '<div class="k-btnrow k-noprint" style="margin-top:0.9rem;">'
+          + '<button class="k-btn" id="chalPrint" type="button">Print this challenge sheet</button>'
+          + '<button class="k-btn k-btn-quiet" id="chalPrintBlank" type="button">Print with every box empty</button>'
+          + '</div>'
+          + '<p class="k-sub k-noprint" style="margin-top:0.6rem;">Printing gives you the phases and tasks '
+          + 'with tick boxes, and leaves the menus behind.</p></div>';
 
     pack.phases.forEach(function(p){ html += renderPhase(p.title, p.tasks, done); });
     if (pack.premium) html += renderPhase('Premium bonus, 5 hard challenges', pack.premium, done);
@@ -149,6 +124,31 @@
 
     root.innerHTML = html;
     updateProgressBar(allTasks, done);
+
+    document.getElementById('chalPrint').addEventListener('click', function(){
+      window.print();
+    });
+
+    // A blank sheet to work through on paper, without touching saved progress.
+    document.getElementById('chalPrintBlank').addEventListener('click', function(){
+      var boxes = root.querySelectorAll('.chal-task-check');
+      var was = [];
+      Array.prototype.forEach.call(boxes, function(b, i){
+        was[i] = b.checked;
+        b.checked = false;
+        b.closest('.chal-task').classList.remove('done');
+      });
+      function restore(){
+        Array.prototype.forEach.call(boxes, function(b, i){
+          b.checked = was[i];
+          b.closest('.chal-task').classList.toggle('done', was[i]);
+        });
+        window.removeEventListener('afterprint', restore);
+      }
+      window.addEventListener('afterprint', restore);
+      window.print();
+      setTimeout(restore, 1200);
+    });
 
     root.addEventListener('change', function(e){
       if (!e.target.classList.contains('chal-task-check')) return;

@@ -110,10 +110,30 @@
     document.body.classList.toggle('ksb-tucked', tucked);
   }
 
+  // Pages open full screen things like the data table over the top of the
+  // rail. They call this to get it out of the way, and again to bring it
+  // back, without reaching into the rail's own classes.
+  var heldForOverlay = false;
+  window.kojohNav = {
+    collapse: collapse,
+    hideForOverlay: function () {
+      heldForOverlay = true;
+      collapse();
+      setTucked(true);
+    },
+    restoreAfterOverlay: function () {
+      if (!heldForOverlay) return;
+      heldForOverlay = false;
+      setTucked(false);
+    },
+    isHeld: function () { return heldForOverlay; }
+  };
+
   // Distance is measured from the last point where the scroll direction
   // changed, not frame to frame, so it takes a deliberate scroll to move
   // the rail rather than the smallest flick of the wheel.
   function onScroll() {
+    if (window.kojohNav && window.kojohNav.isHeld()) return;
     if (scrollTicking) return;
     scrollTicking = true;
     window.requestAnimationFrame(function () {

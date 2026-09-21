@@ -99,6 +99,11 @@
     <div class="k-modal-foot">
       <button class="k-btn" id="tmPrev" type="button">Previous</button>
       <span class="k-modal-page" id="tmPage"></span>
+      <span class="k-pagejump">
+        <label for="tmJump">Go to</label>
+        <input class="k-pageinput" id="tmJump" type="number" min="1" step="1" inputmode="numeric"
+               aria-label="Jump to a page number">
+      </span>
       <button class="k-btn k-btn-brand" id="tmNext" type="button">Next</button>
     </div>
   </div>
@@ -427,10 +432,26 @@
     }
 
     var pack = STATE.lic.task_pack || { phases: [] };
+    var done = loadProgress();
+    var all = allTasks();
+    var checked = all.filter(function(t){ return done[t.id]; }).length;
+
     var h = '';
-    h += '<div class="page-card k-card-soft"><h2>How to work it</h2>'
+    h += '<div class="page-card k-card-soft k-noprint"><h2>How to work it</h2>'
       +  '<p>Each phase below names the tool it is meant for. Do them in order, the later phases assume '
-      +  'the cleaning from the earlier ones is already done. Your task numbers are yours alone.</p></div>';
+      +  'the cleaning from the earlier ones is already done. Your task numbers are yours alone. '
+      +  'Tick tasks off as you go, your progress is kept on this device and shows on the challenge page too.</p>'
+      +  '<div class="k-btnrow">'
+      +  '<button class="k-btn" id="dsPrintChal" type="button">Print this challenge sheet</button>'
+      +  '<a class="k-btn" href="challenge.html?slug=' + encodeURIComponent(ds.slug) + '">Open the full challenge page</a>'
+      +  '</div></div>';
+
+    h += '<div class="k-printonly"><h1>' + esc(ds.title) + '</h1>'
+      +  '<p>License ' + esc(STATE.lic.license_code) + '</p></div>';
+
+    h += '<div class="page-card"><h2>Your progress</h2>'
+      +  '<div class="chal-progress-bar"><div class="chal-progress-fill" id="dsProgFill"></div></div>'
+      +  '<p id="dsProgLabel" style="margin-top:0.5rem;">' + checked + ' / ' + all.length + ' tasks checked off</p></div>';
 
     (pack.phases || []).forEach(function(p){
       var tools = phaseTools(p);
@@ -440,27 +461,43 @@
         tools.forEach(function(t){ h += '<span class="k-ptool">' + esc(t) + '</span>'; });
         h += '</div>';
       }
-      h += '<div class="k-tasklist">';
-      (p.tasks || []).forEach(function(t){
-        h += '<div class="k-task"><span class="k-task-id">' + esc(t.id) + '</span><span>' + inlineCode(t.text) + '</span></div>';
-      });
-      h += '</div></div>';
+      h += '<div class="chal-phase-tasks">' + taskRows(p.tasks || [], done) + '</div></div>';
     });
 
     if (pack.premium && pack.premium.length) {
-      h += '<div class="page-card k-card-brand"><h2>Premium bonus, 5 hard challenges</h2><div class="k-tasklist">';
-      pack.premium.forEach(function(t){
-        h += '<div class="k-task"><span class="k-task-id">' + esc(t.id) + '</span><span>' + inlineCode(t.text) + '</span></div>';
-      });
-      h += '</div></div>';
+      h += '<div class="page-card k-card-brand"><h2>Premium bonus, 5 hard challenges</h2>'
+        +  '<div class="chal-phase-tasks">' + taskRows(pack.premium, done) + '</div></div>';
     }
 
-    h += '<div class="page-card"><h2>Track your progress</h2>'
-      +  '<p class="k-sub">The challenge page keeps a tick box against every task.</p>'
-      +  '<div class="k-btnrow"><a class="k-btn k-btn-brand" href="challenge.html?slug='
-      +  encodeURIComponent(ds.slug) + '">Open your challenge page</a></div></div>';
-
     return h;
+  }
+
+  function taskRows(tasks, done){
+    return tasks.map(function(t){
+      var on = !!done[t.id];
+      return '<label class="chal-task' + (on ? ' done' : '') + '" data-task="' + esc(t.id) + '">'
+        + '<input type="checkbox" class="chal-task-check"' + (on ? ' checked' : '') + '>'
+        + '<span class="chal-task-body"><span class="chal-task-id">' + esc(t.id) + '</span>'
+        + inlineCode(t.text) + '</span></label>';
+    }).join('');
+  }
+
+  // Same storage key the challenge page uses, so ticking in one place shows
+  // up in the other.
+  function progressKey(){ return 'kojoh-progress-' + (STATE.lic && STATE.lic.license_code); }
+  function loadProgress(){
+    try { return JSON.parse(localStorage.getItem(progressKey()) || '{}'); }
+    catch (e) { return {}; }
+  }
+  function saveProgress(done){
+    try { localStorage.setItem(progressKey(), JSON.stringify(done)); } catch (e) {}
+  }
+  function allTasks(){
+    var pack = (STATE.lic && STATE.lic.task_pack) || {};
+    var out = [];
+    (pack.phases || []).forEach(function(p){ out = out.concat(p.tasks || []); });
+    if (pack.premium) out = out.concat(pack.premium);
+    return out;
   }
 
   // Which tools a phase calls for, read out of the task wording itself.
@@ -635,6 +672,32 @@
     if (f) f.addEventListener('click', onDownload);
     var c = document.getElementById('dsCopyPrompt');
     if (c) c.addEventListener('click', copyPrompt);
+
+    var pr = document.getElementById('dsPrintChal');
+    if (pr) pr.addEventListener('click', function(){ window.print(); });
+
+    var panel = document.getElementById('panel-challenge');
+    if (panel && STATE.lic) {
+      panel.addEventListener('change', function(e){
+        if (!e.target.classList.contains('chal-task-check')) return;
+        var row = e.target.closest('.chal-task');
+        var done = loadProgress();
+        done[row.getAttribute('data-task')] = e.target.checked;
+        row.classList.toggle('done', e.target.checked);
+        saveProgress(done);
+        updateProgress(done);
+      });
+      updateProgress(loadProgress());
+    }
+  }
+
+  function updateProgress(done){
+    var all = allTasks();
+    var n = all.filter(function(t){ return done[t.id]; }).length;
+    var fill = document.getElementById('dsProgFill');
+    var label = document.getElementById('dsProgLabel');
+    if (fill) fill.style.width = (all.length ? (100 * n / all.length) : 0) + '%';
+    if (label) label.textContent = n + ' / ' + all.length + ' tasks checked off';
   }
 
   function typeTitle(){
@@ -774,11 +837,14 @@
   function openDialog(id){
     document.getElementById(id).hidden = false;
     document.body.classList.add('k-noscroll');
+    // The nav rail sits over the page, so move it aside while a dialog is up.
+    if (window.kojohNav) window.kojohNav.hideForOverlay();
   }
   function closeDialog(id){
     document.getElementById(id).hidden = true;
     if (document.querySelectorAll('.k-modal:not([hidden])').length === 0) {
       document.body.classList.remove('k-noscroll');
+      if (window.kojohNav) window.kojohNav.restoreAfterOverlay();
     }
   }
 
@@ -946,13 +1012,39 @@
     document.getElementById('tmPage').textContent = 'Page ' + (STATE.page + 1) + ' of ' + pages;
     document.getElementById('tmPrev').disabled = STATE.page === 0;
     document.getElementById('tmNext').disabled = STATE.page >= pages - 1;
-    document.getElementById('tmBody').scrollTop = 0;
+
+    var jump = document.getElementById('tmJump');
+    jump.max = pages;
+    jump.value = STATE.page + 1;
+    STATE.pages = pages;
+
+    var wrap = document.querySelector('#tmBody .k-tablewrap');
+    if (wrap) { wrap.scrollTop = 0; wrap.scrollLeft = 0; }
   }
 
   // ---------------------------------------------------------------- modal events
   document.getElementById('tmClose').addEventListener('click', function(){ closeDialog('tableModal'); });
   document.getElementById('tmPrev').addEventListener('click', function(){ STATE.page--; renderPage(); });
   document.getElementById('tmNext').addEventListener('click', function(){ STATE.page++; renderPage(); });
+
+  (function(){
+    var jump = document.getElementById('tmJump');
+    function go(){
+      var pages = STATE.pages || 1;
+      var n = parseInt(jump.value, 10);
+      if (isNaN(n)) { jump.value = STATE.page + 1; return; }
+      n = Math.min(pages, Math.max(1, n));
+      STATE.page = n - 1;
+      renderPage();
+    }
+    jump.addEventListener('keydown', function(e){
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      go();
+      jump.blur();
+    });
+    jump.addEventListener('blur', go);
+  })();
   document.getElementById('authClose').addEventListener('click', function(){ closeDialog('authModal'); });
   document.getElementById('payClose').addEventListener('click', function(){ closeDialog('payModal'); });
   document.getElementById('filesClose').addEventListener('click', function(){ closeDialog('filesModal'); });

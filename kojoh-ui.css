@@ -151,6 +151,7 @@
   background:var(--bg); color:var(--muted); font-weight:600; text-align:right;
 }
 .k-table tbody tr:hover .k-rownum{background:var(--brand-soft);}
+.k-table thead th:first-child{left:0; z-index:3;}
 
 /* ------------------------------------------------------------ task lists */
 .k-tasklist{display:flex; flex-direction:column; gap:0.5rem;}
@@ -245,7 +246,7 @@
 /* ------------------------------------------------------------ modals */
 .k-noscroll{overflow:hidden;}
 .k-modal{
-  position:fixed; inset:0; z-index:200;
+  position:fixed; inset:0; z-index:1000;   /* above the nav rail at 900 */
   display:flex; align-items:center; justify-content:center; padding:1.25rem;
   background:rgba(20,19,23,0.55); backdrop-filter:blur(3px);
   animation:kFade 0.18s ease both;
@@ -277,8 +278,9 @@
   font-size:1.25rem; line-height:1; font-family:inherit;
 }
 .k-modal-close:hover{background:var(--brand); border-color:var(--brand); color:var(--bg);}
-.k-modal-body{flex:1; overflow:auto; padding:0.75rem;}
-.k-modal-body .k-tablewrap{border:none; border-radius:0;}
+.k-modal-body{flex:1; min-height:0; overflow:hidden; padding:0.75rem; display:flex;}
+.k-modal-body .k-tablewrap{border:none; border-radius:0; flex:1; min-height:0; width:100%;}
+.k-modal-body .k-modal-loading{flex:1;}
 .k-modal-loading{padding:3rem 1rem; text-align:center; color:var(--muted); font-size:0.875rem;}
 .k-modal-foot{
   display:flex; align-items:center; justify-content:center; gap:1rem;
@@ -389,8 +391,12 @@
 /* ------------------------------------------------------------ tabs */
 .k-tabs{
   display:flex; gap:0.15rem; margin:1.6rem 0 1.5rem;
-  border-bottom:1px solid var(--line); overflow-x:auto;
+  border-bottom:1px solid var(--line);
+  overflow-x:auto;
+  overflow-y:hidden;          /* without this the browser computes it as auto */
+  scrollbar-width:none;
 }
+.k-tabs::-webkit-scrollbar{display:none;}
 .k-tab{
   font-family:inherit; font-size:0.875rem; font-weight:600; white-space:nowrap;
   padding:0.7rem 1.05rem; background:none; border:none; cursor:pointer;
@@ -453,3 +459,79 @@
   .k-dstitle.k-typing::after{animation:none;}
   .k-tabpanel, .k-act-pop{animation:none;}
 }
+
+/* ------------------------------------------------------------ challenge tasks */
+/* Shared by the challenge page and the Challenge tab on a dataset. */
+.chal-phase-tasks{display:flex; flex-direction:column; gap:0.6rem; margin-top:0.9rem;}
+.chal-task{
+  display:flex; align-items:flex-start; gap:0.65rem;
+  padding:0.7rem 0.85rem; background:var(--bg); border:1px solid var(--line);
+  border-radius:0.65rem; transition:opacity 0.15s ease;
+}
+.chal-task.done{opacity:0.5;}
+.chal-task-check{
+  flex-shrink:0; width:1.1rem; height:1.1rem; margin-top:0.15rem;
+  accent-color:var(--brand); cursor:pointer;
+}
+.chal-task-body{flex:1; font-size:0.875rem; line-height:1.55;}
+.chal-task-id{
+  display:inline-block; font-family:'Space Grotesk',sans-serif; font-weight:700;
+  font-size:0.6875rem; letter-spacing:0.02em; color:var(--muted);
+  background:var(--card); border:1px solid var(--line); border-radius:5px;
+  padding:0.05rem 0.4rem; margin-right:0.5rem; vertical-align:middle;
+}
+.chal-task.done .chal-task-body{text-decoration:line-through;}
+.chal-progress-bar{
+  height:8px; border-radius:999px; background:var(--bg); border:1px solid var(--line);
+  overflow:hidden; margin-top:0.75rem;
+}
+.chal-progress-fill{height:100%; background:var(--brand); transition:width 0.25s ease; width:0%;}
+.chal-badge{
+  display:inline-block; font-size:0.75rem; font-weight:600; padding:0.2rem 0.65rem;
+  border-radius:999px; border:1px solid var(--line); background:var(--bg); margin-right:0.4rem;
+}
+.chal-badge.premium{background:var(--brand); color:#FFFFFF; border-color:var(--brand);}
+
+/* ------------------------------------------------------------ page jump */
+.k-pagejump{display:inline-flex; align-items:center; gap:0.4rem; font-size:0.75rem; color:var(--muted);}
+.k-pageinput{
+  width:3.4rem; text-align:center; font-family:inherit; font-size:0.8125rem; font-weight:600;
+  padding:0.35rem 0.4rem; border-radius:0.5rem; border:1px solid var(--line);
+  background:var(--card); color:var(--text); font-variant-numeric:tabular-nums;
+}
+.k-pageinput:focus{outline:2px solid var(--brand); outline-offset:-1px;}
+.k-pageinput::-webkit-outer-spin-button,
+.k-pageinput::-webkit-inner-spin-button{-webkit-appearance:none; margin:0;}
+.k-pageinput{-moz-appearance:textfield;}
+
+/* ------------------------------------------------------------ printing */
+/* A challenge sheet you can carry: tasks and tick boxes, nothing else. */
+@media print{
+  .ksb-rail, .ksb-overlay, .ksb-mobile-trigger, .ksb-edge,
+  .page-header, .topnav-wrap, .k-modal, .k-tabs, .k-actions,
+  .k-hero, .k-noprint{display:none !important;}
+
+  body{background:#FFFFFF !important; color:#000000 !important;}
+  .page-wrap, .main{max-width:none; padding:0; margin:0;}
+  .page-card{
+    break-inside:avoid; page-break-inside:avoid;
+    border:1px solid #CCCCCC; box-shadow:none; background:#FFFFFF;
+  }
+  h1, h2{color:#000000;}
+  a{color:#000000; text-decoration:none;}
+
+  .chal-task, .k-task{break-inside:avoid; page-break-inside:avoid;}
+
+  /* Native checkboxes print inconsistently, so draw them. */
+  .chal-task input[type="checkbox"]{
+    -webkit-appearance:none; appearance:none;
+    width:13px; height:13px; flex:none;
+    border:1.5px solid #000000; border-radius:2px; background:#FFFFFF;
+  }
+  .chal-task input[type="checkbox"]:checked{background:#000000;}
+  .chal-task.done{opacity:1;}
+  .chal-task.done .chal-task-body{text-decoration:none;}
+
+  .k-printonly{display:block !important;}
+}
+.k-printonly{display:none;}
