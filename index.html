@@ -417,14 +417,31 @@
     return 'Dataset';
   }
 
+  // The anchor is built once and then updated in place. Replacing the node on
+  // every tick would pull the link out from under a click already in flight.
+  var link = null, elTitle = null, elSub = null, elStat = null;
+
+  function build(){
+    slot.innerHTML = '<a class="nv-item" href="#"><span class="nv-ico">' + ICON + '</span>'
+      + '<span class="nv-txt"><span class="nv-title"></span><span class="nv-sub"></span></span>'
+      + '<span class="nv-stat"></span></a>';
+    link = slot.querySelector('.nv-item');
+    elTitle = slot.querySelector('.nv-title');
+    elSub = slot.querySelector('.nv-sub');
+    elStat = slot.querySelector('.nv-stat');
+  }
+
   function show(i){
     var it = items[i];
     if (!it) return;
-    slot.innerHTML = '<a class="nv-item" href="dataset.html?slug=' + encodeURIComponent(it.ds.slug) + '">'
-      + '<span class="nv-ico">' + ICON + '</span>'
-      + '<span class="nv-txt"><span class="nv-title">' + esc(it.ds.title) + '</span>'
-      + '<span class="nv-sub">' + it.sub + '</span></span>'
-      + '<span class="nv-stat">' + stat(it.ds) + '</span></a>';
+    if (!link) build();
+    link.setAttribute('href', 'dataset.html?slug=' + encodeURIComponent(it.ds.slug));
+    elTitle.textContent = it.ds.title;
+    elSub.innerHTML = it.sub;
+    elStat.textContent = stat(it.ds);
+    link.classList.remove('nv-item-in');
+    void link.offsetWidth;
+    link.classList.add('nv-item-in');
   }
 
   function step(){
