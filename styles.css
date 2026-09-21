@@ -72,7 +72,7 @@ h1,h2,h3{font-family:'Space Grotesk', sans-serif;}
   width:min(40rem, calc(100% - 13rem));
   background:#141317;
   border-radius:0 0 1.75rem 1.75rem;
-  padding:0.95rem 2.25rem 1rem;
+  padding:0.75rem 1.9rem 0.65rem;
   display:flex;
   justify-content:center;
   z-index:1;
@@ -117,10 +117,10 @@ h1,h2,h3{font-family:'Space Grotesk', sans-serif;}
   color:#8E8B85;
 }
 .nv-ico{
-  flex:none; width:1.65rem; height:1.65rem; border-radius:0.45rem;
+  flex:none; width:1.5rem; height:1.5rem; border-radius:0.42rem;
   background:rgba(255,255,255,0.09); color:#EDEBE6; display:grid; place-items:center;
 }
-.nv-txt{min-width:0; display:flex; flex-direction:column; gap:0.08rem; flex:1;}
+.nv-txt{min-width:0; display:flex; flex-direction:column; gap:0.02rem; flex:1;}
 .nv-title{
   font-size:0.8125rem; font-weight:600; color:#EDEBE6;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
