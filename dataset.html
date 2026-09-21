@@ -111,7 +111,7 @@
 <script>
 (function(){
   var LIVE = !!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase);
-  var SUPA = LIVE ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY) : null;
+  var SUPA = LIVE ? window.kojohSupa() : null;
   var root = document.getElementById('dsRoot');
 
   var FREE_COLUMNS = 6;

@@ -46,7 +46,7 @@
 <script src="config.js"></script>
 <script>
   var LIVE = !!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase);
-  var SUPA = LIVE ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY) : null;
+  var SUPA = LIVE ? window.kojohSupa() : null;
   var noteEl = document.getElementById('sNote');
   function note(msg, kind){ noteEl.hidden = false; noteEl.textContent = msg; noteEl.classList.remove('error','ok'); if (kind) noteEl.classList.add(kind); }
 

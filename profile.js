@@ -2,7 +2,7 @@
 
 (function () {
   var LIVE = !!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase);
-  var SUPA = LIVE ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY) : null;
+  var SUPA = LIVE ? window.kojohSupa() : null;
 
   function initials(first, last, username, email) {
     var a = (first || '').trim().charAt(0);

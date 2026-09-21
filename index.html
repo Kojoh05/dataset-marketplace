@@ -326,7 +326,7 @@
 // Live folder counts, replaces the hardcoded numbers on the folder cards.
 (function(){
   if (!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase)) return;
-  var SUPA = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+  var SUPA = window.kojohSupa();
   Promise.all([
     SUPA.from('folders').select('id, slug'),
     SUPA.from('datasets').select('folder_id')
@@ -358,7 +358,7 @@
   var slot = document.getElementById('navSlot');
   if (!slot) return;
   if (!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase)) return;
-  var SUPA = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+  var SUPA = window.kojohSupa();
 
   var items = [], at = 0, timer = null, HOLD = 4600;
   var ICON = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" '

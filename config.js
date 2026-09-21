@@ -4,10 +4,21 @@ window.KOJOH_VERSION = '0.3.0';
 // ---------------------------------------------------------------------------
 // One shared Supabase client, so pages stop spinning up duplicates.
 // ---------------------------------------------------------------------------
+// Every page must go through this. Two clients in one tab each run their own
+// refresh timer, and because Supabase rotates refresh tokens the slower one
+// then refreshes with a token the faster one already spent. That request comes
+// back "already used", the client wipes the stored session, and the person is
+// signed out for no reason they can see. One client per tab, no race.
 window.kojohSupa = function(){
   if (window.__kojohSupa) return window.__kojohSupa;
   if (!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase)) return null;
-  window.__kojohSupa = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+  window.__kojohSupa = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY, {
+    auth: {
+      persistSession: true,      // keep the session in localStorage across reloads
+      autoRefreshToken: true,    // renew the access token before it expires
+      detectSessionInUrl: true   // pick the session up out of an OAuth redirect
+    }
+  });
   return window.__kojohSupa;
 };
 

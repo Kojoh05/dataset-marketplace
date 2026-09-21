@@ -9,7 +9,7 @@
 var SUPA = null;
 var LIVE = false;
 if (window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase) {
-  SUPA = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+  SUPA = window.kojohSupa();
   LIVE = true;
 }
 
