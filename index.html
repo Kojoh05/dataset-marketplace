@@ -378,54 +378,76 @@
     if (s < 86400) return Math.floor(s / 3600) + 'h ago';
     return Math.floor(s / 86400) + 'd ago';
   }
-  function cap(s){ return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
 
   Promise.all([
     SUPA.from('datasets').select('id, slug, title, difficulty, price, is_free, preview_rows'),
-    SUPA.from('hypes').select('dataset_id, created_at').order('created_at', { ascending:false }).limit(12)
+    SUPA.from('hypes').select('dataset_id, created_at').order('created_at', { ascending:false }).limit(12),
+    SUPA.rpc('dataset_shelf')
   ]).then(function(res){
     var sets = (res[0] && res[0].data) || [];
     var hypes = (res[1] && !res[1].error && res[1].data) || [];
+    var shelf = (res[2] && !res[2].error && res[2].data) || [];
     if (!sets.length) { slot.innerHTML = '<span class="nv-empty">New datasets land here soon</span>'; return; }
 
-    var byId = {};
-    sets.forEach(function(d){ byId[d.id] = d; });
+    var stats = {};
+    shelf.forEach(function(s){ stats[s.dataset_id] = s; });
 
-    var used = {};
+    var lastHype = {};
     hypes.forEach(function(h){
-      var d = byId[h.dataset_id];
-      if (!d || used[d.id]) return;
-      used[d.id] = 1;
-      items.push({ ds:d, sub:'hyped &#183; ' + ago(h.created_at) });
+      if (!lastHype[h.dataset_id]) lastHype[h.dataset_id] = h.created_at;
     });
+
+    // Rank is by how recently a dataset was last bought. Never bought means
+    // no rank at all rather than a misleading one, so those read as NEW.
+    sets.sort(function(a, b){
+      var la = (stats[a.id] && stats[a.id].last_claimed_at) || null;
+      var lb = (stats[b.id] && stats[b.id].last_claimed_at) || null;
+      if (la && lb) return new Date(lb) - new Date(la);
+      if (la) return -1;
+      if (lb) return 1;
+      return String(a.title).localeCompare(String(b.title));
+    });
+
+    var rank = 0;
     sets.forEach(function(d){
-      if (used[d.id]) return;
+      var s = stats[d.id] || {};
+      var ranked = !!s.last_claimed_at;
+      if (ranked) rank++;
+
       var bits = [];
-      if (d.difficulty) bits.push(cap(d.difficulty));
-      bits.push(d.is_free ? 'Free' : '&#8377;' + Number(d.price || 0).toFixed(0));
-      items.push({ ds:d, sub:bits.join(' &#183; ') });
+      var p = d.preview_rows;
+      if (p && p.total_rows) bits.push(nf(p.total_rows) + ' rows');
+      if (lastHype[d.id]) bits.push('hyped ' + ago(lastHype[d.id]));
+      else if (s.last_claimed_at) bits.push('sold ' + ago(s.last_claimed_at));
+      else bits.push(d.is_free ? 'Free' : '&#8377;' + Number(d.price || 0).toFixed(0));
+
+      items.push({
+        ds: d,
+        badge: ranked ? '#' + rank : 'NEW',
+        ranked: ranked,
+        sub: bits.join(' &#183; '),
+        stat: s.licenses_total
+          ? nf(s.licenses_left) + ' of ' + nf(s.licenses_total) + ' left'
+          : (p && p.total_rows ? nf(p.total_rows) + ' rows' : 'Dataset'),
+        low: s.licenses_total ? (s.licenses_left / s.licenses_total) <= 0.2 : false
+      });
     });
 
     show(0);
     start();
   });
 
-  function stat(d){
-    var p = d.preview_rows;
-    if (p && p.total_rows) return nf(p.total_rows) + ' rows';
-    if (p && p.columns && p.columns.length) return p.columns.length + ' cols';
-    return 'Dataset';
-  }
-
   // The anchor is built once and then updated in place. Replacing the node on
   // every tick would pull the link out from under a click already in flight.
-  var link = null, elTitle = null, elSub = null, elStat = null;
+  var link = null, elRank = null, elTitle = null, elSub = null, elStat = null;
 
   function build(){
-    slot.innerHTML = '<a class="nv-item" href="#"><span class="nv-ico">' + ICON + '</span>'
+    slot.innerHTML = '<a class="nv-item" href="#"><span class="nv-rank"></span>'
+      + '<span class="nv-ico">' + ICON + '</span>'
       + '<span class="nv-txt"><span class="nv-title"></span><span class="nv-sub"></span></span>'
       + '<span class="nv-stat"></span></a>';
     link = slot.querySelector('.nv-item');
+    elRank = slot.querySelector('.nv-rank');
     elTitle = slot.querySelector('.nv-title');
     elSub = slot.querySelector('.nv-sub');
     elStat = slot.querySelector('.nv-stat');
@@ -436,9 +458,13 @@
     if (!it) return;
     if (!link) build();
     link.setAttribute('href', 'dataset.html?slug=' + encodeURIComponent(it.ds.slug));
+    link.setAttribute('title', it.ds.title);
+    elRank.textContent = it.badge;
+    elRank.className = 'nv-rank' + (it.ranked ? '' : ' nv-rank-new');
     elTitle.textContent = it.ds.title;
     elSub.innerHTML = it.sub;
-    elStat.textContent = stat(it.ds);
+    elStat.textContent = it.stat;
+    elStat.className = 'nv-stat' + (it.low ? ' nv-stat-low' : '');
     link.classList.remove('nv-item-in');
     void link.offsetWidth;
     link.classList.add('nv-item-in');

@@ -107,6 +107,15 @@ h1,h2,h3{font-family:'Space Grotesk', sans-serif;}
 .nv-item-in{animation:nvIn 0.42s cubic-bezier(.2,.8,.2,1) both;}
 .nv-item:hover{background:rgba(255,255,255,0.07);}
 @keyframes nvIn{from{opacity:0; transform:translateY(7px);} to{opacity:1; transform:none;}}
+.nv-rank{
+  flex:none; min-width:1.9rem; text-align:center;
+  font-size:0.75rem; font-weight:700; color:#EDEBE6;
+  font-variant-numeric:tabular-nums; letter-spacing:0.01em;
+}
+.nv-rank-new{
+  font-size:0.5625rem; font-weight:700; letter-spacing:0.08em;
+  color:#8E8B85;
+}
 .nv-ico{
   flex:none; width:1.65rem; height:1.65rem; border-radius:0.45rem;
   background:rgba(255,255,255,0.09); color:#EDEBE6; display:grid; place-items:center;
@@ -115,6 +124,7 @@ h1,h2,h3{font-family:'Space Grotesk', sans-serif;}
 .nv-title{
   font-size:0.8125rem; font-weight:600; color:#EDEBE6;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  max-width:15rem;
 }
 .nv-sub{
   font-size:0.6875rem; color:#8E8B85;
@@ -125,6 +135,7 @@ h1,h2,h3{font-family:'Space Grotesk', sans-serif;}
   padding-left:0.85rem; border-left:1px solid rgba(255,255,255,0.13);
   font-variant-numeric:tabular-nums; white-space:nowrap;
 }
+.nv-stat-low{color:#E8A87C;}
 .nv-next{
   flex:none; background:none; border:none; color:#8E8B85; cursor:pointer;
   padding:0.32rem; display:grid; place-items:center; border-radius:0.4rem;
