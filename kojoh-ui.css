@@ -18,6 +18,16 @@
 
 .ds-wide{max-width:64rem;}
 
+/* ------------------------------------------------------------ toasts */
+.k-toasts{
+  position:fixed; right:1.25rem; bottom:1.25rem; z-index:1200;
+  display:flex; flex-direction:column; gap:0.5rem; max-width:22rem;
+}
+.k-toast{
+  background:#B3261E; color:#FFFFFF; font-size:0.8125rem; line-height:1.4;
+  padding:0.65rem 0.9rem; border-radius:0.6rem; box-shadow:0 8px 24px rgba(0,0,0,0.18);
+}
+
 /* ------------------------------------------------------------ chips */
 .k-chiprow{display:flex; flex-wrap:wrap; gap:0.45rem; margin:0 0 1.5rem;}
 .k-chip{

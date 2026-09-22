@@ -149,6 +149,21 @@
   function empty(icon, title, body){
     root.innerHTML = '<div class="empty-state"><div class="empty-state-icon">' + icon + '</div><h3>' + esc(title) + '</h3><p>' + body + '</p></div>';
   }
+  // A quiet, transient error notice, so a failed hype/bookmark/etc. doesn't
+  // just silently snap back with no explanation of why.
+  function kToast(msg){
+    var wrap = document.querySelector('.k-toasts');
+    if (!wrap) {
+      wrap = document.createElement('div');
+      wrap.className = 'k-toasts';
+      document.body.appendChild(wrap);
+    }
+    var t = document.createElement('div');
+    t.className = 'k-toast';
+    t.textContent = msg;
+    wrap.appendChild(t);
+    setTimeout(function(){ t.remove(); }, 5000);
+  }
   function paragraphs(text){
     return String(text || '').split(/\n\s*\n/).map(function(p){ return '<p>' + esc(p) + '</p>'; }).join('');
   }
@@ -864,9 +879,11 @@
     if (STATE.hyped) {
       var d = await SUPA.from('hypes').delete().eq('dataset_id', STATE.ds.id).eq('user_id', uid);
       if (!d.error) { STATE.hyped = false; STATE.hypes = Math.max(0, STATE.hypes - 1); }
+      else kToast(d.error.message);
     } else {
       var a = await SUPA.from('hypes').insert({ dataset_id: STATE.ds.id, user_id: uid });
       if (!a.error) { STATE.hyped = true; STATE.hypes++; }
+      else kToast(a.error.message);
     }
 
     btn.disabled = false;
@@ -893,9 +910,11 @@
     if (STATE.marked) {
       var d = await SUPA.from('bookmarks').delete().eq('dataset_id', STATE.ds.id).eq('user_id', uid);
       if (!d.error) STATE.marked = false;
+      else kToast(d.error.message);
     } else {
       var a = await SUPA.from('bookmarks').insert({ dataset_id: STATE.ds.id, user_id: uid });
       if (!a.error) STATE.marked = true;
+      else kToast(a.error.message);
     }
 
     btn.disabled = false;
