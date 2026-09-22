@@ -309,6 +309,23 @@
       document.head.appendChild(el);
     });
 
+    // A handful of pages keep a small page-specific <style> block in their
+    // own <head> instead of a separate stylesheet (e.g. purchases.html).
+    // That block lives in the <head> we never touch on a soft nav, so
+    // without this it silently vanishes until a hard refresh brings the
+    // whole document back. Copy any block this page doesn't already have.
+    var haveStyle = Array.prototype.slice.call(document.querySelectorAll('style[data-ksb-style]'))
+      .map(function (s) { return s.textContent; });
+    Array.prototype.slice.call(doc.querySelectorAll('style')).forEach(function (style) {
+      var css = style.textContent || '';
+      if (!css.trim() || haveStyle.indexOf(css) !== -1) return;
+      haveStyle.push(css);
+      var el = document.createElement('style');
+      el.setAttribute('data-ksb-style', '1');
+      el.textContent = css;
+      document.head.appendChild(el);
+    });
+
     return pending.length ? Promise.all(pending) : Promise.resolve();
   }
 
