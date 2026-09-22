@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>KOJOH | Leaderboard</title>
+<script src="theme.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="pages.css">
+<link rel="stylesheet" href="nav.css">
+<link rel="stylesheet" href="kojoh-ui.css">
+<script src="nav.js"></script>
+</head>
+<body>
+
+<header class="page-header">
+  <span class="page-title">Leaderboard</span>
+</header>
+
+<main class="page-wrap">
+  <div id="lbRoot">
+    <div class="empty-state"><div class="empty-state-icon"></div><h3>Loading&hellip;</h3><p>One moment.</p></div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="supabase-config.js"></script>
+<script src="config.js"></script>
+<script src="icons.js"></script>
+<script>
+(function(){
+  var LIVE = !!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase);
+  var SUPA = LIVE ? window.kojohSupa() : null;
+  var root = document.getElementById('lbRoot');
+
+  function esc(s){
+    return String(s === null || s === undefined ? '' : s)
+      .replace(/[<>&"]/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]; });
+  }
+  function empty(icon, title, body){
+    root.innerHTML = '<div class="empty-state"><div class="empty-state-icon">' + icon + '</div><h3>' + esc(title) + '</h3><p>' + body + '</p></div>';
+  }
+  function nf(n){ return Number(n || 0).toLocaleString('en-IN'); }
+
+  var MEDAL = {
+    1: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M8.7 13.3 7 22l5-3 5 3-1.7-8.7"/></svg>',
+    2: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M8.7 13.3 7 22l5-3 5 3-1.7-8.7"/></svg>',
+    3: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M8.7 13.3 7 22l5-3 5 3-1.7-8.7"/></svg>'
+  };
+
+  async function load(){
+    if (!LIVE) { empty(kIcon('plug'), 'Preview mode', 'Connect Supabase to view the leaderboard.'); return; }
+
+    var sessRes = await SUPA.auth.getSession();
+    var session = sessRes.data && sessRes.data.session;
+    var myId = session && session.user.id;
+
+    var res = await SUPA.rpc('leaderboard', { p_limit: 100 });
+    if (res.error) { empty(kIcon('alert'), 'Could not load', esc(res.error.message)); return; }
+    var rows = res.data || [];
+
+    var html = '';
+    html += '<div class="page-lead"><h1>Global leaderboard</h1>'
+      + '<p>Points your challenge submissions earn once our team reviews the GitHub repo and the LinkedIn post you '
+      + 'sent in. Totals are added up across every dataset you\'ve worked.</p></div>';
+
+    if (!rows.length) {
+      html += '<div class="page-card"><p class="k-sub" style="margin:0;">No points on the board yet. '
+        + 'Finish a challenge, submit your links, and be the first.</p></div>';
+      root.innerHTML = html;
+      return;
+    }
+
+    html += '<div class="page-card">';
+    rows.forEach(function(r){
+      var mine = myId && r.user_id === myId;
+      var rankMark = MEDAL[r.rank] ? '<span class="lb-rank-top">' + MEDAL[r.rank] + '</span>' : nf(r.rank);
+      html += '<div class="lb-row' + (mine ? ' lb-me' : '') + '">'
+        + '<span class="lb-rank">' + rankMark + '</span>'
+        + '<span><span class="lb-name">' + esc(r.username || 'A KOJOH builder') + (mine ? ' (you)' : '') + '</span>'
+        + '<div class="lb-sub">' + nf(r.challenges_completed) + ' challenge' + (r.challenges_completed === 1 ? '' : 's') + ' scored</div></span>'
+        + '<span><span class="lb-pts">' + nf(r.total_points) + '</span><div class="lb-pts-sub">points</div></span>'
+        + '</div>';
+    });
+    html += '</div>';
+
+    root.innerHTML = html;
+  }
+
+  window.kReady(load);
+})();
+</script>
+</body>
+</html>

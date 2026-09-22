@@ -12,7 +12,8 @@
       { href: 'search.html', label: 'Search datasets', icon: 'search' },
       { href: 'recommendations.html', label: 'Recommended', icon: 'star' },
       { href: 'saved.html', label: 'Saved datasets', icon: 'bookmark' },
-      { href: 'purchases.html', label: 'Your purchases', icon: 'bag' }
+      { href: 'purchases.html', label: 'Your purchases', icon: 'bag' },
+      { href: 'leaderboard.html', label: 'Leaderboard', icon: 'trophy' }
     ]},
     { group: 'MORE', items: [
       { href: 'settings.html', label: 'Settings', icon: 'gear' },
@@ -32,6 +33,7 @@
     info: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
     help: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
     bulb: '<path d="M12 2 2 22h20L12 2z"/><line x1="12" y1="9" x2="12" y2="14"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+    trophy: '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 5H4a2 2 0 0 0 0 4h1M17 5h3a2 2 0 0 1 0 4h-1"/>',
     chevronLeft: '<polyline points="15 18 9 12 15 6"/>'
   };
 

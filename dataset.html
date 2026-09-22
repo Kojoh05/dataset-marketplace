@@ -123,7 +123,8 @@
   var STATE = {
     ds:null, session:null, lic:null, tags:[], schema:[],
     csvRows:null, page:0, pageSize:500,
-    hypes:0, hyped:false, marked:false, tab:'data', typed:false
+    hypes:0, hyped:false, marked:false, tab:'data', typed:false,
+    submission:null
   };
 
   // Tools we recognise from a dataset tag, and what each one is for here.
@@ -195,9 +196,15 @@
 
     if (STATE.session) {
       var licRes = await SUPA.from('dataset_licenses')
-        .select('license_code, tier, task_pack')
+        .select('id, license_code, tier, task_pack')
         .eq('dataset_id', STATE.ds.id).eq('claimed_by', STATE.session.user.id).maybeSingle();
       if (!licRes.error) STATE.lic = licRes.data;
+
+      if (STATE.lic) {
+        var subRes = await SUPA.from('challenge_submissions')
+          .select('*').eq('license_id', STATE.lic.id).maybeSingle();
+        if (!subRes.error) STATE.submission = subRes.data;
+      }
     }
 
     var tagsRes = await SUPA.from('dataset_tags').select('tags(name)').eq('dataset_id', STATE.ds.id);
@@ -453,6 +460,8 @@
       +  '<div class="chal-progress-bar"><div class="chal-progress-fill" id="dsProgFill"></div></div>'
       +  '<p id="dsProgLabel" style="margin-top:0.5rem;">' + checked + ' / ' + all.length + ' tasks checked off</p></div>';
 
+    var frozen = !!STATE.submission;
+
     (pack.phases || []).forEach(function(p){
       var tools = phaseTools(p);
       h += '<div class="page-card"><h2>' + esc(p.title) + '</h2>';
@@ -461,22 +470,66 @@
         tools.forEach(function(t){ h += '<span class="k-ptool">' + esc(t) + '</span>'; });
         h += '</div>';
       }
-      h += '<div class="chal-phase-tasks">' + taskRows(p.tasks || [], done) + '</div></div>';
+      h += '<div class="chal-phase-tasks">' + taskRows(p.tasks || [], done, frozen) + '</div></div>';
     });
 
     if (pack.premium && pack.premium.length) {
       h += '<div class="page-card k-card-brand"><h2>Premium bonus, 5 hard challenges</h2>'
-        +  '<div class="chal-phase-tasks">' + taskRows(pack.premium, done) + '</div></div>';
+        +  '<div class="chal-phase-tasks">' + taskRows(pack.premium, done, frozen) + '</div></div>';
     }
+
+    h += submitPanel(all, checked, frozen);
 
     return h;
   }
 
-  function taskRows(tasks, done){
+  // Github link + LinkedIn link + submit, or the frozen result once sent.
+  function submitPanel(all, checked, frozen){
+    var s = STATE.submission;
+
+    if (frozen) {
+      var statusOn = s.status === 'reviewed';
+      var h = '<div class="page-card k-noprint"><h2>Your submission</h2>';
+      h += '<div class="chal-frozen">';
+      h += '<div class="chal-frozen-head">' + icon(I_LOCK, 15)
+        + '<span>Submitted, ' + esc(all.length) + ' / ' + esc(all.length) + ' tasks</span>'
+        + '<span class="chal-status' + (statusOn ? ' chal-status-reviewed' : '') + '" style="margin-left:auto;">'
+        + (statusOn ? 'Reviewed' : 'Pending review') + '</span></div>';
+      h += '<p class="chal-frozen-row">GitHub repo, <a href="' + esc(s.github_url) + '" target="_blank" rel="noopener">' + esc(s.github_url) + '</a></p>';
+      h += '<p class="chal-frozen-row">LinkedIn post, <a href="' + esc(s.linkedin_url) + '" target="_blank" rel="noopener">' + esc(s.linkedin_url) + '</a></p>';
+      h += '<p class="chal-frozen-row">Submitted ' + esc(new Date(s.submitted_at).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'})) + '.</p>';
+      if (statusOn) {
+        h += '<p class="chal-frozen-row">Points awarded, <span class="chal-points">' + esc(s.points == null ? 0 : s.points) + '</span>'
+          + ' &nbsp; <a href="leaderboard.html">See the leaderboard</a></p>';
+      } else {
+        h += '<p class="chal-frozen-row k-sub" style="margin:0.5rem 0 0;">Our team checks your repo and post and awards points from here, '
+          + 'no need to do anything else. This page is now locked to how it was when you submitted.</p>';
+      }
+      h += '</div></div>';
+      return h;
+    }
+
+    var allDone = all.length > 0 && checked === all.length;
+    var h = '<div class="page-card k-noprint" id="dsSubmitCard"><h2>Submit for review</h2>'
+      + '<p class="k-sub">Once every task above is ticked, drop your GitHub repo and your LinkedIn post here and submit. '
+      + 'Our team reviews the work and awards points, which land on the global leaderboard. '
+      + 'Submitting freezes this page, so make sure both links are final.</p>'
+      + '<div class="chal-submit-field"><label class="chal-submit-label" for="dsSubGithub">GitHub repo link</label>'
+      + '<input class="chal-submit-input" type="url" id="dsSubGithub" placeholder="https://github.com/you/project" autocomplete="off"></div>'
+      + '<div class="chal-submit-field"><label class="chal-submit-label" for="dsSubLinkedin">LinkedIn post link</label>'
+      + '<input class="chal-submit-input" type="url" id="dsSubLinkedin" placeholder="https://www.linkedin.com/posts/..." autocomplete="off"></div>'
+      + '<button class="k-btn k-btn-brand" id="dsSubmitChal" type="button"' + (allDone ? '' : ' disabled') + '>Submit challenge</button>'
+      + '<p class="chal-submit-gate" id="dsSubGate"' + (allDone ? ' hidden' : '') + '>Tick off every task above to unlock submitting.</p>'
+      + '<p class="chal-submit-err" id="dsSubErr" hidden></p>'
+      + '</div>';
+    return h;
+  }
+
+  function taskRows(tasks, done, frozen){
     return tasks.map(function(t){
       var on = !!done[t.id];
       return '<label class="chal-task' + (on ? ' done' : '') + '" data-task="' + esc(t.id) + '">'
-        + '<input type="checkbox" class="chal-task-check"' + (on ? ' checked' : '') + '>'
+        + '<input type="checkbox" class="chal-task-check"' + (on ? ' checked' : '') + (frozen ? ' disabled' : '') + '>'
         + '<span class="chal-task-body"><span class="chal-task-id">' + esc(t.id) + '</span>'
         + inlineCode(t.text) + '</span></label>';
     }).join('');
@@ -677,7 +730,7 @@
     if (pr) pr.addEventListener('click', function(){ window.print(); });
 
     var panel = document.getElementById('panel-challenge');
-    if (panel && STATE.lic) {
+    if (panel && STATE.lic && !STATE.submission) {
       panel.addEventListener('change', function(e){
         if (!e.target.classList.contains('chal-task-check')) return;
         var row = e.target.closest('.chal-task');
@@ -689,6 +742,9 @@
       });
       updateProgress(loadProgress());
     }
+
+    var sc = document.getElementById('dsSubmitChal');
+    if (sc) sc.addEventListener('click', onSubmitChallenge);
   }
 
   function updateProgress(done){
@@ -698,6 +754,71 @@
     var label = document.getElementById('dsProgLabel');
     if (fill) fill.style.width = (all.length ? (100 * n / all.length) : 0) + '%';
     if (label) label.textContent = n + ' / ' + all.length + ' tasks checked off';
+    var allDone = all.length > 0 && n === all.length;
+    var btn = document.getElementById('dsSubmitChal');
+    if (btn) btn.disabled = !allDone;
+    var gate = document.getElementById('dsSubGate');
+    if (gate) gate.hidden = allDone;
+  }
+
+  // ---------------------------------------------------------------- challenge submit
+  function isGithubUrl(v){ return /^https:\/\/(www\.)?github\.com\/[^\s/]+\/[^\s/]+/i.test(String(v || '').trim()); }
+  function isLinkedinUrl(v){ return /^https:\/\/([a-z]{2,3}\.)?linkedin\.com\/.+/i.test(String(v || '').trim()); }
+
+  async function onSubmitChallenge(){
+    var btn = document.getElementById('dsSubmitChal');
+    var err = document.getElementById('dsSubErr');
+    var gh = document.getElementById('dsSubGithub').value.trim();
+    var li = document.getElementById('dsSubLinkedin').value.trim();
+    err.hidden = true;
+
+    var all = allTasks();
+    var done = loadProgress();
+    var n = all.filter(function(t){ return done[t.id]; }).length;
+    if (!(all.length && n === all.length)) {
+      err.textContent = 'Tick off every task before submitting.';
+      err.hidden = false;
+      return;
+    }
+    if (!isGithubUrl(gh)) {
+      err.textContent = 'That doesn\'t look like a GitHub repo link, it should look like https://github.com/you/project.';
+      err.hidden = false;
+      return;
+    }
+    if (!isLinkedinUrl(li)) {
+      err.textContent = 'That doesn\'t look like a LinkedIn link, it should look like https://www.linkedin.com/posts/...';
+      err.hidden = false;
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="k-spin"></span>Submitting';
+
+    var row = {
+      license_id: STATE.lic.id,
+      dataset_id: STATE.ds.id,
+      user_id: STATE.session.user.id,
+      license_code: STATE.lic.license_code,
+      tasks_total: all.length,
+      tasks_done: n,
+      tasks_snapshot: done,
+      github_url: gh,
+      linkedin_url: li
+    };
+
+    var res = await SUPA.from('challenge_submissions').insert(row).select().maybeSingle();
+    if (res.error) {
+      btn.disabled = false;
+      btn.textContent = 'Submit challenge';
+      err.textContent = /duplicate|unique/i.test(res.error.message)
+        ? 'This license has already been submitted.'
+        : res.error.message;
+      err.hidden = false;
+      return;
+    }
+
+    STATE.submission = res.data;
+    render();
   }
 
   function typeTitle(){
@@ -871,7 +992,7 @@
     }
 
     var licRes = await SUPA.from('dataset_licenses')
-      .select('license_code, tier, task_pack')
+      .select('id, license_code, tier, task_pack')
       .eq('dataset_id', STATE.ds.id).eq('claimed_by', STATE.session.user.id).maybeSingle();
 
     if (licRes.error || !licRes.data) {
@@ -880,6 +1001,7 @@
       note.innerHTML = '<span class="k-err">Unlocked, but the license did not come back. Reload the page.</span>';
       return;
     }
+    STATE.submission = null;
 
     STATE.lic = licRes.data;
     btn.disabled = false;

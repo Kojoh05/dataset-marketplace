@@ -492,6 +492,51 @@
 }
 .chal-badge.premium{background:var(--brand); color:#FFFFFF; border-color:var(--brand);}
 
+/* ------------------------------------------------------------ challenge submit */
+.chal-submit-field{margin-bottom:0.9rem;}
+.chal-submit-label{display:block; font-size:0.8125rem; font-weight:600; margin-bottom:0.35rem;}
+.chal-submit-input{
+  width:100%; font-family:inherit; font-size:0.875rem; padding:0.65rem 0.8rem;
+  border-radius:0.6rem; border:1px solid var(--line); background:var(--bg); color:var(--text);
+}
+.chal-submit-input:focus{outline:2px solid var(--brand); outline-offset:-1px;}
+.chal-submit-gate{font-size:0.75rem; color:var(--muted); margin-top:0.6rem;}
+.chal-submit-err{font-size:0.8125rem; color:#B3261E; margin-top:0.7rem;}
+.chal-frozen{
+  border:1px solid var(--brand-line); background:var(--brand-soft); border-radius:0.75rem;
+  padding:1rem 1.1rem;
+}
+.chal-frozen-head{display:flex; align-items:center; gap:0.5rem; font-weight:700; margin-bottom:0.5rem;}
+.chal-frozen-head svg{flex-shrink:0;}
+.chal-frozen-row{font-size:0.8125rem; margin:0.35rem 0; word-break:break-all;}
+.chal-frozen-row a{color:var(--text);}
+.chal-status{
+  display:inline-block; font-size:0.75rem; font-weight:600; padding:0.2rem 0.65rem;
+  border-radius:999px; border:1px solid var(--line); background:var(--bg); white-space:nowrap;
+}
+.chal-status-reviewed{background:var(--brand); border-color:var(--brand); color:#FFFFFF;}
+.chal-points{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.15rem;}
+
+/* ------------------------------------------------------------ leaderboard */
+.lb-row{
+  display:grid; grid-template-columns:2.4rem 1fr auto; align-items:center; gap:0.9rem;
+  padding:0.75rem 0.4rem; border-bottom:1px solid var(--line);
+}
+.lb-row:last-child{border-bottom:none;}
+.lb-row.lb-me{background:var(--brand-soft); border-radius:0.6rem; padding-left:0.7rem; padding-right:0.7rem;}
+.lb-rank{
+  font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1rem; color:var(--muted);
+  text-align:center;
+}
+.lb-rank-top{
+  width:1.9rem; height:1.9rem; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  background:var(--brand); color:#FFFFFF; margin:0 auto;
+}
+.lb-name{font-weight:600; font-size:0.9375rem; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.lb-sub{font-size:0.75rem; color:var(--muted); margin-top:1px;}
+.lb-pts{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.05rem; text-align:right; white-space:nowrap;}
+.lb-pts-sub{font-size:0.6875rem; color:var(--muted); text-align:right; font-weight:400;}
+
 /* ------------------------------------------------------------ page jump */
 .k-pagejump{display:inline-flex; align-items:center; gap:0.4rem; font-size:0.75rem; color:var(--muted);}
 .k-pageinput{
