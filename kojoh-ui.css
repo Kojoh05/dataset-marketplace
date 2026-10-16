@@ -913,3 +913,20 @@ h2.chal-phase-head{display:flex; align-items:center; justify-content:space-betwe
   code{background:#F1F1F1 !important; color:#000000 !important;}
 }
 .k-printonly{display:none;}
+
+
+/* ------------------------------------------------------------ character art */
+.k-dscard-artwrap, .k-art-banner{
+  background:#fff; border:1px solid var(--line); border-radius:calc(var(--radius) - 4px); overflow:hidden;
+}
+.k-dscard-artwrap{margin:-0.2rem -0.2rem 0.1rem;}
+.k-dscard-art, .k-art-banner-img{display:block; width:100%; height:auto; aspect-ratio:3/2; object-fit:cover;}
+.k-art-banner{margin:0 0 1.5rem;}
+.k-art-banner-img{aspect-ratio:3/1; object-position:center 40%;}
+@media (max-width:640px){ .k-art-banner-img{aspect-ratio:3/2;} }
+.k-artask{position:fixed; inset:0; z-index:1000; display:flex; align-items:center; justify-content:center; padding:1rem; background:rgba(0,0,0,0.55);}
+.k-artask-box{max-width:24rem; width:100%; padding:1.5rem; border-radius:var(--radius); background:var(--card); border:1px solid var(--line); text-align:center;}
+.k-artask-box h2{margin:0 0 0.5rem; font-size:1.2rem;}
+.k-artask-box p{margin:0 0 1rem; color:var(--muted); font-size:0.9rem; line-height:1.6;}
+.k-artask-row{display:flex; gap:0.6rem; justify-content:center; margin-bottom:0.8rem;}
+.k-artask-skip{background:none; border:0; color:var(--muted); font-size:0.8rem; cursor:pointer; text-decoration:underline;}

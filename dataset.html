@@ -312,6 +312,8 @@
     var preview = ds.preview_rows || null;
     var main = '', aside = '';
 
+    var artImg = window.kojohArtImg(ds, 'k-art-banner-img');
+    if (artImg) main += '<div class="k-art-banner">' + artImg + '</div>';
     main += buildHero(preview);
     main += '<div class="page-card k-card-soft"><h2>The story</h2>' + paragraphs(ds.long_description) + '</div>';
 

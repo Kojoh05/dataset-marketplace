@@ -87,7 +87,7 @@
     if (!s.data.session) { empty(kIcon('lock'), 'Sign in required', 'Please <a href="auth.html">log in</a> to see your saved datasets.'); return; }
     UID = s.data.session.user.id;
     var r = await Promise.all([
-      SUPA.from('bookmarks').select('dataset_id, created_at, datasets(id, title, short_description, slug, price, is_free, difficulty, preview_rows)').order('created_at', { ascending: false }),
+      SUPA.from('bookmarks').select('dataset_id, created_at, datasets(id, title, short_description, slug, price, is_free, difficulty, preview_rows, art_boy_url, art_girl_url)').order('created_at', { ascending: false }),
       window.kojohOwned(),
       window.kojohShelf()
     ]);

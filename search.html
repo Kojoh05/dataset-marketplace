@@ -155,7 +155,7 @@
     results.innerHTML = window.kojohSkeleton('list');
     if (!LIVE) { run(q); return; }
     Promise.all([
-      SUPA.from('datasets').select('id, slug, title, short_description, price, is_free, difficulty, preview_rows, created_at').order('created_at', { ascending:false }),
+      SUPA.from('datasets').select('id, slug, title, short_description, price, is_free, difficulty, preview_rows, created_at, art_boy_url, art_girl_url').order('created_at', { ascending:false }),
       window.kojohOwned(),
       window.kojohShelf()
     ]).then(function(r){

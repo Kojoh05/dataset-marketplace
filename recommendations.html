@@ -61,7 +61,7 @@
     subEl.innerHTML = 'Based on your tracks: <strong>' + escape(jobs.join(', ')) + '</strong>. <a href="settings.html#profile">Change them</a>';
 
     var jobIds = (pjt.data || []).map(function(r){ return r.job_title_id; });
-    var djt = await SUPA.from('dataset_job_titles').select('dataset_id, datasets(id, title, short_description, price, is_free, difficulty, preview_rows, slug)').in('job_title_id', jobIds);
+    var djt = await SUPA.from('dataset_job_titles').select('dataset_id, datasets(id, title, short_description, price, is_free, difficulty, preview_rows, slug, art_boy_url, art_girl_url)').in('job_title_id', jobIds);
     if (djt.error) { empty(kIcon('alert'), 'Could not load datasets', djt.error.message); return; }
 
     var seen = {};

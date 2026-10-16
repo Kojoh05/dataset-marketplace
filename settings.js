@@ -28,6 +28,10 @@ async function loadUser(){
   var pr = await SUPA.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
   currentProfile = pr.data || null;
   if (currentProfile) $('settingsUsername').value = currentProfile.username || '';
+  if (currentProfile && currentProfile.gender === 'other') {
+    var cs = $('character'); if (cs) cs.hidden = false;
+    markArt(currentProfile.art_pref === 'girl' ? 'girl' : (currentProfile.art_pref === 'boy' ? 'boy' : (window.kojohArt ? window.kojohArt() : 'boy')));
+  }
   $('settingsEmail').placeholder = currentUser.email || 'new@example.com';
 }
 
@@ -149,3 +153,10 @@ $('passwordForm').addEventListener('submit', async function(e){
 });
 
 window.kReady(loadUser);
+
+function markArt(who){
+  document.querySelectorAll('[data-art-pick]').forEach(function(b){
+    b.classList.toggle('active', b.getAttribute('data-art-pick') === who);
+  });
+}
+function pickArt(who){ markArt(who); if (window.kojohSetArt) window.kojohSetArt(who); }

@@ -1,5 +1,5 @@
 // KOJOH global config
-window.KOJOH_VERSION = '0.3.0';
+window.KOJOH_VERSION = '0.3.1';
 
 // ---------------------------------------------------------------------------
 // One shared Supabase client, so pages stop spinning up duplicates.
@@ -156,6 +156,8 @@ window.kojohDsCard = function(d, opts){
   var pv = d.preview_rows || null;
   var diff = d.difficulty ? d.difficulty.charAt(0).toUpperCase() + d.difficulty.slice(1) : '';
   var h = '<a class="k-dscard' + (opts.reveal ? ' k-reveal' : '') + '" href="dataset.html?slug=' + encodeURIComponent(d.slug) + '">';
+  var art = window.kojohArtImg(d, 'k-dscard-art');
+  if (art) h += '<div class="k-dscard-artwrap">' + art + '</div>';
   h += '<div class="k-dscard-top">';
   if (opts.owned) h += '<span class="k-dscard-flag k-dscard-flag-owned">Owned</span>';
   if (diff) h += '<span class="k-chip k-chip-brand">' + esc(diff) + '</span>';
@@ -243,3 +245,89 @@ window.kojohLinkCheck = function(input, kind){
   input.addEventListener('input', function(){ check(false); });
   input.addEventListener('blur', function(){ check(true); });
 };
+
+
+// ---------------------------------------------------------------------------
+// Gender-aware character art. Male sees the boy, female sees the girl, and
+// "other" picks once (stored on profiles.art_pref). Guests see the boy.
+// ---------------------------------------------------------------------------
+(function(){
+  var KEY = 'kojoh-art';
+  function lsGet(){ try { return localStorage.getItem(KEY); } catch(e){ return null; } }
+  function lsSet(v){ try { if (v) localStorage.setItem(KEY, v); else localStorage.removeItem(KEY); } catch(e){} }
+  var esc = function(s){ return window.kojohEsc ? window.kojohEsc(s) : String(s == null ? '' : s); };
+
+  window.kojohArt = function(){ return lsGet() === 'girl' ? 'girl' : 'boy'; };
+  window.kojohArtUrl = function(d, who){
+    who = who || window.kojohArt();
+    return (who === 'girl' ? d.art_girl_url : d.art_boy_url) || d.art_boy_url || d.art_girl_url || '';
+  };
+  window.kojohArtImg = function(d, cls){
+    if (!d || (!d.art_boy_url && !d.art_girl_url)) return '';
+    return '<img class="' + cls + '" data-art data-boy="' + esc(d.art_boy_url || '') + '" data-girl="' + esc(d.art_girl_url || '')
+      + '" src="' + esc(window.kojohArtUrl(d)) + '" alt="" loading="lazy">';
+  };
+  window.kojohApplyArt = function(){
+    var who = window.kojohArt();
+    Array.prototype.forEach.call(document.querySelectorAll('img[data-art]'), function(im){
+      var u = im.getAttribute(who === 'girl' ? 'data-girl' : 'data-boy') || im.getAttribute('data-boy') || im.getAttribute('data-girl');
+      if (u && im.getAttribute('src') !== u) im.setAttribute('src', u);
+    });
+  };
+  // Save a choice: always locally, and on the profile when signed in.
+  window.kojohSetArt = function(who){
+    who = who === 'girl' ? 'girl' : 'boy';
+    lsSet(who);
+    window.kojohApplyArt();
+    var s = window.kojohSupa && window.kojohSupa();
+    if (!s) return Promise.resolve();
+    return s.auth.getSession().then(function(r){
+      var u = r.data && r.data.session && r.data.session.user;
+      if (!u) return;
+      return s.from('profiles').update({ art_pref: who }).eq('id', u.id);
+    }).catch(function(){});
+  };
+
+  function chooser(){
+    if (document.getElementById('kArtAsk')) return;
+    try { if (sessionStorage.getItem('kojoh-art-skip')) return; } catch(e){}
+    var d = document.createElement('div');
+    d.id = 'kArtAsk'; d.className = 'k-artask';
+    d.innerHTML = '<div class="k-artask-box" role="dialog" aria-modal="true" aria-labelledby="kArtAskT">'
+      + '<h2 id="kArtAskT">Pick your character</h2>'
+      + '<p>Datasets on KOJOH come with a little illustrated character. Which one would you like to see? You can change it any time in Settings.</p>'
+      + '<div class="k-artask-row"><button type="button" class="k-btn k-btn-brand" data-a="boy">Boy</button>'
+      + '<button type="button" class="k-btn k-btn-brand" data-a="girl">Girl</button></div>'
+      + '<button type="button" class="k-artask-skip" data-a="skip">Not now</button></div>';
+    document.body.appendChild(d);
+    d.addEventListener('click', function(e){
+      var a = e.target && e.target.getAttribute && e.target.getAttribute('data-a');
+      if (!a) return;
+      if (a === 'skip') { try { sessionStorage.setItem('kojoh-art-skip', '1'); } catch(x){} }
+      else window.kojohSetArt(a);
+      d.remove();
+    });
+    var first = d.querySelector('button'); if (first) first.focus();
+  }
+
+  window.kojohArtInit = function(){
+    var s = window.kojohSupa && window.kojohSupa();
+    if (!s) return Promise.resolve();
+    return s.auth.getSession().then(function(r){
+      var u = r.data && r.data.session && r.data.session.user;
+      if (!u) return;
+      return s.from('profiles').select('gender, art_pref').eq('id', u.id).maybeSingle().then(function(p){
+        if (p.error) return s.from('profiles').select('gender').eq('id', u.id).maybeSingle();
+        return p;
+      }).then(function(p){
+        var g = p && p.data && p.data.gender, pref = p && p.data && p.data.art_pref;
+        if (g === 'male') lsSet('boy');
+        else if (g === 'female') lsSet('girl');
+        else if (g === 'other') { if (pref === 'boy' || pref === 'girl') lsSet(pref); else chooser(); }
+        window.kojohApplyArt();
+      });
+    }).catch(function(){});
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', window.kojohArtInit);
+  else window.kojohArtInit();
+})();
