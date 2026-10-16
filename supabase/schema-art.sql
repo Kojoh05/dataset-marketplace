@@ -19,3 +19,9 @@ update public.datasets
    set art_boy_url  = 'assets/art/diwali-boy.webp',
        art_girl_url = 'assets/art/diwali-girl.webp'
  where slug = 'diwali-discount-trap-fy2526';
+
+-- Late Again: Last-Mile Delivery
+update public.datasets
+   set art_boy_url  = 'assets/art/lateagain-boy.webp',
+       art_girl_url = 'assets/art/lateagain-girl.webp'
+ where slug = 'late-again-last-mile-fy2526';
