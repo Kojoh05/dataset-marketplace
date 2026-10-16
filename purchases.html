@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KOJOH | Your purchases</title>
 <script src="theme.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,23 +12,6 @@
 <link rel="stylesheet" href="pages.css">
 <link rel="stylesheet" href="nav.css">
 <link rel="stylesheet" href="kojoh-ui.css">
-<style>
-  .ds-item{flex-wrap:wrap;}
-  .ds-item-actions{display:flex; align-items:center; gap:0.5rem; flex-shrink:0;}
-  .ds-item-btn{
-    font-family:inherit; font-size:0.8125rem; font-weight:600; cursor:pointer;
-    padding:0.45rem 0.85rem; border-radius:999px; border:1px solid var(--line);
-    background:var(--bg); color:var(--text); text-decoration:none; display:inline-block;
-  }
-  .ds-item-btn:hover{background:var(--card);}
-  .ds-item-btn.primary{background:var(--brand); color:#FFFFFF; border-color:var(--brand);}
-  .ds-files{
-    width:100%; margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid var(--line);
-    display:none; flex-direction:column; gap:0.4rem;
-  }
-  .ds-files.open{display:flex;}
-  .ds-files a{font-size:0.8125rem; color:var(--text);}
-</style>
 <script src="nav.js"></script>
 </head>
 <body>
@@ -51,56 +34,109 @@
 <script src="config.js"></script>
 <script src="icons.js"></script>
 <script>
+(function(){
   var LIVE = !!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase);
   var SUPA = LIVE ? window.kojohSupa() : null;
   var el = document.getElementById('purchaseResults');
+  var esc = window.kojohEsc;
+  el.innerHTML = window.kojohSkeleton('list');
 
   function empty(icon, title, body){
     el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">' + icon + '</div><h3>' + title + '</h3><p>' + body + '</p></div>';
   }
-  function escape(s){ return String(s || '').replace(/[<>&"]/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]; }); }
+  function progress(lic){
+    if (!lic || !lic.task_pack) return null;
+    var all = [];
+    (lic.task_pack.phases || []).forEach(function(p){ all = all.concat(p.tasks || []); });
+    if (lic.task_pack.premium) all = all.concat(lic.task_pack.premium);
+    var done = {};
+    try { done = JSON.parse(localStorage.getItem('kojoh-progress-' + lic.license_code) || '{}'); } catch (e) {}
+    var n = all.filter(function(t){ return done[t.id]; }).length;
+    return { n: n, total: all.length, pct: all.length ? Math.round(100 * n / all.length) : 0 };
+  }
 
-  async function toggleFiles(btn, slug, storagePath){
-    var wrap = btn.closest('.ds-item').querySelector('.ds-files');
-    var isOpen = wrap.classList.toggle('open');
-    if (!isOpen || wrap.dataset.loaded) return;
+  async function toggleFiles(btn, storagePath){
+    var wrap = btn.closest('.k-libcard').querySelector('.k-libcard-files');
+    var open = wrap.hidden;
+    wrap.hidden = !open;
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    btn.textContent = open ? 'Hide files' : 'Files';
+    if (!open || wrap.dataset.loaded) return;
     wrap.dataset.loaded = '1';
-    wrap.innerHTML = 'Loading files…';
+    wrap.innerHTML = '<p class="k-sub" style="margin:0;">Preparing your links</p>';
     var listRes = await SUPA.storage.from('datasets').list(storagePath);
     if (listRes.error || !listRes.data || !listRes.data.length) {
-      wrap.innerHTML = 'No files available yet, check back soon.';
+      wrap.innerHTML = '<p class="k-sub" style="margin:0;">No files uploaded for this one yet, check back soon.</p>';
       return;
     }
     var links = await Promise.all(listRes.data.map(async function(f){
       var signed = await SUPA.storage.from('datasets').createSignedUrl(storagePath + '/' + f.name, 3600);
       if (signed.error) return '';
-      return '<a href="' + signed.data.signedUrl + '" download>' + kIcon('folder', 14) + ' ' + escape(f.name) + '</a>';
+      var kb = f.metadata && f.metadata.size ? Math.round(f.metadata.size / 1024) : null;
+      return '<a class="k-file" href="' + signed.data.signedUrl + '" download><span class="k-file-name">' + esc(f.name) + '</span>'
+        + '<span class="k-file-meta">' + (kb ? (kb > 1024 ? (kb / 1024).toFixed(1) + ' MB' : kb + ' KB') : 'Download') + '</span></a>';
     }));
-    wrap.innerHTML = links.filter(Boolean).join('');
+    wrap.innerHTML = '<div class="k-filelist">' + links.filter(Boolean).join('') + '</div>'
+      + '<p class="k-sub k-sub-tight">Links stay valid for one hour.</p>';
   }
 
   async function load(){
     if (!LIVE) { empty(kIcon('plug'), 'Preview mode', 'Connect Supabase to see your purchases.'); return; }
     var s = await SUPA.auth.getSession();
     if (!s.data.session) { empty(kIcon('lock'), 'Sign in required', 'Please <a href="auth.html">log in</a> to see your purchases.'); return; }
-    var res = await SUPA.from('purchases').select('dataset_id, price_paid, purchased_at, datasets(title, short_description, slug, storage_path)').order('purchased_at', { ascending: false });
-    if (res.error) { empty(kIcon('alert'), 'Could not load', res.error.message); return; }
-    var rows = (res.data || []).filter(function(r){ return r.datasets; });
-    if (!rows.length) { empty(kIcon('bag'), 'No purchases yet', 'Once you buy a dataset it lives here, with your files and your personal challenge ready any time. <a href="search.html">Browse datasets</a>.'); return; }
-    el.innerHTML = '<div class="ds-list">' + rows.map(function(r, i){
-      var d = r.datasets;
-      var paid = r.price_paid ? ('₹' + r.price_paid + ' paid') : 'Free (beta)';
-      return '<div class="ds-item">'
-        + '<div class="ds-item-info"><div class="ds-item-title">' + escape(d.title) + '</div><div class="ds-item-sub">' + escape(d.short_description || '') + ' · ' + paid + '</div></div>'
-        + '<div class="ds-item-actions">'
-        +   '<a class="ds-item-btn primary" href="challenge.html?slug=' + encodeURIComponent(d.slug) + '">Open challenge</a>'
-        +   '<button class="ds-item-btn" data-slug="' + escape(d.slug) + '" data-path="' + escape(d.storage_path || d.slug) + '" onclick="toggleFiles(this, this.dataset.slug, this.dataset.path)">Files</button>'
-        + '</div>'
-        + '<div class="ds-files" id="dsFiles' + i + '"></div>'
-        + '</div>';
+    var uid = s.data.session.user.id;
+    var r = await Promise.all([
+      SUPA.from('purchases').select('dataset_id, price_paid, purchased_at, datasets(title, short_description, slug, storage_path, difficulty)').order('purchased_at', { ascending: false }),
+      SUPA.from('dataset_licenses').select('id, dataset_id, license_code, task_pack').eq('claimed_by', uid),
+      SUPA.from('challenge_submissions').select('license_id, status, points')
+    ]);
+    var res = r[0];
+    if (res.error) { empty(kIcon('alert'), 'Could not load', esc(res.error.message)); return; }
+    var lics = {}; ((r[1] && r[1].data) || []).forEach(function(l){ lics[l.dataset_id] = l; });
+    var subs = {}; ((r[2] && r[2].data) || []).forEach(function(x){ subs[x.license_id] = x; });
+    var rows = (res.data || []).filter(function(x){ return x.datasets; });
+    if (!rows.length) {
+      empty(kIcon('bag'), 'No purchases yet', 'Once you unlock a dataset it lives here, with your files and your personal challenge ready any time.'
+        + '<br><br><a class="k-btn k-btn-brand" href="search.html">Browse datasets</a>');
+      return;
+    }
+
+    el.innerHTML = '<div class="k-lib">' + rows.map(function(row){
+      var d = row.datasets;
+      var lic = lics[row.dataset_id];
+      var sub = lic ? subs[lic.id] : null;
+      var p = progress(lic);
+      var when = new Date(row.purchased_at).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+      var status = '';
+      if (sub && sub.status === 'reviewed') status = '<span class="k-dscard-flag k-dscard-flag-owned">Reviewed, ' + esc(sub.points || 0) + ' pts</span>';
+      else if (sub) status = '<span class="k-dscard-flag">Waiting on review</span>';
+      else if (p && p.total && p.n === p.total) status = '<span class="k-dscard-flag k-dscard-flag-low">Ready to submit</span>';
+      var cta = sub ? 'View submission' : (p && p.n ? 'Continue challenge' : 'Start challenge');
+
+      var h = '<article class="k-libcard"><div>';
+      h += '<h3 class="k-libcard-title"><a href="dataset.html?slug=' + encodeURIComponent(d.slug) + '">' + esc(d.title) + '</a></h3>';
+      h += '<div class="k-libcard-meta">';
+      if (d.difficulty) h += '<span class="k-chip k-chip-brand">' + esc(d.difficulty.charAt(0).toUpperCase() + d.difficulty.slice(1)) + '</span>';
+      if (lic) h += '<span class="k-chip">' + esc(lic.license_code) + '</span>';
+      h += '<span class="k-chip">' + (row.price_paid ? '&#8377;' + esc(row.price_paid) + ' paid' : 'Free (beta)') + ', ' + esc(when) + '</span>';
+      h += status + '</div>';
+      if (p && p.total && !sub) {
+        h += '<div class="k-progline"><span class="k-progline-bar" aria-hidden="true"><span style="width:' + p.pct + '%"></span></span>'
+          + '<span>' + p.n + ' of ' + p.total + ' tasks</span></div>';
+      }
+      h += '</div><div class="k-libcard-actions">';
+      h += '<a class="k-btn k-btn-brand" href="challenge.html?slug=' + encodeURIComponent(d.slug) + '">' + cta + '</a>';
+      h += '<button class="k-btn" type="button" data-path="' + esc(d.storage_path || d.slug) + '" aria-expanded="false">Files</button>';
+      h += '</div><div class="k-libcard-files" hidden></div></article>';
+      return h;
     }).join('') + '</div>';
+
+    Array.prototype.forEach.call(el.querySelectorAll('[data-path]'), function(b){
+      b.addEventListener('click', function(){ toggleFiles(b, b.getAttribute('data-path')); });
+    });
   }
   window.kReady(load);
+})();
 </script>
 </body>
 </html>

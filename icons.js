@@ -16,6 +16,8 @@
     bag: '<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>',
     target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/>',
     inbox: '<path d="M3 13h4l2 3h6l2-3h4"/><path d="M5.5 5h13l2.5 8v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5z"/>',
+    star: '<polygon points="12 2.8 14.8 8.6 21.2 9.4 16.5 13.8 17.7 20.2 12 17.1 6.3 20.2 7.5 13.8 2.8 9.4 9.2 8.6"/>',
+    trophy: '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 5H4a2 2 0 0 0 0 4h1M17 5h3a2 2 0 0 1 0 4h-1"/>',
     bookmark: '<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>',
     search: '<circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/>',
     bulb: '<path d="M9 18h6"/><path d="M10 21.5h4"/><path d="M12 2.5a6 6 0 0 0-3.5 10.9c.6.45.9 1 .9 1.6v.5h5.2v-.5c0-.6.3-1.15.9-1.6A6 6 0 0 0 12 2.5z"/>',

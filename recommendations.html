@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KOJOH | Recommended datasets</title>
 <script src="theme.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="pages.css">
 <link rel="stylesheet" href="nav.css">
+<link rel="stylesheet" href="kojoh-ui.css">
 <script src="nav.js"></script>
 </head>
 <body>
@@ -37,6 +38,7 @@
   var SUPA = LIVE ? window.kojohSupa() : null;
   var el = document.getElementById('recResults');
   var subEl = document.getElementById('recSub');
+  el.innerHTML = window.kojohSkeleton('list');
 
   function empty(icon, title, body){
     el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">' + icon + '</div><h3>' + title + '</h3><p>' + body + '</p></div>';
@@ -56,19 +58,31 @@
       empty(kIcon('target'), 'Pick your job tracks first', 'Head to <a href="settings.html#profile">settings</a> to set your interested professions. Recommendations key off those.');
       return;
     }
-    subEl.textContent = 'Based on your tracks: ' + jobs.join(', ');
+    subEl.innerHTML = 'Based on your tracks: <strong>' + escape(jobs.join(', ')) + '</strong>. <a href="settings.html#profile">Change them</a>';
 
     var jobIds = (pjt.data || []).map(function(r){ return r.job_title_id; });
-    var djt = await SUPA.from('dataset_job_titles').select('dataset_id, datasets(id, title, short_description, price, slug)').in('job_title_id', jobIds);
+    var djt = await SUPA.from('dataset_job_titles').select('dataset_id, datasets(id, title, short_description, price, is_free, difficulty, preview_rows, slug)').in('job_title_id', jobIds);
     if (djt.error) { empty(kIcon('alert'), 'Could not load datasets', djt.error.message); return; }
 
     var seen = {};
     var rows = (djt.data || []).filter(function(r){ if (!r.datasets || seen[r.datasets.id]) return false; seen[r.datasets.id] = 1; return true; });
     if (!rows.length) { empty(kIcon('inbox'), 'No datasets yet', 'No datasets have been tagged for your tracks yet. The catalog is still being seeded. Check back soon.'); return; }
-    el.innerHTML = '<div class="ds-list">' + rows.map(function(r){
-      var d = r.datasets;
-      return '<div class="ds-item"><div class="ds-item-info"><div class="ds-item-title">' + escape(d.title) + '</div><div class="ds-item-sub">' + escape(d.short_description || '') + '</div></div><div class="ds-item-meta"><span class="ds-item-price">' + (d.price ? '₹' + d.price : 'Free') + '</span></div></div>';
-    }).join('') + '</div>';
+    var extra = await Promise.all([window.kojohOwned(), window.kojohShelf()]);
+    var owned = extra[0] || {}, shelf = extra[1] || {};
+    var fresh = rows.filter(function(r){ return !owned[r.datasets.id]; });
+    var mine = rows.filter(function(r){ return owned[r.datasets.id]; });
+    var h = '';
+    if (fresh.length) {
+      h += '<div class="k-dsgrid">' + fresh.map(function(r){ return window.kojohDsCard(r.datasets, { shelf: shelf[r.datasets.id] }); }).join('') + '</div>';
+    } else {
+      h += '<div class="empty-state" style="margin-bottom:1.5rem;"><div class="empty-state-icon">' + kIcon('star') + '</div><h3>You have every match already</h3>'
+        + '<p>Nice. New projects for your tracks show up here first. <a href="search.html">Browse the whole shelf</a> in the meantime.</p></div>';
+    }
+    if (mine.length) {
+      h += '<h2 class="section-title" style="margin:2rem 0 0.9rem;font-size:1.05rem;">Already in your library</h2>';
+      h += '<div class="k-dsgrid">' + mine.map(function(r){ return window.kojohDsCard(r.datasets, { owned: true }); }).join('') + '</div>';
+    }
+    el.innerHTML = h;
   }
   window.kReady(load);
 </script>

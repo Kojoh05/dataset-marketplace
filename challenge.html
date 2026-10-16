@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KOJOH | Your challenge</title>
 <script src="theme.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,7 +22,6 @@
 
 <main class="page-wrap">
   <div id="chalRoot">
-    <div class="empty-state"><div class="empty-state-icon"></div><h3>Loading…</h3><p>One moment.</p></div>
   </div>
 </main>
 
@@ -35,6 +34,7 @@
   var LIVE = !!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase);
   var SUPA = LIVE ? window.kojohSupa() : null;
   var root = document.getElementById('chalRoot');
+  root.innerHTML = window.kojohSkeleton ? window.kojohSkeleton('page') : '';
 
   function escape(s){ return String(s || '').replace(/[<>&"]/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]; }); }
   function empty(icon, title, body){
@@ -115,6 +115,9 @@
     if (btn) btn.disabled = !allDone;
     var gate = document.getElementById('chalSubGate');
     if (gate) gate.hidden = allDone;
+    var ready = document.getElementById('chalReady');
+    if (ready) ready.classList.toggle('show', allDone && !!btn);
+    if (window.kojohPhaseCounts) window.kojohPhaseCounts(root);
   }
 
   async function load(){
@@ -150,6 +153,8 @@
     if (pack.premium) allTasks = allTasks.concat(pack.premium);
 
     var html = '';
+    html += '<nav class="k-crumbs" aria-label="Breadcrumb"><a href="purchases.html">Your library</a><span aria-hidden="true">/</span>'
+          + '<a href="dataset.html?slug=' + encodeURIComponent(ds.slug) + '">' + escape(ds.title) + '</a></nav>';
     html += '<div class="page-lead"><h1>' + escape(ds.title) + '</h1>';
     html += '<p><span class="chal-badge">' + escape(lic.license_code) + '</span>';
     html += '<span class="chal-badge' + (lic.tier === 'premium' ? ' premium' : '') + '">' + (lic.tier === 'premium' ? 'Premium' : 'Standard') + '</span></p>';
@@ -158,6 +163,8 @@
 
     html += '<div class="page-card"><h2>Your progress</h2><div class="chal-progress-bar"><div class="chal-progress-fill" id="chalProgressFill"></div></div>'
           + '<p id="chalProgressLabel" style="margin-top:0.5rem;"></p>'
+          + '<div class="chal-ready" id="chalReady"><span>Every task is ticked. Ready to send it in?</span>'
+          + '<button class="k-btn" id="chalGoSubmit" type="button">Go to submit</button></div>'
           + '<div class="k-btnrow k-noprint" style="margin-top:0.9rem;">'
           + '<button class="k-btn" id="chalPrint" type="button">Print this challenge sheet</button>'
           + '<button class="k-btn k-btn-quiet" id="chalPrintBlank" type="button">Print with every box empty</button>'
@@ -180,6 +187,18 @@
     document.getElementById('chalPrint').addEventListener('click', function(){
       window.print();
     });
+
+    var go = document.getElementById('chalGoSubmit');
+    if (go) go.addEventListener('click', function(){
+      var card = document.getElementById('chalSubmitCard');
+      if (!card) return;
+      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(function(){ var g = document.getElementById('chalSubGithub'); if (g) g.focus({ preventScroll: true }); }, 450);
+    });
+    if (window.kojohLinkCheck) {
+      window.kojohLinkCheck(document.getElementById('chalSubGithub'), 'github');
+      window.kojohLinkCheck(document.getElementById('chalSubLinkedin'), 'linkedin');
+    }
 
     var subBtn = document.getElementById('chalSubmitChal');
     if (subBtn) {
@@ -246,6 +265,17 @@
       return;
     }
 
+    // Submitting locks the page for good, so ask once more before sending.
+    if (btn.getAttribute('data-armed') !== '1') {
+      btn.setAttribute('data-armed', '1');
+      btn.textContent = 'Click again to submit and lock';
+      clearTimeout(btn._armTimer);
+      btn._armTimer = setTimeout(function(){ btn.removeAttribute('data-armed'); btn.textContent = 'Submit challenge'; }, 5000);
+      return;
+    }
+    clearTimeout(btn._armTimer);
+    btn.removeAttribute('data-armed');
+
     btn.disabled = true;
     btn.textContent = 'Submitting';
 
@@ -276,6 +306,7 @@
       return;
     }
 
+    if (window.kojohToast) window.kojohToast('Submitted. Our team will review it and award your points.');
     load();
   }
 

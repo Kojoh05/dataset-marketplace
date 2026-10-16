@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KOJOH | Leaderboard</title>
 <script src="theme.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,7 +22,6 @@
 
 <main class="page-wrap">
   <div id="lbRoot">
-    <div class="empty-state"><div class="empty-state-icon"></div><h3>Loading&hellip;</h3><p>One moment.</p></div>
   </div>
 </main>
 
@@ -35,6 +34,7 @@
   var LIVE = !!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase);
   var SUPA = LIVE ? window.kojohSupa() : null;
   var root = document.getElementById('lbRoot');
+  root.innerHTML = window.kojohSkeleton ? window.kojohSkeleton('list') : '';
 
   function esc(s){
     return String(s === null || s === undefined ? '' : s)
@@ -67,11 +67,30 @@
       + '<p>Points your challenge submissions earn once our team reviews the GitHub repo and the LinkedIn post you '
       + 'sent in. Totals are added up across every dataset you\'ve worked.</p></div>';
 
+    var how = '<div class="page-card"><h2>How points work</h2><div class="lb-how">'
+      + '<div><strong>1. Finish a challenge</strong>Tick off every task in a dataset you own.</div>'
+      + '<div><strong>2. Submit your links</strong>Your GitHub repo and the LinkedIn post about it.</div>'
+      + '<div><strong>3. Get reviewed</strong>Our team checks the work and awards points.</div></div></div>';
+
     if (!rows.length) {
-      html += '<div class="page-card"><p class="k-sub" style="margin:0;">No points on the board yet. '
-        + 'Finish a challenge, submit your links, and be the first.</p></div>';
-      root.innerHTML = html;
+      html += '<div class="empty-state" style="margin-bottom:1.25rem;"><div class="empty-state-icon">' + kIcon('trophy') + '</div>'
+        + '<h3>The board is empty, for now</h3><p>Finish a challenge, submit your links, and your name goes up first.</p>'
+        + '<div class="k-btnrow" style="justify-content:center;"><a class="k-btn k-btn-brand" href="purchases.html">Go to your library</a></div></div>';
+      root.innerHTML = html + how;
       return;
+    }
+
+    var me = myId ? rows.filter(function(r){ return r.user_id === myId; })[0] : null;
+    if (me) {
+      var above = rows.filter(function(r){ return r.rank === me.rank - 1; })[0];
+      html += '<div class="lb-me-card"><div><div class="lb-me-rank">#' + nf(me.rank) + '</div>'
+        + '<div class="lb-me-sub">' + nf(me.total_points) + ' points across ' + nf(me.challenges_completed) + ' challenge' + (me.challenges_completed === 1 ? '' : 's')
+        + (above ? ', ' + nf(above.total_points - me.total_points) + ' behind #' + nf(above.rank) : ', top of the board') + '</div></div>'
+        + '<a href="purchases.html">Climb higher &rarr;</a></div>';
+    } else if (myId) {
+      html += '<div class="lb-me-card"><div><div class="lb-me-rank" style="font-size:1.2rem;">You are not on the board yet</div>'
+        + '<div class="lb-me-sub">Submit a finished challenge to get your first points.</div></div>'
+        + '<a href="purchases.html">Your library &rarr;</a></div>';
     }
 
     html += '<div class="page-card">';
@@ -87,7 +106,7 @@
     });
     html += '</div>';
 
-    root.innerHTML = html;
+    root.innerHTML = html + how;
   }
 
   window.kReady(load);

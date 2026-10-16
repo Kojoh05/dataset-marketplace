@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KOJOH | Dataset Marketplace</title>
 <script>
 // First-time / logged-out visitors land on the welcome page first.
@@ -132,7 +132,8 @@
   <div class="search-row">
     <div class="searchbox">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7A7772" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
-      <input placeholder="Search datasets">
+      <input id="homeSearch" type="search" placeholder="Search by role, tool or topic" aria-label="Search datasets" enterkeyhint="search" autocomplete="off">
+      <kbd class="searchbox-hint">Enter</kbd>
     </div>
   </div>
 
@@ -182,36 +183,36 @@
   </div>
 
   <div class="folder-grid" id="practiceFolders" style="display:none;">
-    <a class="folder f-python" href="#categories">
+    <a class="folder f-python is-soon" href="suggestions.html">
       <div class="folder-tab"><span class="folder-count">3 levels</span></div>
       <div class="folder-body">
         <span class="folder-title">Python</span>
         <p class="folder-desc">Beginner, Intermediate, and Hard tasks on the same real dataset, solved in pandas.</p>
-        <span class="folder-link">View tracks &rarr;</span>
+        <span class="folder-link">Coming soon</span>
       </div>
     </a>
-    <a class="folder f-sql" href="#categories">
+    <a class="folder f-sql is-soon" href="suggestions.html">
       <div class="folder-tab"><span class="folder-count">3 levels</span></div>
       <div class="folder-body">
         <span class="folder-title">SQL</span>
         <p class="folder-desc">Query the same business data across three tiers, from simple filters to window functions.</p>
-        <span class="folder-link">View tracks &rarr;</span>
+        <span class="folder-link">Coming soon</span>
       </div>
     </a>
-    <a class="folder f-excel" href="#categories">
+    <a class="folder f-excel is-soon" href="suggestions.html">
       <div class="folder-tab"><span class="folder-count">3 levels</span></div>
       <div class="folder-body">
         <span class="folder-title">Excel</span>
         <p class="folder-desc">Formulas, pivot tables, and dashboards, leveled up dataset by dataset.</p>
-        <span class="folder-link">View tracks &rarr;</span>
+        <span class="folder-link">Coming soon</span>
       </div>
     </a>
-    <a class="folder f-viz" href="#categories">
+    <a class="folder f-viz is-soon" href="suggestions.html">
       <div class="folder-tab"><span class="folder-count">3 levels</span></div>
       <div class="folder-body">
         <span class="folder-title">Visualization</span>
         <p class="folder-desc">Turn the same numbers into charts and dashboards, from basics to a full data story.</p>
-        <span class="folder-link">View tracks &rarr;</span>
+        <span class="folder-link">Coming soon</span>
       </div>
     </a>
   </div>
@@ -220,23 +221,12 @@
   <div class="list-card">
     <div class="list-head">
       <h3>Recently added</h3>
-      <a href="#">View all datasets</a>
+      <a href="search.html">Browse every dataset &rarr;</a>
     </div>
     <div class="list-cols"><span>Dataset</span><span>Folder</span><span>Price</span></div>
-    <div class="list-row">
-      <div><div class="ds-name">UPI transaction fraud</div><div class="ds-cat">Synthetic, India fintech</div></div>
-      <span class="ds-cat">Data analyst</span>
-      <span class="ds-price">₹99</span>
-    </div>
-    <div class="list-row">
-      <div><div class="ds-name">21-script logistics pipeline</div><div class="ds-cat">Multi-source, needs ETL</div></div>
-      <span class="ds-cat">Data engineer</span>
-      <span class="ds-price">₹149</span>
-    </div>
-    <div class="list-row">
-      <div><div class="ds-name">A/B test, contradictory results</div><div class="ds-cat">Free</div></div>
-      <span class="ds-cat">Product analyst</span>
-      <span class="ds-price">₹0</span>
+    <div id="recentList">
+      <div class="list-row"><div><div class="k-skel k-skel-line" style="width:70%"></div><div class="k-skel k-skel-line" style="width:40%"></div></div><span class="k-skel k-skel-line" style="width:60%"></span><span class="k-skel k-skel-line" style="width:50%"></span></div>
+      <div class="list-row"><div><div class="k-skel k-skel-line" style="width:62%"></div><div class="k-skel k-skel-line" style="width:35%"></div></div><span class="k-skel k-skel-line" style="width:55%"></span><span class="k-skel k-skel-line" style="width:45%"></span></div>
     </div>
   </div>
 </div>
@@ -323,6 +313,51 @@
 <script src="profile.js"></script>
 <script src="script.js"></script>
 <script>
+// Home search goes to the search page with the query filled in.
+(function(){
+  var box = document.getElementById('homeSearch');
+  if (!box) return;
+  box.addEventListener('keydown', function(e){
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    var q = box.value.trim();
+    var url = 'search.html' + (q ? '?q=' + encodeURIComponent(q) : '');
+    if (window.kojohSoftNav) window.kojohSoftNav(url); else window.location.href = url;
+  });
+})();
+
+// Recently added, read live from the catalogue.
+(function(){
+  var host = document.getElementById('recentList');
+  if (!host) return;
+  if (!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase)) { host.innerHTML = ''; return; }
+  var SUPA = window.kojohSupa();
+  var esc = window.kojohEsc;
+  Promise.all([
+    SUPA.from('datasets').select('slug, title, short_description, price, is_free, difficulty, created_at, folder_id').order('created_at', { ascending:false }).limit(5),
+    SUPA.from('folders').select('id, title')
+  ]).then(function(r){
+    var rows = (r[0] && r[0].data) || [];
+    var folders = {};
+    ((r[1] && r[1].data) || []).forEach(function(f){ folders[f.id] = f.title; });
+    if (!rows.length) {
+      host.innerHTML = '<div class="list-row"><span class="ds-cat">New datasets land here as soon as they are published.</span></div>';
+      return;
+    }
+    host.innerHTML = rows.map(function(d){
+      var diff = d.difficulty ? d.difficulty.charAt(0).toUpperCase() + d.difficulty.slice(1) : '';
+      var age = Math.floor((Date.now() - new Date(d.created_at).getTime()) / 86400000);
+      var fresh = age <= 14 ? '<span class="list-new">New</span>' : '';
+      return '<a class="list-row list-link" href="dataset.html?slug=' + encodeURIComponent(d.slug) + '">'
+        + '<div><div class="ds-name">' + esc(d.title) + fresh + '</div>'
+        + '<div class="ds-cat">' + esc(diff) + (diff ? ' &#183; ' : '') + esc(String(d.short_description || '').slice(0, 70)) + (String(d.short_description || '').length > 70 ? '&#8230;' : '') + '</div></div>'
+        + '<span class="ds-cat">' + esc(folders[d.folder_id] || '') + '</span>'
+        + '<span class="ds-price">' + window.kojohMoney(d) + '</span></a>';
+    }).join('');
+  }, function(){ host.innerHTML = ''; });
+})();
+</script>
+<script>
 // Live folder counts, replaces the hardcoded numbers on the folder cards.
 (function(){
   if (!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase)) return;
@@ -342,7 +377,14 @@
       var el = card.querySelector('.folder-count');
       if (!el) return;
       var n = bySlug[slug];
-      if (!n) { el.textContent = 'Coming soon'; return; }
+      if (!n) {
+        el.textContent = 'Coming soon';
+        card.classList.add('is-soon');
+        card.setAttribute('href', 'suggestions.html');
+        var lk = card.querySelector('.folder-link');
+        if (lk) lk.textContent = 'Coming soon, tell us what you need';
+        return;
+      }
       el.textContent = n + (n === 1 ? ' dataset' : ' datasets');
       if (card.getAttribute('href') === '#categories') {
         card.setAttribute('href', 'folder.html?slug=' + encodeURIComponent(slug));

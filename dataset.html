@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KOJOH | Dataset</title>
 <script src="theme.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,7 +22,6 @@
 
 <main class="page-wrap ds-wide">
   <div id="dsRoot">
-    <div class="empty-state"><div class="empty-state-icon"></div><h3>Loading</h3><p>One moment.</p></div>
   </div>
 </main>
 
@@ -118,13 +117,14 @@
   var LIVE = !!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase);
   var SUPA = LIVE ? window.kojohSupa() : null;
   var root = document.getElementById('dsRoot');
+  root.innerHTML = window.kojohSkeleton ? window.kojohSkeleton('page') : '';
 
   var FREE_COLUMNS = 6;
   var STATE = {
     ds:null, session:null, lic:null, tags:[], schema:[],
     csvRows:null, page:0, pageSize:500,
     hypes:0, hyped:false, marked:false, tab:'data', typed:false,
-    submission:null
+    submission:null, shelf:null, folder:null
   };
 
   // Tools we recognise from a dataset tag, and what each one is for here.
@@ -152,6 +152,7 @@
   // A quiet, transient error notice, so a failed hype/bookmark/etc. doesn't
   // just silently snap back with no explanation of why.
   function kToast(msg){
+    if (window.kojohToast) { window.kojohToast(msg, { kind:'error' }); return; }
     var wrap = document.querySelector('.k-toasts');
     if (!wrap) {
       wrap = document.createElement('div');
@@ -229,7 +230,13 @@
       .select('column_name, description').eq('dataset_id', STATE.ds.id).order('sort_order');
     STATE.schema = schemaRes.data || [];
 
-    await loadSocial();
+    var extra = await Promise.all([
+      STATE.ds.folder_id ? SUPA.from('folders').select('title, slug').eq('id', STATE.ds.folder_id).maybeSingle() : Promise.resolve({}),
+      window.kojohShelf ? window.kojohShelf() : Promise.resolve({}),
+      loadSocial()
+    ]);
+    STATE.folder = (extra[0] && extra[0].data) || null;
+    STATE.shelf = (extra[1] || {})[STATE.ds.id] || null;
     render();
   }
 
@@ -255,6 +262,10 @@
     var ds = STATE.ds;
     var owned = !!STATE.lic;
     var html = '';
+
+    html += '<nav class="k-crumbs" aria-label="Breadcrumb"><a href="index.html#categories">Folders</a>';
+    if (STATE.folder) html += '<span aria-hidden="true">/</span><a href="folder.html?slug=' + encodeURIComponent(STATE.folder.slug) + '">' + esc(STATE.folder.title) + '</a>';
+    html += '</nav>';
 
     // one title, typed in on the first render only
     html += '<div class="k-dshead">';
@@ -285,6 +296,7 @@
 
     root.innerHTML = html;
     wire();
+    stickyCta();
   }
 
   function tabBtn(key, label, locked){
@@ -333,6 +345,7 @@
     }
 
     var tools = toolsFor(STATE.tags);
+    aside += owned ? ownedCard() : buyCard();
     aside += '<div class="k-asidecard"><h3>At a glance</h3>';
     if (ds.difficulty) aside += fact('Difficulty', esc(cap(ds.difficulty)));
     if (preview && preview.total_rows) {
@@ -360,6 +373,92 @@
     }
 
     return '<div class="k-split"><div>' + main + '</div><aside class="k-aside">' + aside + '</aside></div>';
+  }
+
+
+  // ---------------------------------------------------------------- buy / owned cards
+  var I_CHECK = '<path d="M20 6L9 17l-5-5"/>';
+
+  function stockLine(){
+    var sh = STATE.shelf;
+    if (!sh || !sh.licenses_total) return '';
+    var pct = Math.max(0, Math.min(100, 100 * sh.licenses_left / sh.licenses_total));
+    var low = pct <= 20;
+    return '<div class="k-buy-stock' + (low ? ' low' : '') + '"><span>' + nf(sh.licenses_left) + ' of ' + nf(sh.licenses_total) + ' licenses left</span>'
+      + '<span class="k-buy-stockbar" aria-hidden="true"><span style="width:' + pct.toFixed(0) + '%"></span></span></div>';
+  }
+
+  function buyCard(){
+    var ds = STATE.ds;
+    var pv = ds.preview_rows || {};
+    var lp = ds.locked_preview || {};
+    var paid = !ds.is_free && Number(ds.price) > 0;
+    var items = [];
+    if (pv.total_rows) items.push('All ' + nf(pv.total_rows) + ' rows and ' + (pv.columns ? pv.columns.length : '') + ' columns, as files');
+    else items.push('The full dataset, as files');
+    if (lp.total_tasks) items.push(lp.total_tasks + ' challenges in your own shuffled order');
+    items.push('The full brief and every column explained');
+    items.push('An AI coaching prompt, ready to paste');
+    items.push('Points on the global leaderboard when you submit');
+    var h = '<div class="k-buy">';
+    h += '<div class="k-buy-price">' + (paid ? '&#8377;0<span class="k-buy-was">' + money(ds) + '</span>' : 'Free') + '</div>';
+    h += '<p class="k-buy-note">' + (paid ? 'Free during the beta. No card needed.' : 'Free forever. Just sign in.') + '</p>';
+    h += '<ul class="k-buy-list">';
+    items.forEach(function(t){ h += '<li>' + icon(I_CHECK, 14) + '<span>' + esc(t) + '</span></li>'; });
+    h += '</ul>';
+    h += '<button class="k-btn k-btn-brand k-btn-lg k-btn-block k-unlock" type="button">' + (STATE.session ? 'Unlock this project' : 'Sign in to unlock') + '</button>';
+    h += stockLine();
+    return h + '</div>';
+  }
+
+  function ownedCard(){
+    var all = allTasks();
+    var done = loadProgress();
+    var n = all.filter(function(t){ return done[t.id]; }).length;
+    var pct = all.length ? Math.round(100 * n / all.length) : 0;
+    var h = '<div class="k-buy k-buy-owned">';
+    h += '<div class="k-buy-ownedhead">' + icon(I_CHECK, 16) + '<span>In your library</span></div>';
+    h += '<p class="k-buy-note" style="margin-bottom:0.5rem;">License ' + esc(STATE.lic.license_code) + '. '
+      + (STATE.submission ? (STATE.submission.status === 'reviewed' ? 'Reviewed, ' + esc(STATE.submission.points || 0) + ' points.' : 'Submitted, waiting on review.') : n + ' of ' + all.length + ' tasks done.') + '</p>';
+    if (!STATE.submission) h += '<div class="k-progline" style="margin-bottom:0.6rem;"><span class="k-progline-bar"><span style="width:' + pct + '%"></span></span><span>' + pct + '%</span></div>';
+    h += '<button class="k-btn k-btn-brand" type="button" data-goto="challenge">' + (STATE.submission ? 'View submission' : (n ? 'Continue the challenge' : 'Start the challenge')) + '</button>';
+    h += '<button class="k-btn" type="button" data-goto="files">Download files</button>';
+    return h + '</div>';
+  }
+
+  // A buy bar that follows the reader on phones once the header buttons scroll away.
+  var stickyBound = false;
+  function stickyCta(){
+    var bar = document.getElementById('dsSticky');
+    if (STATE.lic) {
+      if (bar) bar.parentNode.removeChild(bar);
+      document.body.classList.remove('has-stickycta');
+      return;
+    }
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'dsSticky';
+      bar.className = 'k-stickycta';
+      document.body.appendChild(bar);
+    }
+    var ds = STATE.ds;
+    var paid = !ds.is_free && Number(ds.price) > 0;
+    bar.innerHTML = '<div><div class="k-stickycta-price">' + (paid ? '&#8377;0 <span class="k-buy-was" style="font-size:0.8rem;">' + money(ds) + '</span>' : 'Free') + '</div>'
+      + '<div class="k-stickycta-sub">' + (paid ? 'Free during the beta' : 'Sign in to start') + '</div></div>'
+      + '<button class="k-btn k-btn-brand" type="button">' + (STATE.session ? 'Unlock project' : 'Sign in to unlock') + '</button>';
+    bar.querySelector('button').addEventListener('click', onUnlockClick);
+    document.body.classList.add('has-stickycta');
+    function check(){
+      var b = document.getElementById('dsSticky');
+      var anchor = document.querySelector('.k-actions');
+      if (!b || !anchor) return;
+      b.classList.toggle('show', anchor.getBoundingClientRect().bottom < 0);
+    }
+    if (!stickyBound) {
+      stickyBound = true;
+      window.addEventListener('scroll', check, { passive:true });
+    }
+    check();
   }
 
   function fact(k, v){
@@ -473,7 +572,9 @@
 
     h += '<div class="page-card"><h2>Your progress</h2>'
       +  '<div class="chal-progress-bar"><div class="chal-progress-fill" id="dsProgFill"></div></div>'
-      +  '<p id="dsProgLabel" style="margin-top:0.5rem;">' + checked + ' / ' + all.length + ' tasks checked off</p></div>';
+      +  '<p id="dsProgLabel" style="margin-top:0.5rem;">' + checked + ' / ' + all.length + ' tasks checked off</p>'
+      +  '<div class="chal-ready" id="dsReady"><span>Every task is ticked. Ready to send it in?</span>'
+      +  '<button class="k-btn" id="dsGoSubmit" type="button">Go to submit</button></div></div>';
 
     var frozen = !!STATE.submission;
 
@@ -588,8 +689,9 @@
     h += '    <div class="k-lockicon">' + icon(I_LOCK, 30) + '</div>';
     h += '    <h3 class="k-lockhead">' + esc(head) + '</h3>';
     h += '    <p class="k-lockbody">' + esc(body) + '</p>';
-    h += '    <div class="k-lockprice">' + money(STATE.ds) + '</div>';
-    h += '    <button class="k-btn k-btn-brand k-btn-lg k-unlock" type="button">Unlock this project</button>';
+    var paidLock = !STATE.ds.is_free && Number(STATE.ds.price) > 0;
+    h += '    <div class="k-lockprice">' + (paidLock ? '&#8377;0 <span class="k-buy-was">' + money(STATE.ds) + '</span>' : 'Free') + '</div>';
+    h += '    <button class="k-btn k-btn-brand k-btn-lg k-unlock" type="button">' + (STATE.session ? 'Unlock this project' : 'Sign in to unlock') + '</button>';
     h += '    <p class="k-locknote">Beta pricing, free while the purchase flow is being tested.</p>';
     h += '  </div></div>';
     return h;
@@ -760,6 +862,26 @@
 
     var sc = document.getElementById('dsSubmitChal');
     if (sc) sc.addEventListener('click', onSubmitChallenge);
+    var gs = document.getElementById('dsGoSubmit');
+    if (gs) gs.addEventListener('click', function(){
+      var card = document.getElementById('dsSubmitCard');
+      if (!card) return;
+      card.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' });
+      setTimeout(function(){ var g = document.getElementById('dsSubGithub'); if (g) g.focus({ preventScroll: true }); }, 450);
+    });
+    if (window.kojohLinkCheck) {
+      window.kojohLinkCheck(document.getElementById('dsSubGithub'), 'github');
+      window.kojohLinkCheck(document.getElementById('dsSubLinkedin'), 'linkedin');
+    }
+    if (STATE.lic && window.kojohPhaseCounts) window.kojohPhaseCounts(document.getElementById('panel-challenge'));
+
+    Array.prototype.forEach.call(document.querySelectorAll('[data-goto]'), function(b){
+      b.addEventListener('click', function(){
+        var g = b.getAttribute('data-goto');
+        if (g === 'files') { onDownload(); return; }
+        switchTab(g);
+      });
+    });
   }
 
   function updateProgress(done){
@@ -774,6 +896,9 @@
     if (btn) btn.disabled = !allDone;
     var gate = document.getElementById('dsSubGate');
     if (gate) gate.hidden = allDone;
+    var ready = document.getElementById('dsReady');
+    if (ready) ready.classList.toggle('show', allDone && !!btn);
+    if (window.kojohPhaseCounts) window.kojohPhaseCounts(document.getElementById('panel-challenge'));
   }
 
   // ---------------------------------------------------------------- challenge submit
@@ -806,6 +931,17 @@
       return;
     }
 
+    // Submitting locks the page for good, so ask once more before sending.
+    if (btn.getAttribute('data-armed') !== '1') {
+      btn.setAttribute('data-armed', '1');
+      btn.textContent = 'Click again to submit and lock';
+      clearTimeout(btn._armTimer);
+      btn._armTimer = setTimeout(function(){ btn.removeAttribute('data-armed'); btn.textContent = 'Submit challenge'; }, 5000);
+      return;
+    }
+    clearTimeout(btn._armTimer);
+    btn.removeAttribute('data-armed');
+
     btn.disabled = true;
     btn.innerHTML = '<span class="k-spin"></span>Submitting';
 
@@ -834,6 +970,7 @@
 
     STATE.submission = res.data;
     render();
+    if (window.kojohToast) window.kojohToast('Submitted. Our team will review it and award your points.');
   }
 
   function typeTitle(){
@@ -935,6 +1072,7 @@
     var text = buildPrompt();
     var done = function(ok){
       btn.innerHTML = ok ? 'Copied' : 'Could not copy';
+      if (window.kojohToast) window.kojohToast(ok ? 'Prompt copied. Paste it into your AI to start.' : 'Could not copy, select the text manually.', { kind: ok ? 'ok' : 'error' });
       setTimeout(function(){ btn.innerHTML = icon(I_COPY) + ' Copy prompt'; }, 1800);
     };
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -1029,6 +1167,7 @@
     closeDialog('payModal');
     STATE.tab = 'summary';
     render();
+    if (window.kojohToast) window.kojohToast('Unlocked. Your license is ' + STATE.lic.license_code + '.');
   }
 
   // ---------------------------------------------------------------- files

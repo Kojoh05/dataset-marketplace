@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KOJOH | Saved datasets</title>
 <script src="theme.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="pages.css">
 <link rel="stylesheet" href="nav.css">
+<link rel="stylesheet" href="kojoh-ui.css">
 <script src="nav.js"></script>
 </head>
 <body>
@@ -22,7 +23,7 @@
 <main class="page-wrap">
   <div class="page-lead">
     <h1>Your bookmarks</h1>
-    <p>Click the bookmark icon on any dataset to save it here for later. Bookmarks are tied to your account and follow you across devices.</p>
+    <p>Datasets you saved for later. They follow your account across devices.</p>
   </div>
 
   <div id="savedResults"></div>
@@ -33,35 +34,70 @@
 <script src="config.js"></script>
 <script src="icons.js"></script>
 <script>
+(function(){
   var LIVE = !!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase);
   var SUPA = LIVE ? window.kojohSupa() : null;
   var el = document.getElementById('savedResults');
+  el.innerHTML = window.kojohSkeleton('list');
+  var UID = null, ROWS = [], OWNED = {}, SHELF = {};
+  var MARK = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
 
   function empty(icon, title, body){
     el.innerHTML = '<div class="empty-state"><div class="empty-state-icon">' + icon + '</div><h3>' + title + '</h3><p>' + body + '</p></div>';
   }
-  function escape(s){ return String(s || '').replace(/[<>&"]/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]; }); }
+  function draw(){
+    if (!ROWS.length) {
+      empty(kIcon('bookmark'), 'No bookmarks yet', 'Tap Bookmark on any dataset and it lands here, on every device you sign in on.'
+        + '<br><br><a class="k-btn k-btn-brand" href="search.html">Find something to save</a>');
+      return;
+    }
+    el.innerHTML = '<p class="k-resultmeta">' + ROWS.length + (ROWS.length === 1 ? ' dataset' : ' datasets') + ' saved</p><div class="k-dsgrid">'
+      + ROWS.map(function(r){
+          return '<div class="k-savedwrap">' + window.kojohDsCard(r.datasets, { owned: OWNED[r.dataset_id], shelf: SHELF[r.dataset_id] })
+            + '<button class="k-saved-remove" type="button" data-id="' + window.kojohEsc(r.dataset_id) + '" title="Remove bookmark" aria-label="Remove bookmark">' + MARK + '</button></div>';
+        }).join('') + '</div>';
+    Array.prototype.forEach.call(el.querySelectorAll('.k-saved-remove'), function(b){
+      b.addEventListener('click', function(){ remove(b.getAttribute('data-id')); });
+    });
+  }
+  async function remove(id){
+    var idx = ROWS.findIndex(function(r){ return r.dataset_id === id; });
+    if (idx < 0) return;
+    var gone = ROWS.splice(idx, 1)[0];
+    draw();
+    var res = await SUPA.from('bookmarks').delete().eq('user_id', UID).eq('dataset_id', id);
+    if (res.error) {
+      ROWS.splice(idx, 0, gone); draw();
+      window.kojohToast('Could not remove it: ' + res.error.message, { kind:'error' });
+      return;
+    }
+    window.kojohToast('Removed from your bookmarks.', {
+      action: 'Undo',
+      onAction: async function(){
+        var back = await SUPA.from('bookmarks').insert({ user_id: UID, dataset_id: id });
+        if (back.error) { window.kojohToast(back.error.message, { kind:'error' }); return; }
+        ROWS.splice(Math.min(idx, ROWS.length), 0, gone); draw();
+      }
+    });
+  }
 
   async function load(){
     if (!LIVE) { empty(kIcon('plug'), 'Preview mode', 'Connect Supabase to see your bookmarks.'); return; }
     var s = await SUPA.auth.getSession();
     if (!s.data.session) { empty(kIcon('lock'), 'Sign in required', 'Please <a href="auth.html">log in</a> to see your saved datasets.'); return; }
-    var res = await SUPA.from('bookmarks').select('dataset_id, created_at, datasets(title, short_description, slug, price)').order('created_at', { ascending: false });
-    if (res.error) { empty(kIcon('alert'), 'Could not load', res.error.message); return; }
-    var rows = (res.data || []).filter(function(r){ return r.datasets; });
-    if (!rows.length) { empty(kIcon('bookmark'), 'No bookmarks yet', 'When you find a dataset you like, tap the bookmark icon on it and it will appear here.'); return; }
-    el.innerHTML = '<div class="ds-list">' + rows.map(function(r){
-      var d = r.datasets;
-      return '<div class="ds-item"><div class="ds-item-info"><div class="ds-item-title">' + escape(d.title) + '</div><div class="ds-item-sub">' + escape(d.short_description || '') + '</div></div><div class="ds-item-meta"><span class="ds-item-price">' + (d.price ? '₹' + d.price : 'Free') + '</span><button class="ds-item-bookmark on" data-id="' + escape(r.dataset_id) + '" title="Remove bookmark">' + kIcon('bookmark', 18) + '</button></div></div>';
-    }).join('') + '</div>';
-    el.querySelectorAll('.ds-item-bookmark').forEach(function(b){
-      b.addEventListener('click', async function(){
-        await SUPA.from('bookmarks').delete().eq('user_id', s.data.session.user.id).eq('dataset_id', b.dataset.id);
-        load();
-      });
-    });
+    UID = s.data.session.user.id;
+    var r = await Promise.all([
+      SUPA.from('bookmarks').select('dataset_id, created_at, datasets(id, title, short_description, slug, price, is_free, difficulty, preview_rows)').order('created_at', { ascending: false }),
+      window.kojohOwned(),
+      window.kojohShelf()
+    ]);
+    if (r[0].error) { empty(kIcon('alert'), 'Could not load', window.kojohEsc(r[0].error.message)); return; }
+    ROWS = (r[0].data || []).filter(function(x){ return x.datasets; });
+    OWNED = r[1] || {}; SHELF = r[2] || {};
+    draw();
   }
   window.kReady(load);
+})();
 </script>
 </body>
 </html>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KOJOH | Suggestions</title>
 <script src="theme.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="pages.css">
 <link rel="stylesheet" href="nav.css">
+<link rel="stylesheet" href="kojoh-ui.css">
 <script src="nav.js"></script>
 </head>
 <body>
@@ -61,6 +62,13 @@
   }
 
   async function init(){
+    var topic = new URLSearchParams(window.location.search).get('topic');
+    var box = document.getElementById('sMessage');
+    if (topic && !box.value) {
+      box.value = 'I searched for "' + topic.slice(0, 80) + '" and found nothing. I would like a dataset for ';
+      box.focus();
+      box.setSelectionRange(box.value.length, box.value.length);
+    }
     if (!LIVE) return;
     var s = await SUPA.auth.getSession();
     if (s.data.session) loadPast(s.data.session.user.id);
@@ -72,9 +80,12 @@
     if (msg.length < 6) { note('A little more detail helps. At least a few words, please.', 'error'); return; }
     if (!LIVE) { note('Preview mode. Connect Supabase to send suggestions.', 'error'); return; }
     var s = await SUPA.auth.getSession();
-    if (!s.data.session) { note('Please log in first so we can follow up if needed.', 'error'); return; }
+    if (!s.data.session) { noteEl.hidden = false; noteEl.className = 'page-note error'; noteEl.innerHTML = 'Please <a href="auth.html">log in</a> first so we can follow up if needed.'; return; }
     var uid = s.data.session.user.id;
+    var btn = this.querySelector('.page-submit');
+    btn.disabled = true; btn.textContent = 'Sending';
     var res = await SUPA.from('suggestions').insert({ user_id: uid, message: msg });
+    btn.disabled = false; btn.textContent = 'Send suggestion';
     if (res.error) { note(res.error.message, 'error'); return; }
     document.getElementById('sMessage').value = '';
     note('Thanks, got it! We read every suggestion.', 'ok');
