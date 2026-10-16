@@ -13,3 +13,9 @@ update public.datasets
    set art_boy_url  = 'assets/art/tata-boy.webp',
        art_girl_url = 'assets/art/tata-girl.webp'
  where slug = 'tata-delhi-sales-fy2526';
+
+-- Diwali Discount Trap
+update public.datasets
+   set art_boy_url  = 'assets/art/diwali-boy.webp',
+       art_girl_url = 'assets/art/diwali-girl.webp'
+ where slug = 'diwali-discount-trap-fy2526';
