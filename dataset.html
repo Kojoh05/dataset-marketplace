@@ -319,7 +319,7 @@
 
     if (preview && preview.rows && preview.rows.length) {
       main += '<div class="page-card"><h2>Sample of the real data</h2>';
-      main += '<p class="k-sub">The first ' + preview.rows.length + ' rows, exactly as they come out of the dealership ERP. '
+      main += '<p class="k-sub">The first ' + preview.rows.length + ' rows, exactly as they come out of the source system. '
            +  'Yes, the dates, the prices and the names are inconsistent. That is the job.</p>';
       main += previewTable(preview, false);
       main += '<p class="k-sub k-sub-tight">Showing ' + preview.rows.length + ' of ' + nf(preview.total_rows) + ' rows, and '
