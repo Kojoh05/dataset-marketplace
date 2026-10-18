@@ -169,7 +169,7 @@
     return String(text || '').split(/\n\s*\n/).map(function(p){ return '<p>' + esc(p) + '</p>'; }).join('');
   }
   function inlineCode(text){
-    return esc(text).replace(/`([^`]+)`/g, '<code>$1</code>');
+    return esc(text).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   }
   function money(ds){
     return ds.is_free ? 'Free' : ('&#8377;' + Number(ds.price).toFixed(0));
@@ -579,6 +579,11 @@
       +  '<button class="k-btn" id="dsGoSubmit" type="button">Go to submit</button></div></div>';
 
     var frozen = !!STATE.submission;
+
+    if (pack.brief) {
+      h += '<div class="page-card k-card-brand"><h2>Your personal brief</h2><p>'
+        +  inlineCode(String(pack.brief).replace(/^\*\*[^*]+:\*\*\s*/, '')) + '</p></div>';
+    }
 
     (pack.phases || []).forEach(function(p){
       var tools = phaseTools(p);
