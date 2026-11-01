@@ -1218,14 +1218,23 @@
       return;
     }
 
-    var licRes = await SUPA.from('dataset_licenses')
-      .select('id, license_code, tier, task_pack')
-      .eq('dataset_id', STATE.ds.id).eq('claimed_by', STATE.session.user.id).maybeSingle();
+    // Read the license back. Right after a payment the session can be mid-refresh, so retry a few times.
+    var licRes = null, uid = null;
+    for (var tryN = 0; tryN < 4; tryN++) {
+      if (tryN) await new Promise(function(r){ setTimeout(r, 1200 * tryN); });
+      var u = await SUPA.auth.getUser();
+      uid = (u.data && u.data.user && u.data.user.id) || (STATE.session && STATE.session.user.id);
+      licRes = await SUPA.from('dataset_licenses')
+        .select('id, license_code, tier, task_pack')
+        .eq('dataset_id', STATE.ds.id).eq('claimed_by', uid).limit(1).maybeSingle();
+      if (!licRes.error && licRes.data) break;
+    }
 
-    if (licRes.error || !licRes.data) {
-      btn.disabled = false;
-      btn.textContent = 'Pay and unlock';
-      note.innerHTML = '<span class="k-err">Unlocked, but the license did not come back. Reload the page.</span>';
+    if (!licRes || licRes.error || !licRes.data) {
+      // The purchase is saved on the server; a fresh load always shows it.
+      btn.innerHTML = '<span class="k-spin"></span>Unlocked, opening your dataset';
+      note.innerHTML = '';
+      setTimeout(function(){ location.reload(); }, 800);
       return;
     }
     STATE.submission = null;

@@ -1,4 +1,4 @@
-const CACHE = 'kojoh-v4';
+const CACHE = 'kojoh-v5';
 const ASSETS = [
   '/',
   '/index.html',
