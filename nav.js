@@ -17,6 +17,7 @@
     ]},
     { group: 'MORE', items: [
       { href: 'settings.html', label: 'Settings', icon: 'gear' },
+      { href: 'pricing.html', label: 'Pricing', icon: 'tag' },
       { href: 'about.html', label: 'About KOJOH', icon: 'info' },
       { href: 'help.html', label: 'Help & contact', icon: 'help' },
       { href: 'suggestions.html', label: 'Suggestions', icon: 'bulb' }
@@ -34,6 +35,7 @@
     help: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
     bulb: '<path d="M12 2 2 22h20L12 2z"/><line x1="12" y1="9" x2="12" y2="14"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
     trophy: '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 5H4a2 2 0 0 0 0 4h1M17 5h3a2 2 0 0 1 0 4h-1"/>',
+    tag: '<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
     chevronLeft: '<polyline points="15 18 9 12 15 6"/>'
   };
 
@@ -363,6 +365,7 @@
         // Re-attach the sidebar (body content, and its classes, were
         // fully replaced, so re-apply the ksb-has-rail/expanded state too).
         ensureSidebar();
+        ensureLegalFooter();
 
         window.scrollTo(0, 0);
 
@@ -413,4 +416,24 @@
   };
 
   window.kReady(ensureSidebar);
+
+  // ---------- Legal footer on every page (payment gateways look for these links) ----------
+  function ensureLegalFooter() {
+    if (document.getElementById('kLegalFoot')) return;
+    if (!document.getElementById('kLegalFootCss')) {
+      var st = document.createElement('style');
+      st.id = 'kLegalFootCss';
+      st.textContent = '.k-legal-foot{max-width:52rem;margin:2rem auto 1.5rem;padding:1.25rem 1.5rem 0;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:.4rem 1.1rem;align-items:center;font-size:.78rem;color:var(--muted)}'
+        + '.k-legal-foot a{color:var(--muted);text-decoration:none}.k-legal-foot a:hover{color:var(--text);text-decoration:underline}.k-legal-foot .c{margin-right:auto}';
+      document.head.appendChild(st);
+    }
+    var f = document.createElement('footer');
+    f.id = 'kLegalFoot';
+    f.className = 'k-legal-foot';
+    f.innerHTML = '<span class="c">&copy; ' + new Date().getFullYear() + ' KOJOH</span>'
+      + '<a href="pricing.html">Pricing</a><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a>'
+      + '<a href="refund.html">Refunds</a><a href="shipping.html">Delivery</a><a href="contact.html">Contact</a>';
+    document.body.appendChild(f);
+  }
+  window.kReady(ensureLegalFooter);
 })();

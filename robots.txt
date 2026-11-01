@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /settings.html
+Disallow: /purchases.html
+Disallow: /saved.html
+Disallow: /challenge.html
+Disallow: /reset-password.html
+
+Sitemap: https://dataset-marketplace-kojoh.vercel.app/sitemap.xml

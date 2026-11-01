@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pricing | KOJOH</title>
+<meta name="description" content="KOJOH dataset prices: free starter datasets, Rs 99 to 149 personal stories, Rs 249 corporate case studies and Rs 449+ premium datasets. One-time payment, no subscription.">
+<link rel="canonical" href="https://dataset-marketplace-kojoh.vercel.app/pricing.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="KOJOH">
+<meta property="og:title" content="Pricing | KOJOH">
+<meta property="og:description" content="KOJOH dataset prices: free starter datasets, Rs 99 to 149 personal stories, Rs 249 corporate case studies and Rs 449+ premium datasets. One-time payment, no subscription.">
+<meta property="og:url" content="https://dataset-marketplace-kojoh.vercel.app/pricing.html">
+<meta property="og:image" content="https://dataset-marketplace-kojoh.vercel.app/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://dataset-marketplace-kojoh.vercel.app/og-image.png">
+<link rel="icon" href="icons/icon-192.png">
+<script src="theme.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="pages.css">
+<link rel="stylesheet" href="nav.css">
+<link rel="stylesheet" href="kojoh-ui.css">
+<script src="nav.js"></script>
+<style>
+.legal p, .legal li{color:var(--muted); font-size:0.875rem; line-height:1.6;}
+.legal p + p{margin-top:0.6rem;}
+.legal ul{margin:0.5rem 0 0 1.1rem; display:flex; flex-direction:column; gap:0.35rem;}
+.legal strong{color:var(--text);}
+.legal a{color:var(--text); font-weight:600;}
+.legal-meta{font-size:0.8rem; color:var(--muted); margin-top:0.35rem;}
+
+.tier-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(13rem,1fr)); gap:0.75rem; margin-top:0.75rem;}
+.tier{border:1px solid var(--line); border-radius:var(--radius); padding:1rem 1.1rem; background:var(--bg);}
+.tier .p{font-family:'Space Grotesk',sans-serif; font-size:1.4rem; font-weight:700; color:var(--text);}
+.tier .n{font-weight:600; color:var(--text); font-size:0.9rem; margin:0.15rem 0 0.35rem;}
+.tier p{font-size:0.8125rem;}
+.price-table{width:100%; border-collapse:collapse; margin-top:0.5rem; font-size:0.875rem;}
+.price-table th{text-align:left; font-weight:600; color:var(--muted); font-size:0.75rem; text-transform:uppercase; letter-spacing:.04em; padding:0.5rem 0.25rem; border-bottom:1px solid var(--line);}
+.price-table td{padding:0.65rem 0.25rem; border-bottom:1px solid var(--line); color:var(--text); vertical-align:top;}
+.price-table td.num{text-align:right; white-space:nowrap; font-weight:600;}
+.price-table a{color:var(--text); font-weight:500; text-decoration:none;}
+.price-table a:hover{text-decoration:underline;}
+.price-table .grp td{font-family:'Space Grotesk',sans-serif; font-weight:700; padding-top:1.1rem; color:var(--muted); font-size:0.75rem; letter-spacing:.06em; text-transform:uppercase;}
+
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <span class="page-title">Pricing</span>
+</header>
+<main class="page-wrap legal">
+  <div class="page-lead">
+    <h1>Pricing</h1>
+    <p>Pay once per dataset. No subscription, no hidden fees. Prices are in Indian Rupees and include applicable taxes.</p>
+    <p class="legal-meta">Last updated: 1 November 2026</p>
+  </div>
+
+  <div class="page-card">
+    <h2>How pricing works</h2>
+    <div class="tier-grid"><div class="tier"><div class="p">Free</div><div class="n">Starter datasets</div><p>Full data and challenges, free forever. The best way to try KOJOH.</p></div><div class="tier"><div class="p">&#8377;99 &ndash; &#8377;149</div><div class="n">Personal stories</div><p>Everyday-life data. The first 100 buyers get a unique personalised pack; after that, the standard challenge.</p></div><div class="tier"><div class="p">&#8377;249</div><div class="n">Corporate case studies</div><p>Messy multi-file company data. Each personalised pack is shared by at most 5 buyers.</p></div><div class="tier"><div class="p">&#8377;449 &ndash; &#8377;899</div><div class="n">Premium</div><p>The deepest datasets, with a challenge pack unique to every buyer.</p></div></div>
+  </div>
+  <div class="page-card">
+    <h2>Every dataset</h2>
+    <div id="priceList"><p>Loading prices&hellip;</p></div>
+  </div>
+  <div class="page-card">
+    <h2>Payment</h2>
+    <p>Payments are handled securely by Razorpay (UPI, cards, netbanking and wallets). Your dataset unlocks instantly. See the <a href="refund.html">Refund Policy</a> and <a href="shipping.html">Delivery Policy</a>.</p>
+  </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="supabase-config.js"></script>
+<script src="config.js"></script>
+
+<script>
+window.kReady(async function(){
+  var host = document.getElementById('priceList');
+  if (!host || !window.kojohSupa) return;
+  try {
+    var s = window.kojohSupa();
+    var r = await Promise.all([
+      s.from('datasets').select('title, slug, price, is_free, folder_id').eq('is_published', true).order('price'),
+      s.from('folders').select('id, title')
+    ]);
+    if (r[0].error) throw r[0].error;
+    var fname = {}; (r[1].data || []).forEach(function(f){ fname[f.id] = f.title; });
+    var groups = {};
+    r[0].data.forEach(function(d){ var g = fname[d.folder_id] || 'Other'; (groups[g] = groups[g] || []).push(d); });
+    var esc = window.kojohEsc || function(x){ return String(x); };
+    var h = '<table class="price-table"><thead><tr><th>Dataset</th><th style="text-align:right">Price</th></tr></thead><tbody>';
+    Object.keys(groups).sort().forEach(function(g){
+      h += '<tr class="grp"><td colspan="2">' + esc(g) + '</td></tr>';
+      groups[g].forEach(function(d){
+        var free = d.is_free || Number(d.price) <= 0;
+        h += '<tr><td><a href="dataset.html?slug=' + encodeURIComponent(d.slug) + '">' + esc(d.title) + '</a></td><td class="num">' + (free ? 'Free' : '&#8377;' + Number(d.price).toFixed(0)) + '</td></tr>';
+      });
+    });
+    host.innerHTML = h + '</tbody></table>';
+  } catch (e) {
+    host.innerHTML = '<p>Prices are shown on each dataset page.</p>';
+  }
+});
+</script>
+</body>
+</html>

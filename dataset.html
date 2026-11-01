@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KOJOH | Dataset</title>
+<meta name="description" content="A realistic messy dataset with a personalised project challenge, documentation and answer-checked tasks. Build a portfolio project on KOJOH.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="KOJOH">
+<meta property="og:title" content="KOJOH | Dataset">
+<meta property="og:description" content="A realistic messy dataset with a personalised project challenge, documentation and answer-checked tasks. Build a portfolio project on KOJOH.">
+<meta property="og:image" content="https://dataset-marketplace-kojoh.vercel.app/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://dataset-marketplace-kojoh.vercel.app/og-image.png">
+<link rel="icon" href="icons/icon-192.png">
 <script src="theme.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1128,8 +1137,8 @@
     document.getElementById('payTotal').innerHTML = ds.is_free
       ? 'Free'
       : (charged(ds) ? money(ds) : '<span class="k-strike">' + money(ds) + '</span>&#8377;0');
-    document.getElementById('payNote').textContent = charged(ds)
-      ? 'Secure payment by Razorpay: UPI, cards, netbanking and wallets. Your license unlocks the moment the payment goes through.'
+    document.getElementById('payNote').innerHTML = charged(ds)
+      ? 'Secure payment by Razorpay: UPI, cards, netbanking and wallets. Your license unlocks the moment the payment goes through. By paying you agree to the <a href="terms.html" target="_blank" rel="noopener">Terms</a> and <a href="refund.html" target="_blank" rel="noopener">Refund Policy</a>.'
       : 'Beta pricing. Nothing is charged and no card details are collected while the purchase flow is being tested.';
     document.getElementById('payGo').textContent = charged(ds) ? 'Pay ' + money(ds).replace('&#8377;', '\u20B9') + ' and unlock' : (ds.is_free ? 'Unlock for free' : 'Unlock');
     openDialog('payModal');

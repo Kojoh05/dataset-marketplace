@@ -118,3 +118,7 @@ body{overflow-x:hidden;}
   .w-grid-4{grid-template-columns:1fr;}
   .w-header{padding:1.25rem 1.25rem;}
 }
+
+.w-foot-links{display:flex;flex-wrap:wrap;gap:.4rem 1rem;justify-content:center;margin-top:.6rem}
+.w-foot-links a{color:inherit;text-decoration:none}
+.w-foot-links a:hover{color:var(--text);text-decoration:underline}
