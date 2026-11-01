@@ -197,6 +197,10 @@
     if (dsRes.error) { empty(kIcon('alert'), 'Could not load', esc(dsRes.error.message)); return; }
     if (!dsRes.data) { empty(kIcon('search'), 'Not found', 'This dataset does not exist or is not published yet.'); return; }
     STATE.ds = dsRes.data;
+    try {
+      var stRes = await SUPA.from('app_settings').select('value').eq('key', 'payments').maybeSingle();
+      STATE.live = !!(stRes.data && stRes.data.value && stRes.data.value.mode === 'live');
+    } catch (e) { STATE.live = false; }
 
     window.kojohSeo({
       title: STATE.ds.seo_title || ('KOJOH | ' + STATE.ds.title),
@@ -390,6 +394,14 @@
       + '<span class="k-buy-stockbar" aria-hidden="true"><span style="width:' + pct.toFixed(0) + '%"></span></span></div>';
   }
 
+  // Paid datasets cost money only once payments are switched to live in the admin.
+  function charged(ds){ return !!STATE.live && !ds.is_free && Number(ds.price) > 0; }
+  function priceHtml(ds, small){
+    if (ds.is_free || !(Number(ds.price) > 0)) return 'Free';
+    if (STATE.live) return money(ds);
+    return '&#8377;0' + (small ? ' ' : '') + '<span class="k-buy-was"' + (small ? ' style="font-size:0.8rem;"' : '') + '>' + money(ds) + '</span>';
+  }
+
   function buyCard(){
     var ds = STATE.ds;
     var pv = ds.preview_rows || {};
@@ -403,8 +415,8 @@
     items.push('An AI coaching prompt, ready to paste');
     items.push('Points on the global leaderboard when you submit');
     var h = '<div class="k-buy">';
-    h += '<div class="k-buy-price">' + (paid ? '&#8377;0<span class="k-buy-was">' + money(ds) + '</span>' : 'Free') + '</div>';
-    h += '<p class="k-buy-note">' + (paid ? 'Free during the beta. No card needed.' : 'Free forever. Just sign in.') + '</p>';
+    h += '<div class="k-buy-price">' + priceHtml(ds) + '</div>';
+    h += '<p class="k-buy-note">' + (paid ? (STATE.live ? 'One-time payment. Instant access. UPI, cards and netbanking.' : 'Free during the beta. No card needed.') : 'Free forever. Just sign in.') + '</p>';
     h += '<ul class="k-buy-list">';
     items.forEach(function(t){ h += '<li>' + icon(I_CHECK, 14) + '<span>' + esc(t) + '</span></li>'; });
     h += '</ul>';
@@ -445,8 +457,8 @@
     }
     var ds = STATE.ds;
     var paid = !ds.is_free && Number(ds.price) > 0;
-    bar.innerHTML = '<div><div class="k-stickycta-price">' + (paid ? '&#8377;0 <span class="k-buy-was" style="font-size:0.8rem;">' + money(ds) + '</span>' : 'Free') + '</div>'
-      + '<div class="k-stickycta-sub">' + (paid ? 'Free during the beta' : 'Sign in to start') + '</div></div>'
+    bar.innerHTML = '<div><div class="k-stickycta-price">' + priceHtml(ds, true) + '</div>'
+      + '<div class="k-stickycta-sub">' + (paid ? (STATE.live ? 'One-time payment' : 'Free during the beta') : 'Sign in to start') + '</div></div>'
       + '<button class="k-btn k-btn-brand" type="button">' + (STATE.session ? 'Unlock project' : 'Sign in to unlock') + '</button>';
     bar.querySelector('button').addEventListener('click', onUnlockClick);
     document.body.classList.add('has-stickycta');
@@ -697,9 +709,9 @@
     h += '    <h3 class="k-lockhead">' + esc(head) + '</h3>';
     h += '    <p class="k-lockbody">' + esc(body) + '</p>';
     var paidLock = !STATE.ds.is_free && Number(STATE.ds.price) > 0;
-    h += '    <div class="k-lockprice">' + (paidLock ? '&#8377;0 <span class="k-buy-was">' + money(STATE.ds) + '</span>' : 'Free') + '</div>';
+    h += '    <div class="k-lockprice">' + priceHtml(STATE.ds, true) + '</div>';
     h += '    <button class="k-btn k-btn-brand k-btn-lg k-unlock" type="button">' + (STATE.session ? 'Unlock this project' : 'Sign in to unlock') + '</button>';
-    h += '    <p class="k-locknote">Beta pricing, free while the purchase flow is being tested.</p>';
+    h += '    <p class="k-locknote">' + (charged(STATE.ds) ? 'One-time payment, instant access.' : (paidLock ? 'Beta pricing, free while the purchase flow is being tested.' : 'Free, just sign in.')) + '</p>';
     h += '  </div></div>';
     return h;
   }
@@ -1115,7 +1127,11 @@
     document.getElementById('payItemPrice').innerHTML = money(ds);
     document.getElementById('payTotal').innerHTML = ds.is_free
       ? 'Free'
-      : '<span class="k-strike">' + money(ds) + '</span>&#8377;0';
+      : (charged(ds) ? money(ds) : '<span class="k-strike">' + money(ds) + '</span>&#8377;0');
+    document.getElementById('payNote').textContent = charged(ds)
+      ? 'Secure payment by Razorpay: UPI, cards, netbanking and wallets. Your license unlocks the moment the payment goes through.'
+      : 'Beta pricing. Nothing is charged and no card details are collected while the purchase flow is being tested.';
+    document.getElementById('payGo').textContent = charged(ds) ? 'Pay ' + money(ds).replace('&#8377;', '\u20B9') + ' and unlock' : (ds.is_free ? 'Unlock for free' : 'Unlock');
     openDialog('payModal');
   }
 
@@ -1141,16 +1157,63 @@
     window.location.href = 'auth.html';
   }
 
+  function loadScript(src){
+    return new Promise(function(resolve, reject){
+      if (document.querySelector('script[src="' + src + '"]')) { resolve(); return; }
+      var sc = document.createElement('script'); sc.src = src; sc.onload = resolve;
+      sc.onerror = function(){ reject(new Error('Could not load the payment window. Check your connection.')); };
+      document.head.appendChild(sc);
+    });
+  }
+
+  async function payWithRazorpay(){
+    await loadScript('https://checkout.razorpay.com/v1/checkout.js');
+    var o = await SUPA.functions.invoke('create-order', { body: { dataset_id: STATE.ds.id } });
+    var od = o.data || {};
+    if (o.error || od.error) {
+      var msg = od.error;
+      if (!msg && o.error && o.error.context && o.error.context.json) { try { msg = (await o.error.context.json()).error; } catch (e) {} }
+      throw new Error(msg || 'Could not start the payment.');
+    }
+    if (od.owned) return;
+    await new Promise(function(resolve, reject){
+      var rz = new window.Razorpay({
+        key: od.key_id, order_id: od.order_id, amount: od.amount, currency: od.currency || 'INR',
+        name: 'KOJOH', description: STATE.ds.title,
+        prefill: { email: od.email || (STATE.session && STATE.session.user.email) || '' },
+        theme: { color: '#141317' },
+        handler: async function(resp){
+          var v = await SUPA.functions.invoke('verify-payment', { body: resp });
+          var vd = v.data || {};
+          if (v.error || vd.error) {
+            var m = vd.error;
+            if (!m && v.error && v.error.context && v.error.context.json) { try { m = (await v.error.context.json()).error; } catch (e) {} }
+            reject(new Error(m || 'Payment received but not verified. Write to us with your payment ID: ' + resp.razorpay_payment_id));
+          } else resolve();
+        },
+        modal: { ondismiss: function(){ reject(new Error('Payment cancelled. Nothing was charged.')); } }
+      });
+      rz.on('payment.failed', function(r){ reject(new Error((r && r.error && r.error.description) || 'Payment failed. Nothing was charged.')); });
+      rz.open();
+    });
+  }
+
   async function doPurchase(){
     var btn = document.getElementById('payGo');
     var note = document.getElementById('payNote');
     btn.disabled = true;
     btn.innerHTML = '<span class="k-spin"></span>Setting up your license';
 
-    var res = await SUPA.rpc('purchase_dataset', { p_dataset_id: STATE.ds.id, p_tier: 'standard' });
+    var res;
+    if (charged(STATE.ds)) {
+      try { await payWithRazorpay(); res = {}; }
+      catch (e) { res = { error: { message: (e && e.message) || 'Payment did not go through.' } }; }
+    } else {
+      res = await SUPA.rpc('purchase_dataset', { p_dataset_id: STATE.ds.id, p_tier: 'standard' });
+    }
     if (res.error) {
       btn.disabled = false;
-      btn.textContent = 'Pay and unlock';
+      btn.textContent = charged(STATE.ds) ? 'Try again' : 'Unlock';
       note.innerHTML = '<span class="k-err">' + esc(res.error.message) + '</span>';
       return;
     }
@@ -1169,8 +1232,7 @@
 
     STATE.lic = licRes.data;
     btn.disabled = false;
-    btn.textContent = 'Pay and unlock';
-    note.textContent = 'Beta pricing. Nothing is charged and no card details are collected while the purchase flow is being tested.';
+    btn.textContent = 'Unlocked';
     closeDialog('payModal');
     STATE.tab = 'summary';
     render();
