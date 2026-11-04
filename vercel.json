@@ -1,4 +1,16 @@
 {
   "cleanUrls": true,
-  "trailingSlash": false
+  "trailingSlash": false,
+  "redirects": [
+    { "source": "/Admin", "destination": "/admin", "permanent": false },
+    { "source": "/Admin/:path*", "destination": "/admin/:path*", "permanent": false }
+  ],
+  "rewrites": [
+    { "source": "/admin", "destination": "https://kojoh-admin-git-main-kojoh.vercel.app/" },
+    { "source": "/admin/:path*", "destination": "https://kojoh-admin-git-main-kojoh.vercel.app/:path*" }
+  ],
+  "headers": [
+    { "source": "/admin/:path*", "headers": [ { "key": "X-Robots-Tag", "value": "noindex, nofollow" } ] },
+    { "source": "/admin", "headers": [ { "key": "X-Robots-Tag", "value": "noindex, nofollow" } ] }
+  ]
 }
