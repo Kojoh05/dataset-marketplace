@@ -122,3 +122,17 @@ body{overflow-x:hidden;}
 .w-foot-links{display:flex;flex-wrap:wrap;gap:.4rem 1rem;justify-content:center;margin-top:.6rem}
 .w-foot-links a{color:inherit;text-decoration:none}
 .w-foot-links a:hover{color:var(--text);text-decoration:underline}
+
+/* Catalog */
+.w-ds-grid{grid-template-columns:repeat(auto-fill, minmax(16rem, 1fr));}
+.w-ds{display:flex; flex-direction:column; gap:.45rem; background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+  padding:1.25rem; color:var(--text); text-decoration:none; transition:transform .15s ease, border-color .15s ease;}
+.w-ds:hover{transform:translateY(-2px); border-color:var(--text);}
+.w-ds-track{font-size:.7rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted);}
+.w-ds h3{font-family:'Space Grotesk', sans-serif; font-size:1.05rem; font-weight:700; line-height:1.25;}
+.w-ds p{font-size:.85rem; line-height:1.5; color:var(--muted); flex:1;}
+.w-ds-foot{display:flex; justify-content:space-between; align-items:center; margin-top:.35rem; font-size:.85rem;}
+.w-ds-foot b{font-family:'Space Grotesk', sans-serif; font-size:1.1rem;}
+.w-ds-foot span{color:var(--muted);}
+.w-ds-more{text-align:center; margin-top:1.75rem; font-size:.875rem; color:var(--muted);}
+.w-ds-more a{color:var(--text); font-weight:600;}
