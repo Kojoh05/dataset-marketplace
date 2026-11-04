@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KOJOH | Certificate</title>
+<meta name="robots" content="noindex">
+<script src="theme.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="pages.css">
+<link rel="stylesheet" href="nav.css">
+<link rel="stylesheet" href="kojoh-ui.css">
+<script src="nav.js"></script>
+<style>
+.cert-wrap{max-width:62rem; margin:0 auto 4rem; padding:0 1.25rem;}
+.cert-tools{display:flex; gap:0.5rem; justify-content:flex-end; flex-wrap:wrap; margin:0 0 1rem;}
+.cert{--acc:#8DB89A; position:relative; aspect-ratio:297/210; width:100%; background:#F4F1EA center/cover no-repeat; color:#1C1A1E;
+  border-radius:6px; box-shadow:0 10px 40px rgba(0,0,0,0.12); overflow:hidden; container-type:inline-size;}
+.cert.lv-intermediate{--acc:#8BB3D9;} .cert.lv-hard{--acc:#D98B5F;}
+.cert.plain::before{content:''; position:absolute; inset:3.4cqw; border:0.25cqw solid var(--acc); outline:0.12cqw solid #1C1A1E; outline-offset:0.7cqw; border-radius:0.4cqw; pointer-events:none;}
+.cert.plain::after{content:''; position:absolute; inset:0; background-image:linear-gradient(rgba(28,26,30,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(28,26,30,0.035) 1px, transparent 1px); background-size:3cqw 3cqw; pointer-events:none;}
+.cert-in{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; text-align:center; padding:7cqw 9cqw 0; z-index:1;}
+.c-brand{font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:4.2cqw; letter-spacing:0.5cqw;}
+.c-kind{font-size:1.25cqw; letter-spacing:0.45cqw; text-transform:uppercase; margin-top:0.6cqw;}
+.cert.has-art .c-brand, .cert.has-art .c-kind{visibility:hidden;}
+.c-pre{font-size:1.5cqw; color:#5d5a55; margin-top:5.2cqw;}
+.c-name{font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:5.2cqw; line-height:1.1; margin:1.2cqw 0 1.4cqw; border-bottom:0.15cqw solid var(--acc); padding:0 2cqw 1cqw;}
+.c-what{font-size:1.7cqw; line-height:1.5; max-width:62cqw;}
+.c-what b{font-weight:600;}
+.c-score{margin-top:2cqw; font-family:'Space Grotesk', sans-serif; font-size:2.4cqw; font-weight:700;}
+.c-score small{display:block; font-family:'IBM Plex Sans', sans-serif; font-size:1.1cqw; font-weight:500; color:#5d5a55; letter-spacing:0.15cqw; text-transform:uppercase;}
+.c-foot{position:absolute; left:8cqw; right:8cqw; bottom:6.5cqw; display:flex; justify-content:space-between; align-items:flex-end; z-index:1;}
+.c-meta{text-align:left; font-size:1.15cqw; line-height:1.7;}
+.c-meta b{display:block; font-size:0.95cqw; letter-spacing:0.12cqw; text-transform:uppercase; color:#5d5a55; font-weight:600;}
+.c-qr{width:9cqw; height:9cqw; background:#fff; padding:0.6cqw; border-radius:0.4cqw;}
+.c-qr img, .c-qr canvas{width:100% !important; height:100% !important;}
+.c-sign{text-align:center; font-size:1.1cqw;}
+.c-seal{width:8cqw; height:8cqw; border-radius:50%; border:0.35cqw solid var(--acc); display:grid; place-items:center; margin:0 auto 0.8cqw; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:1.05cqw; letter-spacing:0.2cqw; color:var(--acc);}
+.cert.has-art .c-seal{visibility:hidden;}
+.c-sign span{display:block; border-top:0.12cqw solid #1C1A1E; padding-top:0.5cqw; min-width:16cqw;}
+.cert-note{font-size:0.875rem; color:var(--muted); text-align:center; margin-top:1rem;}
+@media print{
+  @page{size:A4 landscape; margin:0;}
+  body{background:#fff !important;}
+  .ksb-rail, .ksb-edge, .page-header, .cert-tools, .cert-note, .k-footer, footer, .ksb-overlay{display:none !important;}
+  .cert-wrap{max-width:none; margin:0; padding:0;}
+  .cert{width:297mm; height:210mm; border-radius:0; box-shadow:none; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+}
+</style>
+</head>
+<body>
+<header class="page-header"><span class="page-title">Certificate</span></header>
+<main class="cert-wrap" id="certApp"><p class="cert-note">Loading certificate</p></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="supabase-config.js"></script>
+<script src="config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+(async function () {
+  var app = document.getElementById('certApp'), esc = window.kojohEsc;
+  var code = (new URLSearchParams(location.search).get('id') || '').trim().toUpperCase();
+  function fail(m) { app.innerHTML = '<div class="empty-state"><h3>Certificate not found</h3><p>' + esc(m) + '</p></div>'; }
+  if (!/^KJ-[A-Z0-9]{8}$/.test(code)) return fail('Check the certificate ID. It looks like KJ-1A2B3C4D.');
+  var r = await window.kojohSupa().from('practice_certificates').select('code, name, role, role_title, level, skipped, score, issued_at, status').eq('code', code).eq('status', 'issued').maybeSingle();
+  if (r.error || !r.data) return fail('There is no issued certificate with ID ' + code + '.');
+  var c = r.data, lvName = { beginner: 'Beginner', intermediate: 'Intermediate', hard: 'Hard' }[c.level] || c.level;
+  var role = c.role_title || c.role.replace(/-/g, ' ').replace(/\b\w/g, function (x) { return x.toUpperCase(); });
+  var url = 'https://www.kojohhi.com/certificate?id=' + c.code;
+  document.title = 'KOJOH | ' + c.name + ', ' + role + ' ' + lvName;
+  app.innerHTML = '<div class="cert-tools"><button class="k-btn" type="button" id="cCopy">Copy link</button>'
+    + '<a class="k-btn" target="_blank" rel="noopener" href="https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=' + encodeURIComponent('KOJOH Practice: ' + role + ', ' + lvName) + '&organizationName=KOJOH&issueYear=' + new Date(c.issued_at).getFullYear() + '&issueMonth=' + (new Date(c.issued_at).getMonth() + 1) + '&certUrl=' + encodeURIComponent(url) + '&certId=' + c.code + '">Add to LinkedIn</a>'
+    + '<button class="k-btn k-btn-brand" type="button" onclick="window.print()">Download PDF</button></div>'
+    + '<div class="cert plain lv-' + esc(c.level) + '" id="cert"><div class="cert-in">'
+    + '<div class="c-brand">KOJOH</div><div class="c-kind">Certificate of completion</div>'
+    + '<div class="c-pre">This certifies that</div><div class="c-name">' + esc(c.name) + '</div>'
+    + '<div class="c-what">' + (c.skipped ? 'has unlocked the' : 'has completed the') + ' <b>' + esc(lvName) + ' level</b> of KOJOH Practice for <b>' + esc(role) + '</b>'
+    + (c.skipped ? '.' : ', solving real business questions on a full case project.') + '</div>'
+    + (c.skipped ? '<div class="c-score"><small>Level unlocked</small></div>' : '<div class="c-score">' + c.score + '%<small>Final score</small></div>')
+    + '</div><div class="c-foot"><div class="c-meta"><b>Issued</b>' + new Date(c.issued_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
+    + '<b style="margin-top:0.6cqw">Certificate ID</b>' + esc(c.code) + '<br>kojohhi.com/certificate</div>'
+    + '<div class="c-qr" id="cQr"></div><div class="c-sign"><div class="c-seal">VERIFIED</div><span>Founder, KOJOH</span></div></div></div>'
+    + '<p class="cert-note">Anyone can verify this certificate at ' + esc(url) + '</p>';
+  try { new QRCode(document.getElementById('cQr'), { text: url, width: 256, height: 256, correctLevel: QRCode.CorrectLevel.M }); } catch (e) {}
+  var art = new Image();
+  art.onload = function () { var el = document.getElementById('cert'); el.style.backgroundImage = 'url(' + art.src + ')'; el.classList.remove('plain'); el.classList.add('has-art'); };
+  art.src = '/assets/cert/' + c.level + '.png';
+  document.getElementById('cCopy').onclick = function () { try { navigator.clipboard.writeText(url); this.textContent = 'Copied'; } catch (e) {} };
+})();
+</script>
+</body>
+</html>

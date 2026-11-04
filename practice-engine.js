@@ -58,11 +58,11 @@
     var e = await KP.sqlReady();
     for (var i = 0; i < files.length; i++) {
       var f = files[i], name = safeName(f.name);
-      if (sqlTables[name] === f.url) continue;
+      if (sqlTables[name] === (f.key || f.url)) continue;
       var text = await fetchText(f.url);
       await e.db.registerFileText(name + '.csv', text);
       await e.conn.query('CREATE OR REPLACE TABLE "' + name + '" AS SELECT * FROM read_csv_auto(\'' + name + '.csv\', header = true)');
-      sqlTables[name] = f.url;
+      sqlTables[name] = f.key || f.url;
     }
   };
 
@@ -266,11 +266,11 @@
   };
   KP.pyLoad = async function (files) {
     await KP.pyReady();
-    var need = files.filter(function (f) { safeName(f.name); return pyLoaded[f.name] !== f.url; });
+    var need = files.filter(function (f) { safeName(f.name); return pyLoaded[f.name] !== (f.key || f.url); });
     if (!need.length) return;
     var arr = await Promise.all(need.map(async function (f) { return { name: f.name, text: await fetchText(f.url) }; }));
     await pyCall('load', { files: arr });
-    need.forEach(function (f) { pyLoaded[f.name] = f.url; });
+    need.forEach(function (f) { pyLoaded[f.name] = f.key || f.url; });
   };
   KP.pyRun = async function (code) {
     await KP.pyReady();
@@ -281,6 +281,8 @@
 
   // ------------------------------------------------------------------ one entry point
   KP.load = function (tool, files) { return tool === 'python' ? KP.pyLoad(files) : KP.sqlLoad(files); };
+  // ------------------------------------------------------------------ word count for written answers
+  KP.words = function (txt) { var m = String(txt || '').trim().match(/\S+/g); return m ? m.length : 0; };
   KP.run = function (tool, code) { return tool === 'python' ? KP.pyRun(code) : KP.sqlRun(code); };
 
   // ------------------------------------------------------------------ fingerprints
@@ -314,7 +316,7 @@
   // ------------------------------------------------------------------ publishing (admin)
   // src: { id, short, title, company, story, tables:[{name,file,about}], tasks:[{id,tool,level,title,question,solution,hint,ordered,points,starter,explain}] }
   // Runs every solution, stores its fingerprint, and splits into a free pack (first freeN per tool open) and a pro pack.
-  var PUBLIC = ['id', 'n', 'tool', 'level', 'title', 'points', 'question', 'hint', 'starter', 'tables', 'ordered', 'hash', 'rows', 'cols', 'fields', 'checklist'];
+  var PUBLIC = ['id', 'n', 'tool', 'level', 'title', 'points', 'question', 'hint', 'starter', 'tables', 'ordered', 'hash', 'rows', 'cols', 'fields', 'checklist', 'word_limit', 'guidance', 'stage'];
   var ANSWER_TOOLS = ['excel', 'powerbi'];
   KP.isAnswerTool = function (tool) { return ANSWER_TOOLS.indexOf(tool) >= 0; };
   function pretty(c) { c = String(c).replace(/_/g, ' '); return c.charAt(0).toUpperCase() + c.slice(1); }
@@ -325,7 +327,11 @@
     function isFree(t) { return t.n <= (KP.isAnswerTool(t.tool) ? freeBI : freeN); }
     var v = opts.v || Date.now();
     var say = opts.onProgress || function () {};
-    var files = src.tables.map(function (t) { return { name: t.name, url: opts.dataBase + t.file + '?v=' + (t.v || v) }; });
+    var files = [];
+    for (var fi = 0; fi < src.tables.length; fi++) {
+      var tb = src.tables[fi];
+      files.push({ name: tb.name, key: tb.file, url: opts.urlFor ? await opts.urlFor(tb) : opts.dataBase + tb.file + '?v=' + (tb.v || v) });
+    }
     say('Loading tables');
     await KP.sqlLoad(files);
     var tables = [];
@@ -333,7 +339,7 @@
       var t = src.tables[i];
       var d = await KP.sqlRun('DESCRIBE "' + t.name + '"');
       var c = await KP.sqlRun('SELECT COUNT(*) AS n FROM "' + t.name + '"');
-      tables.push({ name: t.name, file: t.file, about: t.about || '', v: t.v || v, rows: c.rows[0][0],
+      tables.push({ name: t.name, file: t.file, private: !!t.private, about: t.about || '', v: t.v || v, rows: c.rows[0][0],
                     columns: d.rows.map(function (r) { return [r[0], r[1]]; }) });
     }
     var skip = opts.skipTools || [];
@@ -347,6 +353,10 @@
       task.tables = src.tables.map(function (x) { return x.name; }).filter(function (n) {
         return new RegExp('\\b' + n + '\\b').test(task.solution || '');
       });
+      if (task.tool === 'written') {
+        task.word_limit = task.word_limit || 200; task.hash = 'written';
+        done.push(task); continue;
+      }
       if (skip.indexOf(task.tool) < 0) {
         say('Checking ' + task.id + ' (' + (k + 1) + ' of ' + src.tasks.length + ')');
         try {
@@ -374,6 +384,27 @@
       done.push(task);
     }
     var meta = { id: src.id, short: src.short, title: src.title, company: src.company, story: src.story, tables: tables, v: v };
+    if (opts.levelMode) {
+      // One sequence per level: n is the position in the level; only the first freeN non-download tasks of the free level are open.
+      done.forEach(function (t, i) { t.n = i + 1; });
+      var freeIds = {}, cnt = 0;
+      if (opts.freeLevel) for (var fq = 0; fq < done.length && cnt < freeN; fq++) {
+        if (KP.isAnswerTool(done[fq].tool)) break;   // the free run stops before the first download task
+        freeIds[done[fq].id] = 1; cnt++;
+      }
+      var pk = function (t, full) {
+        var o = {}; PUBLIC.forEach(function (f) { if (t[f] !== undefined) o[f] = t[f]; });
+        if (full) { if (!KP.isAnswerTool(t.tool) && t.tool !== 'written') o.solution = t.solution; if (t.explain) o.explain = t.explain; if (t.answer_values) o.answer_values = t.answer_values; }
+        return o;
+      };
+      var pubTables = tables.map(function (t) { var o = Object.assign({}, t); if (o.private) delete o.file; return o; });
+      return { v: v, errors: errors,
+        free: Object.assign({}, meta, { tables: opts.freeLevel ? pubTables : tables.map(function (t) { return { name: t.name, about: t.about, rows: t.rows, columns: t.columns }; }),
+          tasks: done.filter(function (t) { return freeIds[t.id]; }).map(function (t) { return pk(t, false); }), more: done.length > Object.keys(freeIds).length }),
+        pro: Object.assign({}, meta, { tasks: done.map(function (t) { return pk(t, true); }) }),
+        src: Object.assign({}, src, { tasks: done.map(function (t) { var o = Object.assign({}, t); delete o.n; return o; }) }),
+        count: done.length };
+    }
     function pick(t, full) {
       var o = {}; PUBLIC.forEach(function (f) { if (t[f] !== undefined) o[f] = t[f]; });
       if (full) {

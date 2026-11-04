@@ -65,8 +65,23 @@ Deno.serve(async (req) => {
     const alreadyPaid = p.status === "paid";
     await admin.from("payments").update({ razorpay_payment_id, status: "paid", paid_at: new Date().toISOString() }).eq("id", p.id);
 
-    let lic: any = null, passExpires: string | null = null;
-    if (p.kind === "pass") {
+    let lic: any = null, passExpires: string | null = null, unlocked: any = null;
+    if (p.kind === "skip") {
+      const m = p.meta || {};
+      const order = ["beginner", "intermediate", "hard"];
+      const prev = order[order.indexOf(m.level) - 1];
+      await admin.from("practice_level_unlocks").upsert({ user_id: user.id, role: m.role, level: m.level });
+      // The skipped level still gets a certificate, marked as unlocked, with no score.
+      const { data: pr } = await admin.from("profiles").select("first_name, last_name, username").eq("id", user.id).maybeSingle();
+      const name = [pr?.first_name, pr?.last_name].filter(Boolean).join(" ") || pr?.username || "KOJOH learner";
+      const { data: have } = await admin.from("practice_certificates").select("id").eq("user_id", user.id).eq("role", m.role).eq("level", prev).maybeSingle();
+      if (!have && prev) {
+        const code = "KJ-" + crypto.randomUUID().replace(/-/g, "").slice(0, 8).toUpperCase();
+        await admin.from("practice_certificates").insert({ code, user_id: user.id, name, role: m.role, role_title: m.role_title || null, level: prev,
+          status: "issued", skipped: true, issued_at: new Date().toISOString() });
+      }
+      unlocked = { role: m.role, level: m.level };
+    } else if (p.kind === "pass") {
       // Extend from today, or from the current expiry if the pass is still running. Only once per payment.
       const { data: cur } = await admin.from("practice_passes").select("expires_at").eq("user_id", user.id).maybeSingle();
       passExpires = cur?.expires_at ?? null;
@@ -107,7 +122,7 @@ Deno.serve(async (req) => {
         }
       } catch (_) { /* never fail a paid order because of the reward */ }
     }
-    return json({ ok: true, license_code: lic?.license_code, pass_expires_at: passExpires, reward });
+    return json({ ok: true, license_code: lic?.license_code, pass_expires_at: passExpires, unlocked, reward });
   } catch (e) {
     return json({ error: String((e as Error)?.message ?? e) }, 500);
   }

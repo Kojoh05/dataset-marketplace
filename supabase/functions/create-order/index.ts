@@ -16,6 +16,9 @@ const PASSES: Record<string, { days: number; price: number; label: string }> = {
   "365": { days: 365, price: 1499, label: "KOJOH Practice pass, 1 year" },
 };
 
+const SKIP_PRICE = 99; // pay to skip straight to the next Practice level
+const LEVELS = ["beginner", "intermediate", "hard"];
+
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors, "Content-Type": "application/json" } });
 
@@ -33,8 +36,32 @@ Deno.serve(async (req) => {
     const { data: { user } } = await userClient.auth.getUser();
     if (!user) return json({ error: "Please sign in again." }, 401);
 
-    const { dataset_id, code, quote, pass } = await req.json();
+    const { dataset_id, code, quote, pass, skip } = await req.json();
     const admin = createClient(url, service);
+
+    if (skip && skip.role && skip.level) {
+      const role = String(skip.role).replace(/[^a-z0-9-]/g, "").slice(0, 60);
+      const level = String(skip.level);
+      if (LEVELS.indexOf(level) < 1) return json({ error: "Only Intermediate and Hard can be unlocked." }, 400);
+      const { data: pas } = await admin.from("practice_passes").select("expires_at").eq("user_id", user.id).gt("expires_at", new Date().toISOString()).maybeSingle();
+      if (!pas) return json({ error: "Skipping a level needs an active Practice pass." }, 400);
+      const { data: has } = await admin.from("practice_level_unlocks").select("level").eq("user_id", user.id).eq("role", role).eq("level", level).maybeSingle();
+      if (has) return json({ error: "This level is already unlocked." }, 400);
+      const amount = SKIP_PRICE * 100;
+      if (quote) return json({ quote: true, amount, list_price: SKIP_PRICE });
+      const r = await fetch("https://api.razorpay.com/v1/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: "Basic " + btoa(`${keyId}:${keySecret}`) },
+        body: JSON.stringify({ amount, currency: "INR", receipt: ("kojoh_" + crypto.randomUUID()).slice(0, 40),
+                               notes: { user_id: user.id, skip_role: role, skip_level: level } }),
+      });
+      const o = await r.json();
+      if (!r.ok) return json({ error: o?.error?.description ?? "Could not create the order." }, 502);
+      const ins = await admin.from("payments").insert({ user_id: user.id, dataset_id: null, kind: "skip", meta: { role, level, role_title: String(skip.role_title || "").slice(0, 80) },
+        amount_paise: amount, razorpay_order_id: o.id, status: "created" });
+      if (ins.error) return json({ error: ins.error.message }, 500);
+      return json({ order_id: o.id, amount, currency: "INR", key_id: keyId, title: "KOJOH Practice: unlock " + level + " level", email: user.email });
+    }
 
     if (pass !== undefined && pass !== null && pass !== "") {
       const pl = PASSES[String(pass)];
