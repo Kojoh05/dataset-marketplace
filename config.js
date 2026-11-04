@@ -339,6 +339,8 @@ window.kojohInitials = function(first, last, username, email){
   return '?';
 };
 window.kojohPaintAvatars = function(me){
+  var wn = document.getElementById('welcomeName');
+  if (wn) wn.textContent = (me && (me.first || me.name)) || 'there';
   ['navAvatar', 'navAvatarMobile', 'panelAvatar'].forEach(function(id){
     var el = document.getElementById(id);
     if (!el) return;
@@ -353,12 +355,13 @@ window.kojohLoadMe = function(){
   if (!s) return Promise.resolve(null);
   return s.auth.getSession().then(function(r){
     var u = r.data && r.data.session && r.data.session.user;
-    if (!u) { if (window.kojohSetMe) window.kojohSetMe(null); return null; }
+    if (!u) { if (window.kojohSetMe) window.kojohSetMe(null); window.kojohPaintAvatars(null); return null; }
     return s.from('profiles').select('first_name, last_name, username, avatar_url').eq('id', u.id).maybeSingle()
       .then(function(p){ return p.error ? s.from('profiles').select('first_name, last_name, username').eq('id', u.id).maybeSingle() : p; })
       .then(function(p){
         var d = (p && p.data) || {};
         var me = {
+          first: d.first_name || d.username || (u.email || '').split('@')[0] || '',
           name: [d.first_name, d.last_name].filter(Boolean).join(' ') || d.username || (u.email || '').split('@')[0] || 'Member',
           initials: window.kojohInitials(d.first_name, d.last_name, d.username, u.email),
           avatar: d.avatar_url || ''
