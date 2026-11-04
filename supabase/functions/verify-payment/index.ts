@@ -10,6 +10,14 @@ const cors = {
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors, "Content-Type": "application/json" } });
 
+const CODE_PCT = 10;      // reward code: % off MRP on the next project
+const CODE_DAYS = 7;      // reward code lifetime
+const ALPHA = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+function makeCode() {
+  const b = new Uint8Array(6); crypto.getRandomValues(b);
+  return "KOJOH-" + [...b].map((x) => ALPHA[x % ALPHA.length]).join("");
+}
+
 async function hmacHex(secret: string, message: string) {
   const enc = new TextEncoder();
   const key = await crypto.subtle.importKey("raw", enc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
@@ -59,7 +67,31 @@ Deno.serve(async (req) => {
       p_user: user.id, p_dataset: p.dataset_id, p_price: p.amount_paise / 100, p_ref: razorpay_payment_id,
     });
     if (error) return json({ error: "Paid, but the license could not be issued: " + error.message + ". Contact support with payment " + razorpay_payment_id }, 500);
-    return json({ ok: true, license_code: lic?.license_code });
+
+    // Mark the reward code used on this order as redeemed (only now that payment succeeded).
+    if (p.discount_code_id) {
+      await admin.from("discount_codes").update({ redeemed_at: new Date().toISOString(), redeemed_payment_id: p.id })
+        .eq("id", p.discount_code_id).is("redeemed_at", null);
+    }
+
+    // Every paid purchase earns one new code: 1 use, valid for 7 days. One active code per user at a time.
+    let reward: { code: string; percent: number; expires_at: string } | null = null;
+    if (p.amount_paise > 0) {
+      try {
+        const { data: have } = await admin.from("discount_codes").select("code, percent, expires_at").eq("source_payment_id", p.id).maybeSingle();
+        if (have) reward = have as any;
+        else {
+          await admin.from("discount_codes").delete().eq("user_id", user.id).is("redeemed_at", null);
+          const expires_at = new Date(Date.now() + CODE_DAYS * 86400000).toISOString();
+          for (let i = 0; i < 5 && !reward; i++) {
+            const code = makeCode();
+            const ins = await admin.from("discount_codes").insert({ code, user_id: user.id, source_payment_id: p.id, percent: CODE_PCT, expires_at });
+            if (!ins.error) reward = { code, percent: CODE_PCT, expires_at };
+          }
+        }
+      } catch (_) { /* never fail a paid order because of the reward */ }
+    }
+    return json({ ok: true, license_code: lic?.license_code, reward });
   } catch (e) {
     return json({ error: String((e as Error)?.message ?? e) }, 500);
   }

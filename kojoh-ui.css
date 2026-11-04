@@ -930,3 +930,17 @@ h2.chal-phase-head{display:flex; align-items:center; justify-content:space-betwe
 .k-artask-box p{margin:0 0 1rem; color:var(--muted); font-size:0.9rem; line-height:1.6;}
 .k-artask-row{display:flex; gap:0.6rem; justify-content:center; margin-bottom:0.8rem;}
 .k-artask-skip{background:none; border:0; color:var(--muted); font-size:0.8rem; cursor:pointer; text-decoration:underline;}
+
+/* ---- reward code / member discount in checkout ---- */
+.k-code{margin:0 0 1rem;}
+.k-code-row{display:flex; gap:0.5rem;}
+.k-code-row input{flex:1; min-width:0; font:inherit; font-size:0.875rem; letter-spacing:0.04em; text-transform:uppercase; padding:0.6rem 0.8rem; border:1px solid var(--line, rgba(128,128,128,.35)); border-radius:var(--radius-sm, 8px); background:transparent; color:var(--text);}
+.k-code-row input:focus{outline:2px solid var(--brand); outline-offset:1px;}
+.k-code-msg{font-size:0.75rem; margin-top:0.4rem; color:var(--muted); line-height:1.5; min-height:1em;}
+.k-code-msg.k-ok{color:var(--text); font-weight:600;}
+.k-order-disc span:last-child{font-weight:700;}
+.k-reward{display:flex; align-items:center; justify-content:space-between; gap:0.75rem; border:1px dashed var(--brand); border-radius:var(--radius); padding:0.85rem 1rem; margin:0.25rem 0 1.1rem;}
+.k-reward-code{font-size:1.35rem; font-weight:700; letter-spacing:0.08em; font-family:ui-monospace,Menlo,Consolas,monospace;}
+.k-rewardcard{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:0.75rem 1rem; border:1px dashed var(--brand); border-radius:var(--radius); padding:1rem 1.1rem; margin:0 0 1.25rem;}
+.k-rewardcard h3{margin:0 0 0.2rem; font-size:0.95rem;}
+.k-rewardcard p{margin:0; font-size:0.8125rem; color:var(--muted);}

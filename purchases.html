@@ -88,8 +88,17 @@
     var r = await Promise.all([
       SUPA.from('purchases').select('dataset_id, price_paid, purchased_at, datasets(title, short_description, slug, storage_path, difficulty)').order('purchased_at', { ascending: false }),
       SUPA.from('dataset_licenses').select('id, dataset_id, license_code, task_pack').eq('claimed_by', uid),
-      SUPA.from('challenge_submissions').select('license_id, status, points')
+      SUPA.from('challenge_submissions').select('license_id, status, points'),
+      SUPA.from('discount_codes').select('code, percent, expires_at').is('redeemed_at', null).gt('expires_at', new Date().toISOString()).order('expires_at', { ascending: false }).limit(1)
     ]);
+    var rw = (r[3] && !r[3].error && r[3].data && r[3].data[0]) || null;
+    var rewardHtml = '';
+    if (rw) {
+      var left = new Date(rw.expires_at) - Date.now(), dd = Math.floor(left / 86400000), hh = Math.floor((left % 86400000) / 3600000);
+      rewardHtml = '<div class="k-rewardcard"><div><h3>Your ' + esc(rw.percent) + '% code for your next project</h3>'
+        + '<p>One use only. Expires in ' + (dd > 0 ? dd + ' day' + (dd === 1 ? '' : 's') + ' ' : '') + hh + ' hr. Applied automatically at checkout.</p></div>'
+        + '<span class="k-reward-code">' + esc(rw.code) + '</span></div>';
+    }
     var res = r[0];
     if (res.error) { empty(kIcon('alert'), 'Could not load', esc(res.error.message)); return; }
     var lics = {}; ((r[1] && r[1].data) || []).forEach(function(l){ lics[l.dataset_id] = l; });
@@ -101,7 +110,7 @@
       return;
     }
 
-    el.innerHTML = '<div class="k-lib">' + rows.map(function(row){
+    el.innerHTML = rewardHtml + '<div class="k-lib">' + rows.map(function(row){
       var d = row.datasets;
       var lic = lics[row.dataset_id];
       var sub = lic ? subs[lic.id] : null;

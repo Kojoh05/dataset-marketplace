@@ -99,9 +99,17 @@ window.kojohMrp = function(d){
   return (m && m > Number(d.price)) ? m : 0;
 };
 window.kojohIsRepeat = function(){ return document.documentElement.classList.contains('k-repeat'); };
+// Practice-pass members get this % off MRP on later purchases (never below the offer price). Server enforces it too.
+window.kojohMemberPct = 20;
+window.kojohIsMember = function(){ return document.documentElement.classList.contains('k-member'); };
+window.kojohMemberPrice = function(d){
+  var offer = Number(d.price) || 0, mrp = window.kojohMrp(d);
+  return mrp ? Math.max(offer, Math.round(mrp * (100 - window.kojohMemberPct) / 100)) : offer;
+};
 window.kojohPriceFor = function(d){
   var mrp = window.kojohMrp(d);
-  return (mrp && window.kojohIsRepeat()) ? mrp : Number(d.price) || 0;
+  if (mrp && window.kojohIsRepeat()) return window.kojohIsMember() ? window.kojohMemberPrice(d) : mrp;
+  return Number(d.price) || 0;
 };
 window.kojohMoney = function(d){
   if (!d) return '';
@@ -110,18 +118,26 @@ window.kojohMoney = function(d){
   if (!mrp) return p;
   var m = '&#8377;' + mrp.toFixed(0);
   return '<span class="k-price"><span class="k-p-offer"><s class="k-mrp">' + m + '</s> ' + p + '</span>'
-    + '<span class="k-p-full">' + m + '</span></span>';
+    + '<span class="k-p-full">' + m + '</span>'
+    + '<span class="k-p-mem"><s class="k-mrp">' + m + '</s> &#8377;' + window.kojohMemberPrice(d).toFixed(0) + '</span></span>';
 };
 (function(){
   var KEY = 'kojoh-repeat-buyer';
+  var MKEY = 'kojoh-member';
   function set(v){
     document.documentElement.classList.toggle('k-repeat', !!v);
     try { localStorage.setItem(KEY, v ? '1' : '0'); } catch(e){}
   }
+  function setMember(v){
+    document.documentElement.classList.toggle('k-member', !!v);
+    try { localStorage.setItem(MKEY, v ? '1' : '0'); } catch(e){}
+  }
   try { if (localStorage.getItem(KEY) === '1') document.documentElement.classList.add('k-repeat'); } catch(e){}
+  try { if (localStorage.getItem(MKEY) === '1') document.documentElement.classList.add('k-member'); } catch(e){}
   if (!document.getElementById('kPriceCss')) {
     var st = document.createElement('style'); st.id = 'kPriceCss';
-    st.textContent = '.k-mrp{opacity:.55;font-weight:500;margin-right:.15em}.k-p-full{display:none}'
+    st.textContent = '.k-mrp{opacity:.55;font-weight:500;margin-right:.15em}.k-p-full,.k-p-mem{display:none}'
+      + 'html.k-repeat.k-member .k-p-full{display:none}html.k-repeat.k-member .k-p-mem{display:inline}'
       + 'html.k-repeat .k-p-offer{display:none}html.k-repeat .k-p-full{display:inline}'
       + '.k-offer-badge{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.02em;padding:.2rem .55rem;border-radius:999px;background:var(--text);color:var(--bg);vertical-align:middle}'
       + 'html.k-repeat .k-offer-badge{display:none}';
@@ -132,9 +148,12 @@ window.kojohMoney = function(d){
     if (!s) return Promise.resolve();
     return s.auth.getSession().then(function(r){
       var u = r.data && r.data.session && r.data.session.user;
-      if (!u) { set(false); return; }
-      return s.from('purchases').select('id', { count: 'exact', head: true }).eq('user_id', u.id).gt('price_paid', 0)
+      if (!u) { set(false); setMember(false); return; }
+      var pass = s.from('practice_passes').select('expires_at').eq('user_id', u.id).gt('expires_at', new Date().toISOString()).limit(1)
+        .then(function(q){ setMember(!q.error && q.data && q.data.length > 0); }, function(){ setMember(false); });
+      var buy = s.from('purchases').select('id', { count: 'exact', head: true }).eq('user_id', u.id).gt('price_paid', 0)
         .then(function(q){ if (!q.error) set((q.count || 0) > 0); });
+      return Promise.all([pass, buy]);
     }).catch(function(){});
   };
 })();

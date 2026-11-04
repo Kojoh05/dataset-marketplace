@@ -67,12 +67,38 @@
       <div class="k-order-row"><span id="payItem">Dataset</span><span id="payItemPrice"></span></div>
       <div class="k-order-row"><span>License</span><span>1 of 100, personalised</span></div>
       <div class="k-order-row"><span>Includes</span><span>Data, project.md, challenges</span></div>
+      <div class="k-order-row k-order-disc" id="payMemRow" hidden><span id="payMemLbl">Practice member</span><span id="payMemAmt"></span></div>
+      <div class="k-order-row k-order-disc" id="payCodeRow" hidden><span id="payCodeLbl">Reward code</span><span id="payCodeAmt"></span></div>
       <div class="k-order-row k-order-total"><span>Total</span><span id="payTotal"></span></div>
+    </div>
+    <div class="k-code" id="payCodeWrap" hidden>
+      <div class="k-code-row">
+        <input id="payCode" type="text" placeholder="Discount code" autocomplete="off" spellcheck="false" maxlength="20" aria-label="Discount code">
+        <button class="k-btn" id="payCodeApply" type="button">Apply</button>
+      </div>
+      <div class="k-code-msg" id="payCodeMsg" aria-live="polite"></div>
     </div>
     <div class="k-dialog-actions">
       <button class="k-btn k-btn-brand k-btn-lg k-btn-block" id="payGo" type="button">Pay and unlock</button>
     </div>
     <p class="k-dialog-note" id="payNote">Beta pricing. Nothing is charged and no card details are collected while the purchase flow is being tested.</p>
+  </div>
+</div>
+
+<!-- reward code after a purchase -->
+<div class="k-modal" id="rewardModal" hidden>
+  <div class="k-dialog">
+    <button class="k-modal-close" id="rewardClose" type="button" aria-label="Close">&#215;</button>
+    <div class="k-dialog-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.2"/>
+      </svg>
+    </div>
+    <h3 class="k-dialog-title">Your code for the next project</h3>
+    <p class="k-dialog-text" id="rewardText"></p>
+    <div class="k-reward"><span class="k-reward-code" id="rewardCode"></span><button class="k-btn" id="rewardCopy" type="button">Copy</button></div>
+    <div class="k-dialog-actions"><a class="k-btn k-btn-brand k-btn-lg k-btn-block" href="/search">Browse more projects</a></div>
+    <p class="k-dialog-note" id="rewardNote"></p>
   </div>
 </div>
 
@@ -1144,6 +1170,71 @@
       : 'Beta pricing. Nothing is charged and no card details are collected while the purchase flow is being tested.';
     document.getElementById('payGo').textContent = charged(ds) ? 'Pay ' + payAmount(ds) + ' and unlock' : (ds.is_free ? 'Unlock for free' : 'Unlock');
     openDialog('payModal');
+    if (charged(ds)) initCheckout();
+    else document.getElementById('payCodeWrap').hidden = true;
+  }
+
+  // ---- member discount + reward code (the server recomputes the price; this only shows it) ----
+  function fmtRs(n){ return '\u20B9' + Number(n).toFixed(0); }
+  async function fetchQuote(code){
+    try {
+      var o = await SUPA.functions.invoke('create-order', { body: { dataset_id: STATE.ds.id, quote: true, code: code || '' } });
+      if (o.error || !o.data || o.data.error || !o.data.quote) return null;
+      return o.data;
+    } catch (e) { return null; }
+  }
+  function paintQuote(q){
+    STATE.quote = q;
+    var ds = STATE.ds, el = function(i){ return document.getElementById(i); };
+    el('payMemRow').hidden = !(q && q.member_saving > 0);
+    el('payCodeRow').hidden = !(q && q.code_ok && q.code_saving > 0);
+    if (q) {
+      el('payItemPrice').textContent = fmtRs(q.list_price);
+      el('payMemLbl').textContent = 'Practice member, ' + q.member_pct + '% off';
+      el('payMemAmt').textContent = '\u2212' + fmtRs(q.member_saving);
+      el('payCodeLbl').textContent = 'Reward code, ' + q.code_pct + '% off';
+      el('payCodeAmt').textContent = '\u2212' + fmtRs(q.code_saving);
+      el('payTotal').textContent = fmtRs(q.amount / 100);
+    } else {
+      el('payItemPrice').innerHTML = money(ds);
+      el('payTotal').textContent = payAmount(ds);
+    }
+    var go = el('payGo');
+    if (!go.disabled) go.textContent = 'Pay ' + (q ? fmtRs(q.amount / 100) : payAmount(ds)) + ' and unlock';
+  }
+  async function applyCode(){
+    var inp = document.getElementById('payCode'), msg = document.getElementById('payCodeMsg');
+    var v = inp.value.trim().toUpperCase();
+    inp.value = v;
+    msg.className = 'k-code-msg'; msg.textContent = v ? 'Checking' : '';
+    var q = await fetchQuote(v);
+    paintQuote(q);
+    STATE.codeApplied = (q && q.code_ok) ? v : '';
+    if (!v) msg.textContent = '';
+    else if (q && q.code_ok) { msg.className = 'k-code-msg k-ok'; msg.textContent = 'Code applied: ' + q.code_pct + '% off.'; }
+    else msg.textContent = (q && q.code_msg) || 'Could not check the code. Try again.';
+  }
+  async function initCheckout(){
+    var inp = document.getElementById('payCode');
+    document.getElementById('payCodeWrap').hidden = false;
+    inp.value = ''; STATE.codeApplied = '';
+    document.getElementById('payCodeMsg').textContent = '';
+    paintQuote(null);
+    try {
+      var r = await SUPA.from('discount_codes').select('code')
+        .is('redeemed_at', null).gt('expires_at', new Date().toISOString()).order('expires_at', { ascending: false }).limit(1);
+      if (!r.error && r.data && r.data[0]) inp.value = r.data[0].code;
+    } catch (e) {}
+    await applyCode();
+  }
+  function showReward(rw){
+    if (!rw || !rw.code) return;
+    var exp = new Date(rw.expires_at);
+    var when = exp.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) + ', ' + exp.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' });
+    document.getElementById('rewardCode').textContent = rw.code;
+    document.getElementById('rewardText').textContent = 'Thanks for your purchase. Use this code to get ' + rw.percent + '% off your next project. One use only, and it expires in 7 days.';
+    document.getElementById('rewardNote').textContent = 'Valid until ' + when + '. You can always find it in Your library. A new purchase replaces any unused code.';
+    openDialog('rewardModal');
   }
 
   function openDialog(id){
@@ -1182,11 +1273,11 @@
     // Make sure the login is still valid (it can change in another tab, e.g. signing in to the admin).
     var sess = (await SUPA.auth.getSession()).data.session;
     if (!sess) throw new Error('You were signed out. Please reload the page and sign in again.');
-    var o = await SUPA.functions.invoke('create-order', { body: { dataset_id: STATE.ds.id } });
+    var o = await SUPA.functions.invoke('create-order', { body: { dataset_id: STATE.ds.id, code: STATE.codeApplied || '' } });
     if (o.error && o.error.context && o.error.context.status === 401) {
       var rf = await SUPA.auth.refreshSession();
       if (rf.error || !rf.data.session) throw new Error('Your login changed in another tab. Please reload the page and sign in again.');
-      o = await SUPA.functions.invoke('create-order', { body: { dataset_id: STATE.ds.id } });
+      o = await SUPA.functions.invoke('create-order', { body: { dataset_id: STATE.ds.id, code: STATE.codeApplied || '' } });
     }
     var od = o.data || {};
     if (o.error || od.error) {
@@ -1194,8 +1285,8 @@
       if (!msg && o.error && o.error.context && o.error.context.json) { try { msg = (await o.error.context.json()).error; } catch (e) {} }
       throw new Error(msg || 'Could not start the payment.');
     }
-    if (od.owned) return;
-    await new Promise(function(resolve, reject){
+    if (od.owned) return null;
+    return await new Promise(function(resolve, reject){
       var rz = new window.Razorpay({
         key: od.key_id, order_id: od.order_id, amount: od.amount, currency: od.currency || 'INR',
         name: 'KOJOH', description: STATE.ds.title,
@@ -1208,7 +1299,7 @@
             var m = vd.error;
             if (!m && v.error && v.error.context && v.error.context.json) { try { m = (await v.error.context.json()).error; } catch (e) {} }
             reject(new Error(m || 'Payment received but not verified. Write to us with your payment ID: ' + resp.razorpay_payment_id));
-          } else resolve();
+          } else resolve(vd.reward || null);
         },
         modal: { ondismiss: function(){ reject(new Error('Payment cancelled. Nothing was charged.')); } }
       });
@@ -1220,12 +1311,17 @@
   async function doPurchase(){
     var btn = document.getElementById('payGo');
     var note = document.getElementById('payNote');
+    if (charged(STATE.ds) && document.getElementById('payCode').value.trim().toUpperCase() !== (STATE.codeApplied || '')) {
+      await applyCode();   // show the updated total first, then they press Pay again
+      return;
+    }
+    STATE.reward = null;
     btn.disabled = true;
     btn.innerHTML = '<span class="k-spin"></span>Setting up your license';
 
     var res;
     if (charged(STATE.ds)) {
-      try { await payWithRazorpay(); res = {}; }
+      try { STATE.reward = await payWithRazorpay(); res = {}; }
       catch (e) { res = { error: { message: (e && e.message) || 'Payment did not go through.' } }; }
     } else {
       res = await SUPA.rpc('purchase_dataset', { p_dataset_id: STATE.ds.id, p_tier: 'standard' });
@@ -1266,6 +1362,7 @@
     STATE.tab = 'summary';
     render();
     if (window.kojohToast) window.kojohToast('Unlocked. Your license is ' + STATE.lic.license_code + '.');
+    if (STATE.reward) showReward(STATE.reward);
   }
 
   // ---------------------------------------------------------------- files
@@ -1429,6 +1526,14 @@
   document.getElementById('authGoLogin').addEventListener('click', function(){ goAuth('login'); });
   document.getElementById('authGoSignup').addEventListener('click', function(){ goAuth('signup'); });
   document.getElementById('payGo').addEventListener('click', doPurchase);
+  document.getElementById('payCodeApply').addEventListener('click', applyCode);
+  document.getElementById('payCode').addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); applyCode(); } });
+  document.getElementById('rewardClose').addEventListener('click', function(){ closeDialog('rewardModal'); });
+  document.getElementById('rewardCopy').addEventListener('click', function(){
+    var c = document.getElementById('rewardCode').textContent;
+    try { navigator.clipboard.writeText(c); } catch (e) {}
+    this.textContent = 'Copied';
+  });
 
   Array.prototype.forEach.call(document.querySelectorAll('.k-modal'), function(m){
     m.addEventListener('click', function(e){ if (e.target === m) closeDialog(m.id); });
