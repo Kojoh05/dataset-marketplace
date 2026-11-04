@@ -20,7 +20,8 @@
   try{
     var hasSession = !!localStorage.getItem('sb-nkohbeiwdrdgqxwzjlfi-auth-token');
     var skip = sessionStorage.getItem('kojoh_skip_welcome');
-    if(!hasSession && !skip){
+    var inUrl = /access_token=|refresh_token=|[?&]code=|type=recovery|error_description=/.test(location.hash + location.search);
+    if(!hasSession && !skip && !inUrl){
       window.location.replace('/welcome');
     }
   }catch(e){}

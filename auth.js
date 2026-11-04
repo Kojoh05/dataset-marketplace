@@ -80,8 +80,16 @@ populateCountries('India');
         document.getElementById('signupError').textContent = 'Google sign-in didn\'t complete. Please try again.';
         return;
       }
-      switchTab('signup');
       var user = session.user;
+      // Already has a KOJOH profile (they used Google before): this is a login, go straight in.
+      SUPA.from('profiles').select('id').eq('id', user.id).maybeSingle().then(function(pr){
+        if (pr && pr.data) { window.location.replace(kojohAfterAuth()); return; }
+        finishGoogleSignup(user);
+      });
+    });
+  }
+  function finishGoogleSignup(user){
+      switchTab('signup');
       var meta = user.user_metadata || {};
       googleMode = true;
       googleProfile = {
@@ -99,7 +107,6 @@ populateCountries('India');
       if (googleProfile.lastName) document.getElementById('suLastName').value = googleProfile.lastName;
       reveal('stepUsername');
       document.getElementById('passwordLabel').textContent = 'Create a password for KOJOH (used alongside Google sign-in)';
-    });
   }
 })();
 
@@ -250,7 +257,8 @@ function undoGoogle(){
 }
 function handleGoogleLogin(){
   if (LIVE) {
-    SUPA.auth.signInWithOAuth({ provider: 'google' });
+    // Same return page as sign up: it logs existing users straight in and walks new ones through the profile step.
+    SUPA.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + '/auth?google=1' } });
     return;
   }
   document.getElementById('loginError').textContent = 'Preview mode. Connect Supabase to enable real Google login.';
