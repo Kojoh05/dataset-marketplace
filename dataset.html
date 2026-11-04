@@ -1179,7 +1179,15 @@
 
   async function payWithRazorpay(){
     await loadScript('https://checkout.razorpay.com/v1/checkout.js');
+    // Make sure the login is still valid (it can change in another tab, e.g. signing in to the admin).
+    var sess = (await SUPA.auth.getSession()).data.session;
+    if (!sess) throw new Error('You were signed out. Please reload the page and sign in again.');
     var o = await SUPA.functions.invoke('create-order', { body: { dataset_id: STATE.ds.id } });
+    if (o.error && o.error.context && o.error.context.status === 401) {
+      var rf = await SUPA.auth.refreshSession();
+      if (rf.error || !rf.data.session) throw new Error('Your login changed in another tab. Please reload the page and sign in again.');
+      o = await SUPA.functions.invoke('create-order', { body: { dataset_id: STATE.ds.id } });
+    }
     var od = o.data || {};
     if (o.error || od.error) {
       var msg = od.error;
