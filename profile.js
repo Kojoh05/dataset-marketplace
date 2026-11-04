@@ -47,11 +47,13 @@
     var editLink = $('panelEditLink'); if (editLink) editLink.hidden = false;
     var emailRow = $('panelEmailRow'); if (emailRow) emailRow.style.pointerEvents = '';
     var logoutBtn = $('panelLogoutBtn'); if (logoutBtn) logoutBtn.hidden = false;
+    if (window.kojohLoadMe) window.kojohLoadMe();
     var loginBtn = $('panelLoginBtn'); if (loginBtn) loginBtn.hidden = true;
   }
 
   window.handleLogout = async function () {
     if (!LIVE) { setGuestState(); return; }
+    if (window.kojohSetMe) window.kojohSetMe(null);
     try { await SUPA.auth.signOut(); } catch (e) { console.warn('Logout error', e); }
     try { sessionStorage.removeItem('kojoh_skip_welcome'); } catch (e) {}
     window.location.href = '/welcome';

@@ -59,6 +59,18 @@
   <!-- PROFILE / USERNAME -->
   <section class="settings-section" id="profile">
     <h2 class="settings-section-title">Profile</h2>
+    <div class="settings-photo">
+      <div class="settings-photo-face" id="photoFace">?</div>
+      <div>
+        <label class="settings-label" style="margin:0 0 .35rem;">Profile photo</label>
+        <div class="settings-photo-actions">
+          <label class="settings-submit settings-photo-btn">Upload photo<input type="file" id="photoInput" accept="image/png,image/jpeg,image/webp" hidden></label>
+          <button type="button" class="settings-photo-remove" id="photoRemove" hidden>Remove</button>
+        </div>
+        <p class="settings-hint">JPG, PNG or WebP. It's cropped to a square and shown on your profile and leaderboard.</p>
+        <div class="settings-note" id="photoNote" hidden></div>
+      </div>
+    </div>
     <form class="settings-form" id="usernameForm">
       <label class="settings-label">Username</label>
       <div class="input-with-status">
@@ -110,5 +122,65 @@
 <script src="config.js"></script>
 <script src="settings.js"></script>
 <script src="forms.js"></script>
+<script>
+// Profile photo: crop to a 256px square, upload to the avatars bucket, save on the profile.
+(function(){
+  var SUPA = window.kojohSupa && window.kojohSupa();
+  if (!SUPA) return;
+  var face = document.getElementById('photoFace'), input = document.getElementById('photoInput');
+  var rm = document.getElementById('photoRemove'), note = document.getElementById('photoNote');
+  function say(msg, kind){ note.hidden = !msg; note.textContent = msg || ''; note.classList.remove('error','ok'); if (kind) note.classList.add(kind); }
+  function paint(me){
+    if (!me) return;
+    if (me.avatar) { face.innerHTML = '<img src="' + window.kojohEsc(me.avatar) + '" alt="">'; rm.hidden = false; }
+    else { face.textContent = me.initials || '?'; rm.hidden = true; }
+  }
+  window.kojohLoadMe().then(paint);
+  function squareWebp(file){
+    return new Promise(function(resolve, reject){
+      var img = new Image(), url = URL.createObjectURL(file);
+      img.onload = function(){
+        var side = Math.min(img.width, img.height), c = document.createElement('canvas');
+        c.width = c.height = 256;
+        c.getContext('2d').drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, 256, 256);
+        URL.revokeObjectURL(url);
+        c.toBlob(function(b){ b ? resolve(b) : reject(new Error('Could not read that image.')); }, 'image/webp', 0.85);
+      };
+      img.onerror = function(){ reject(new Error('That file is not an image we can read.')); };
+      img.src = url;
+    });
+  }
+  async function save(avatarUrl){
+    var u = (await SUPA.auth.getUser()).data.user;
+    var r = await SUPA.from('profiles').update({ avatar_url: avatarUrl }).eq('id', u.id);
+    if (r.error) throw r.error;
+    var me = await window.kojohLoadMe(); paint(me);
+  }
+  input.addEventListener('change', async function(){
+    var f = input.files && input.files[0]; input.value = '';
+    if (!f) return;
+    if (f.size > 8 * 1024 * 1024) { say('Please pick an image under 8 MB.', 'error'); return; }
+    say('Uploading…');
+    try {
+      var u = (await SUPA.auth.getUser()).data.user;
+      if (!u) throw new Error('Please sign in again.');
+      var blob = await squareWebp(f);
+      var path = u.id + '/avatar-' + Date.now() + '.webp';
+      var up = await SUPA.storage.from('avatars').upload(path, blob, { contentType: 'image/webp', upsert: true });
+      if (up.error) throw up.error;
+      await save(SUPA.storage.from('avatars').getPublicUrl(path).data.publicUrl);
+      say('Photo updated.', 'ok');
+    } catch (e) {
+      var m = (e && e.message) || String(e);
+      if (/bucket|row-level|avatar_url|schema cache/i.test(m)) m = 'Photo uploads are not switched on yet. Run supabase/schema-avatars.sql once in Supabase.';
+      say(m, 'error');
+    }
+  });
+  rm.addEventListener('click', async function(){
+    try { await save(null); say('Photo removed.', 'ok'); } catch (e) { say((e && e.message) || 'Could not remove it.', 'error'); }
+  });
+})();
+</script>
+
 </body>
 </html>

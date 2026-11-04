@@ -344,3 +344,22 @@ body.ksb-has-rail.ksb-expanded {
     background: rgba(20, 19, 17, 0.32);
   }
 }
+
+/* Profile chip pinned to the bottom of the rail */
+.ksb-me {
+  display: flex; align-items: center; gap: 0.6rem;
+  margin: 0.25rem 0.5rem 0.9rem; padding: 0.4rem; border-radius: 12px;
+  text-decoration: none; color: var(--text, #1C1A1E); white-space: nowrap; overflow: hidden;
+  transition: background 0.15s ease;
+}
+.ksb-me:hover, .ksb-me.active { background: var(--ksb-hover); }
+.ksb-me-face {
+  flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--folder-product, #E3DDF5); color: var(--folder-product-text, #1C1A1E);
+  font-size: 0.75rem; font-weight: 700;
+}
+.ksb-me-face img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ksb-me-text { display: flex; flex-direction: column; line-height: 1.2; }
+.ksb-me-text b { font-size: 0.8125rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
+.ksb-me-text small { font-size: 0.7rem; color: var(--muted, #7A7772); }

@@ -329,6 +329,48 @@ window.kojohProfessionJobs = function(picked){
 };
 
 // ---------------------------------------------------------------------------
+// Who is signed in: name, initials and photo for the rail chip and avatars.
+// ---------------------------------------------------------------------------
+window.kojohInitials = function(first, last, username, email){
+  var a = (first || '').trim().charAt(0), b = (last || '').trim().charAt(0);
+  if (a || b) return (a + b).toUpperCase();
+  if (username) return username.slice(0, 2).toUpperCase();
+  if (email) return email.slice(0, 2).toUpperCase();
+  return '?';
+};
+window.kojohPaintAvatars = function(me){
+  ['navAvatar', 'navAvatarMobile', 'panelAvatar'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (!el) return;
+    if (me && me.avatar) {
+      el.innerHTML = '<img src="' + window.kojohEsc(me.avatar) + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;">';
+      el.style.overflow = 'hidden';
+    } else if (me) el.textContent = me.initials;
+  });
+};
+window.kojohLoadMe = function(){
+  var s = window.kojohSupa && window.kojohSupa();
+  if (!s) return Promise.resolve(null);
+  return s.auth.getSession().then(function(r){
+    var u = r.data && r.data.session && r.data.session.user;
+    if (!u) { if (window.kojohSetMe) window.kojohSetMe(null); return null; }
+    return s.from('profiles').select('first_name, last_name, username, avatar_url').eq('id', u.id).maybeSingle()
+      .then(function(p){ return p.error ? s.from('profiles').select('first_name, last_name, username').eq('id', u.id).maybeSingle() : p; })
+      .then(function(p){
+        var d = (p && p.data) || {};
+        var me = {
+          name: [d.first_name, d.last_name].filter(Boolean).join(' ') || d.username || (u.email || '').split('@')[0] || 'Member',
+          initials: window.kojohInitials(d.first_name, d.last_name, d.username, u.email),
+          avatar: d.avatar_url || ''
+        };
+        if (window.kojohSetMe) window.kojohSetMe(me);
+        window.kojohPaintAvatars(me);
+        return me;
+      });
+  }).catch(function(){ return null; });
+};
+
+// ---------------------------------------------------------------------------
 // Gender-aware character art. Male sees the boy, female sees the girl, and
 // "other" picks once (stored on profiles.art_pref). Guests see the boy.
 // ---------------------------------------------------------------------------
@@ -414,6 +456,6 @@ window.kojohProfessionJobs = function(picked){
       });
     }).catch(function(){});
   };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ window.kojohArtInit(); window.kojohRefreshBuyer(); });
-  else { window.kojohArtInit(); window.kojohRefreshBuyer(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ window.kojohArtInit(); window.kojohRefreshBuyer(); window.kojohLoadMe(); });
+  else { window.kojohArtInit(); window.kojohRefreshBuyer(); window.kojohLoadMe(); }
 })();

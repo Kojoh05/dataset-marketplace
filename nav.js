@@ -80,8 +80,36 @@
       });
     });
     html += '</nav>';
+    html += '<a class="ksb-me" id="ksbMe" data-ksb-link href="/auth" title="Log in">' + meInner(readMe()) + '</a>';
     return html;
   }
+
+  // ---------- Profile chip (bottom of the rail, on every page) ----------
+  function readMe() {
+    try { return JSON.parse(localStorage.getItem('kojoh-me') || 'null'); } catch (e) { return null; }
+  }
+  function escHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function meInner(me) {
+    var face = me && me.avatar
+      ? '<img src="' + escHtml(me.avatar) + '" alt="">'
+      : (me ? escHtml(me.initials || '?') : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>');
+    return '<span class="ksb-me-face">' + face + '</span>'
+      + '<span class="ksb-item-label ksb-me-text"><b>' + escHtml(me ? me.name : 'Log in') + '</b>'
+      + '<small>' + (me ? 'Profile and settings' : 'or create an account') + '</small></span>';
+  }
+  function paintMe(me) {
+    var a = document.getElementById('ksbMe');
+    if (!a) return;
+    a.innerHTML = meInner(me);
+    a.setAttribute('href', me ? '/settings#profile' : '/auth');
+    a.setAttribute('title', me ? me.name : 'Log in');
+    a.classList.toggle('active', !!me && currentFile() === '/settings');
+  }
+  // Pages with Supabase call this once they know who is signed in (null = guest).
+  window.kojohSetMe = function (me) {
+    try { if (me) localStorage.setItem('kojoh-me', JSON.stringify(me)); else localStorage.removeItem('kojoh-me'); } catch (e) {}
+    paintMe(me);
+  };
 
   function applyExpandedState(expanded) {
     var rail = document.getElementById('ksbRail');
