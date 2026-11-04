@@ -314,10 +314,15 @@
   // ------------------------------------------------------------------ publishing (admin)
   // src: { id, short, title, company, story, tables:[{name,file,about}], tasks:[{id,tool,level,title,question,solution,hint,ordered,points,starter,explain}] }
   // Runs every solution, stores its fingerprint, and splits into a free pack (first freeN per tool open) and a pro pack.
-  var PUBLIC = ['id', 'n', 'tool', 'level', 'title', 'points', 'question', 'hint', 'starter', 'tables', 'ordered', 'hash', 'rows', 'cols'];
+  var PUBLIC = ['id', 'n', 'tool', 'level', 'title', 'points', 'question', 'hint', 'starter', 'tables', 'ordered', 'hash', 'rows', 'cols', 'fields', 'checklist'];
+  var ANSWER_TOOLS = ['excel', 'powerbi'];
+  KP.isAnswerTool = function (tool) { return ANSWER_TOOLS.indexOf(tool) >= 0; };
+  function pretty(c) { c = String(c).replace(/_/g, ' '); return c.charAt(0).toUpperCase() + c.slice(1); }
   KP.buildPacks = async function (src, opts) {
     opts = opts || {};
     var freeN = opts.freeN === undefined ? 5 : opts.freeN;
+    var freeBI = opts.freeBI === undefined ? 3 : opts.freeBI;
+    function isFree(t) { return t.n <= (KP.isAnswerTool(t.tool) ? freeBI : freeN); }
     var v = opts.v || Date.now();
     var say = opts.onProgress || function () {};
     var files = src.tables.map(function (t) { return { name: t.name, url: opts.dataBase + t.file + '?v=' + (t.v || v) }; });
@@ -346,6 +351,21 @@
         say('Checking ' + task.id + ' (' + (k + 1) + ' of ' + src.tasks.length + ')');
         try {
           var res = await KP.run(task.tool, task.solution);
+          if (KP.isAnswerTool(task.tool)) {
+            if (res.rows.length !== 1) throw new Error('The answer query must return exactly one row, one column per answer. It returned ' + res.rows.length + ' rows.');
+            var labels = task.labels || [];
+            task.fields = [];
+            for (var q = 0; q < res.columns.length; q++) {
+              var val = res.rows[0][q], f = { key: res.columns[q], label: labels[q] || pretty(res.columns[q]), hash: await KP.answerHash(val) };
+              var num = typeof val === 'number' ? val : NaN;
+              if (isFinite(num) && Math.abs(num) >= 1000) f.hash0 = await KP.answerHash(Math.round(num));
+              task.fields.push(f);
+            }
+            task.answer_values = res.rows[0];
+            task.hash = 'answers'; task.rows = 1; task.cols = res.columns.length;
+            done.push(task);
+            continue;
+          }
           var fp = await KP.fingerprint(res, task.ordered);
           task.hash = fp.hash; task.rows = fp.rows; task.cols = fp.cols;
           if (!fp.rows) errors.push({ id: task.id, error: 'Solution returns no rows. Learners can never match an empty answer by mistake, but check it is intended.', warn: true });
@@ -356,18 +376,46 @@
     var meta = { id: src.id, short: src.short, title: src.title, company: src.company, story: src.story, tables: tables, v: v };
     function pick(t, full) {
       var o = {}; PUBLIC.forEach(function (f) { if (t[f] !== undefined) o[f] = t[f]; });
-      if (full) { o.solution = t.solution; if (t.explain) o.explain = t.explain; }
+      if (full) {
+        if (!KP.isAnswerTool(t.tool)) o.solution = t.solution;
+        if (t.explain) o.explain = t.explain;
+        if (t.answer_values) o.answer_values = t.answer_values;
+      }
       return o;
     }
     var free = Object.assign({}, meta, { tasks: done.map(function (t) {
-      return t.n <= freeN ? pick(t, false) : { id: t.id, n: t.n, tool: t.tool, level: t.level, title: t.title, points: t.points, locked: true };
+      return isFree(t) ? pick(t, false) : { id: t.id, n: t.n, tool: t.tool, level: t.level, title: t.title, points: t.points, locked: true };
     }) });
     var pro = Object.assign({}, meta, { tasks: done.map(function (t) { return pick(t, true); }) });
     var cleanSrc = Object.assign({}, src, { tables: src.tables.map(function (t) { return { name: t.name, file: t.file, about: t.about || '', v: t.v || v }; }),
       tasks: done.map(function (t) { var o = Object.assign({}, t); delete o.n; return o; }) });
     return { v: v, errors: errors, free: free, pro: pro, src: cleanSrc,
              summary: { id: src.id, short: src.short, title: src.title, company: src.company, v: v, tasks: done.length,
-                        free: done.filter(function (t) { return t.n <= freeN; }).length } };
+                        free: done.filter(isFree).length } };
+  };
+
+  // ------------------------------------------------------------------ typed answers (Excel / Power BI)
+  function normAns(v) {
+    if (v === null || v === undefined) return '';
+    if (typeof v === 'number' || typeof v === 'bigint' || typeof v === 'boolean') return normVal(v);
+    var raw = String(v).trim();
+    var s = raw.replace(/^(rs\.?|inr)\s*/i, '').replace(/[\u20B9,%\s]/g, '');
+    if (/^-?\d+(\.\d+)?$/.test(s)) return normVal(Number(s));
+    return raw.toLowerCase().replace(/\s+/g, ' ');
+  }
+  KP.sha = async function (txt) {
+    var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(txt));
+    return Array.prototype.map.call(new Uint8Array(buf), function (b) { return ('0' + b.toString(16)).slice(-2); }).join('');
+  };
+  KP.answerHash = function (v) { return KP.sha('ans:' + JSON.stringify(normAns(v))); };
+  // values: array of typed strings, same order as task.fields. Returns [{ ok }].
+  KP.checkAnswers = async function (task, values) {
+    var out = [];
+    for (var i = 0; i < task.fields.length; i++) {
+      var f = task.fields[i], h = await KP.answerHash(values[i]);
+      out.push({ ok: !!String(values[i] || '').trim() && (h === f.hash || (f.hash0 && h === f.hash0)) });
+    }
+    return out;
   };
 
   // task: { hash, rows, cols, ordered }

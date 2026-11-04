@@ -111,3 +111,21 @@
   .pr-plan-tag{right:0.75rem;}
   .pr-kbd{display:none;}
 }
+
+/* Excel / Power BI */
+.pr-dl{display:flex; justify-content:space-between; align-items:center; gap:0.75rem 1rem; flex-wrap:wrap; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:0.85rem 1rem; margin:0 0 1rem;}
+.pr-dl strong{display:block; font-size:0.875rem;}
+.pr-dl span{font-size:0.75rem; color:var(--muted);}
+.pr-dl-btns{display:flex; flex-wrap:wrap; gap:0.4rem;}
+.pr-dl-btns .k-btn{font-size:0.75rem; padding:0.4rem 0.8rem;}
+.pr-answers{display:flex; flex-direction:column; gap:0.7rem;}
+.pr-ans{display:flex; flex-direction:column; gap:0.3rem; font-size:0.8125rem; font-weight:600;}
+.pr-ans-in{display:flex; align-items:center; gap:0.5rem;}
+.pr-ans input{flex:1; min-width:0; font:inherit; font-family:'IBM Plex Mono', monospace; font-weight:500; font-size:0.9rem; color:var(--text); background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:0.6rem 0.75rem;}
+.pr-ans input:focus{outline:2px solid var(--text); outline-offset:1px;}
+.pr-mark{width:1.4rem; text-align:center; font-size:1rem;}
+.pr-mark.no{color:var(--muted);}
+.pr-checklist{margin-top:1rem; display:flex; flex-direction:column; gap:0.45rem; font-size:0.8125rem;}
+.pr-checklist label{display:flex; gap:0.5rem; align-items:flex-start; line-height:1.45;}
+.pr-anslist{margin:0.5rem 0 0; padding-left:1.1rem; font-size:0.8125rem; line-height:1.7;}
+.pr-sol p{font-size:0.875rem; line-height:1.6; margin:0;}

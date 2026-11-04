@@ -16,8 +16,10 @@
   ];
   var TOOLS = [
     { key: 'sql', label: 'SQL' }, { key: 'python', label: 'Python' },
-    { key: 'excel', label: 'Excel', soon: true }, { key: 'viz', label: 'Visualization', soon: true }
+    { key: 'excel', label: 'Excel' }, { key: 'powerbi', label: 'Power BI' }
   ];
+  function toolLabel(k) { var t = TOOLS.filter(function (x) { return x.key === k; })[0]; return t ? t.label : k; }
+  function isAnswerTool(k) { return k === 'excel' || k === 'powerbi'; }
   var LEVELS = ['Foundations', 'Applied', 'Business case', 'Interview'];
 
   var S = {
@@ -145,7 +147,7 @@
     }
     return '<section class="pr-pass"><div><div class="pr-eyebrow">Practice pass</div>'
       + '<h3>Unlock every task in every role</h3>'
-      + '<ul class="pr-perks"><li>All SQL and Python tasks for 4 roles, from basics to interview level</li>'
+      + '<ul class="pr-perks"><li>All SQL, Python, Excel and Power BI tasks, from basics to interview level</li>'
       + '<li>Full solutions with explanations</li><li>20% off every portfolio project while your pass is active</li>'
       + '<li>One-time payment, no auto-renewal</li></ul></div>'
       + '<div class="pr-pass-plans">' + PASSES.map(function (p, i) {
@@ -193,16 +195,18 @@
           }).join('') + '</div></div>';
       }).join('') + '</details>';
     h += '<div class="pr-tabs" role="tablist">' + TOOLS.map(function (t) {
+      var has = pack.tasks.some(function (x) { return x.tool === t.key; });
       return '<button type="button" role="tab" class="pr-tab' + (t.key === S.tool ? ' on' : '') + '" data-tool="' + t.key + '">'
-        + t.label + (t.soon ? ' <span class="pr-soon">soon</span>' : '') + '</button>';
+        + t.label + (has ? '' : ' <span class="pr-soon">soon</span>') + '</button>';
     }).join('') + '</div>';
     var tool = TOOLS.filter(function (t) { return t.key === S.tool; })[0];
-    if (tool.soon) {
-      h += '<div class="empty-state pr-soonbox"><h3>' + tool.label + ' practice is coming</h3><p>'
-        + (tool.key === 'excel' ? 'Download a workbook, solve it in Excel or Google Sheets, upload it, and get it checked.' : 'Chart briefs with a scoring rubric and a model answer.')
-        + ' For now, SQL and Python are live.</p></div>';
+    if (!tasks.length) {
+      h += '<div class="empty-state pr-soonbox"><h3>' + tool.label + ' practice for ' + esc(pack.title) + ' is coming</h3><p>'
+        + (isAnswerTool(tool.key) ? 'You will download the data, build it in ' + tool.label + ', and type the numbers your work shows to get them checked.' : 'Tasks for this tool are on the way.')
+        + ' Try the other tabs meanwhile.</p></div>';
       app.innerHTML = h; return;
     }
+    if (isAnswerTool(S.tool)) h += downloadBar(pack);
     LEVELS.forEach(function (lv) {
       var list = tasks.filter(function (t) { return t.level === lv; });
       if (!list.length) return;
@@ -224,7 +228,7 @@
     document.title = 'KOJOH | ' + t.title;
     var list = pack.tasks.filter(function (x) { return x.tool === t.tool; });
     var idx = list.indexOf(t), prev = list[idx - 1], next = list[idx + 1];
-    var h = '<a class="pr-back" href="?role=' + S.role + (t.tool !== 'sql' ? '&tool=' + t.tool : '') + '" data-nav="role">' + esc(pack.title) + ' / ' + (t.tool === 'sql' ? 'SQL' : 'Python') + '</a>';
+    var h = '<a class="pr-back" href="?role=' + S.role + (t.tool !== 'sql' ? '&tool=' + t.tool : '') + '" data-nav="role">' + esc(pack.title) + ' / ' + toolLabel(t.tool) + '</a>';
     h += '<div class="pr-taskhead"><div><div class="pr-eyebrow">' + esc(t.level) + ' &middot; ' + t.points + ' pts' + (S.progress.solved[t.id] ? ' &middot; Solved' : '') + '</div>'
       + '<h1 class="pr-title">' + esc(t.title) + '</h1></div>'
       + '<div class="pr-nav">' + (prev ? '<a class="k-btn" href="?role=' + S.role + '&task=' + prev.id + '" data-task="' + prev.id + '">Previous</a>' : '')
@@ -233,6 +237,7 @@
       h += '<div class="pr-lockbox"><p>This task is part of the Practice pass.</p></div>' + passCard();
       app.innerHTML = h; return;
     }
+    if (isAnswerTool(t.tool)) { app.innerHTML = h + answerTaskHtml(pack, t); wireAnswers(pack, t, next); return; }
     var draft = lsGet('kojoh-prac-code-' + t.id, null);
     h += '<div class="pr-work">'
       + '<section class="pr-brief"><p class="pr-q">' + esc(t.question) + '</p>'
@@ -257,6 +262,102 @@
       + '<div class="pr-result" id="prResult"></div></section></div>';
     app.innerHTML = h;
     wireEditor(pack, t, next);
+  }
+
+  // ------------------------------------------------------------------ Excel / Power BI tasks
+  function downloadBar(pack) {
+    return '<div class="pr-dl"><div><strong>Get the data</strong><span>Open it in Excel, Google Sheets or Power BI Desktop.</span></div>'
+      + '<div class="pr-dl-btns"><button type="button" class="k-btn k-btn-brand" data-xlsx="1">Excel workbook (.xlsx)</button>'
+      + pack.tables.map(function (t) {
+        return '<button type="button" class="k-btn" data-csv="' + esc(t.name) + '">' + esc(t.name) + '.csv</button>';
+      }).join('') + '</div></div>';
+  }
+  var xlsxP = null;
+  async function downloadWorkbook(pack, btn) {
+    var label = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Preparing workbook';
+    try {
+      if (!xlsxP) xlsxP = new Promise(function (res, rej) {
+        var sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+        sc.onload = res; sc.onerror = function () { xlsxP = null; rej(new Error('Could not load the Excel builder. Download the CSV files instead.')); };
+        document.head.appendChild(sc);
+      });
+      await xlsxP;
+      var wb = window.XLSX.utils.book_new();
+      for (var i = 0; i < pack.tables.length; i++) {
+        var t = pack.tables[i];
+        var txt = await KP.fetchText(BASE + 'data/' + t.file + '?v=' + (t.v || pack.v));
+        var ws = window.XLSX.read(txt, { type: 'string', raw: false, cellDates: true }).Sheets.Sheet1;
+        window.XLSX.utils.book_append_sheet(wb, ws, t.name.slice(0, 31));
+      }
+      window.XLSX.writeFile(wb, (pack.company || 'kojoh') + '-practice-data.xlsx');
+    } catch (e) { toast(e.message, 'error'); }
+    btn.disabled = false; btn.textContent = label;
+  }
+  function answerTaskHtml(pack, t) {
+    var saved = lsGet('kojoh-prac-ans-' + t.id, []), ticks = lsGet('kojoh-prac-chk-' + t.id, {});
+    var h = downloadBar(pack) + '<div class="pr-work">'
+      + '<section class="pr-brief"><p class="pr-q">' + esc(t.question) + '</p>'
+      + '<div class="pr-acts"><button type="button" class="k-btn" id="prHint">Show hint</button>'
+      + (t.explain ? '<button type="button" class="k-btn" id="prSol">Show method</button>' : '') + '</div>'
+      + '<div class="pr-hint" id="prHintBox" hidden>' + esc(t.hint || 'No hint for this one.') + '</div>'
+      + (t.explain ? '<div class="pr-sol" id="prSolBox" hidden><p>' + esc(t.explain) + '</p>'
+          + (t.answer_values ? '<ul class="pr-anslist">' + t.fields.map(function (f, i) { return '<li>' + esc(f.label) + ': <strong>' + esc(t.answer_values[i]) + '</strong></li>'; }).join('') + '</ul>' : '') + '</div>'
+        : '<p class="pr-note">The full method and answers come with the <a href="/practice#pass" data-nav="home">Practice pass</a>.</p>');
+    if (t.checklist && t.checklist.length) {
+      h += '<div class="pr-checklist"><div class="pr-eyebrow">Your build should have</div>' + t.checklist.map(function (c, i) {
+        return '<label><input type="checkbox" data-tick="' + i + '"' + (ticks[i] ? ' checked' : '') + '> ' + esc(c) + '</label>';
+      }).join('') + '</div>';
+    }
+    h += '</section><section class="pr-editor"><div class="pr-edbar"><span>Your answers from ' + toolLabel(t.tool) + '</span></div>'
+      + '<div class="pr-answers">' + t.fields.map(function (f, i) {
+        return '<label class="pr-ans"><span>' + esc(f.label) + '</span><span class="pr-ans-in"><input type="text" inputmode="decimal" autocomplete="off" data-ans="' + i + '" value="' + esc(saved[i] || '') + '">'
+          + '<b class="pr-mark" data-mark="' + i + '"></b></span></label>';
+      }).join('') + '</div>'
+      + '<p class="pr-note">Numbers: 2 decimals unless the value is a whole count. You can type 1,23,456.70 or 123456.7, with or without the rupee sign.</p>'
+      + '<div class="pr-runbar"><button type="button" class="k-btn k-btn-brand" id="prCheck">Check answers</button></div>'
+      + '<div class="pr-verdict" id="prVerdict" hidden></div></section></div>';
+    return h;
+  }
+  function wireAnswers(pack, t, next) {
+    var inputs = Array.prototype.slice.call(document.querySelectorAll('[data-ans]'));
+    var verdict = document.getElementById('prVerdict');
+    inputs.forEach(function (inp) {
+      inp.addEventListener('input', function () { lsSet('kojoh-prac-ans-' + t.id, inputs.map(function (x) { return x.value; })); });
+      inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); check(); } });
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-tick]'), function (c) {
+      c.onchange = function () { var o = lsGet('kojoh-prac-chk-' + t.id, {}); o[c.getAttribute('data-tick')] = c.checked; lsSet('kojoh-prac-chk-' + t.id, o); };
+    });
+    document.getElementById('prHint').onclick = function () { document.getElementById('prHintBox').hidden = false; };
+    var sol = document.getElementById('prSol');
+    if (sol) sol.onclick = function () {
+      if (!S.attempted[t.id] && !S.progress.solved[t.id] && !confirm('Have a go first? Building it yourself is what makes it stick.')) return;
+      document.getElementById('prSolBox').hidden = false;
+    };
+    document.getElementById('prCheck').onclick = check;
+    async function check() {
+      S.attempted[t.id] = true;
+      var vals = inputs.map(function (x) { return x.value; });
+      var res = await KP.checkAnswers(t, vals);
+      var right = 0;
+      res.forEach(function (r, i) {
+        var m = document.querySelector('[data-mark="' + i + '"]');
+        m.textContent = vals[i].trim() ? (r.ok ? '\u2713' : '\u2717') : '';
+        m.className = 'pr-mark ' + (r.ok ? 'ok' : 'no');
+        if (r.ok) right++;
+      });
+      verdict.hidden = false;
+      if (right === res.length) {
+        var fresh = markSolved(t);
+        verdict.className = 'pr-verdict ok';
+        verdict.innerHTML = '<strong>All correct.</strong> ' + (fresh ? '+' + t.points + ' points. ' : '')
+          + (next ? '<a href="?role=' + S.role + '&task=' + next.id + '" data-task="' + next.id + '">Next task</a>' : 'That was the last one in this track.');
+      } else {
+        verdict.className = 'pr-verdict no';
+        verdict.innerHTML = '<strong>' + right + ' of ' + res.length + ' correct.</strong> Check the filters (for example Delivered only) and rounding.';
+      }
+    }
   }
 
   // ------------------------------------------------------------------ editor + running
@@ -423,6 +524,20 @@
 
   // ------------------------------------------------------------------ clicks
   app.addEventListener('click', function (e) {
+    var x = e.target.closest('[data-xlsx]');
+    if (x) { e.preventDefault(); var pk = S.packs[S.role + (hasPass() ? ':pro' : ':free')]; if (pk) downloadWorkbook(pk, x); return; }
+    var cv = e.target.closest('[data-csv]');
+    if (cv) {
+      e.preventDefault();
+      var pk2 = S.packs[S.role + (hasPass() ? ':pro' : ':free')];
+      var tb = pk2 && pk2.tables.filter(function (t) { return t.name === cv.getAttribute('data-csv'); })[0];
+      if (tb) KP.fetchText(BASE + 'data/' + tb.file + '?v=' + (tb.v || pk2.v)).then(function (txt) {
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([txt], { type: 'text/csv' }));
+        a.download = tb.name + '.csv'; document.body.appendChild(a); a.click(); a.remove();
+      }).catch(function (er) { toast(er.message, 'error'); });
+      return;
+    }
     var a = e.target.closest('[data-role],[data-tool],[data-task],[data-nav],[data-pass]');
     if (!a) return;
     if (a.hasAttribute('data-pass')) { e.preventDefault(); openPass(a.getAttribute('data-pass')); return; }
