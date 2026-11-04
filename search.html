@@ -12,7 +12,7 @@
 <meta property="og:image" content="https://www.kojohhi.com/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://www.kojohhi.com/og-image.png">
-<link rel="canonical" href="https://www.kojohhi.com/search.html">
+<link rel="canonical" href="https://www.kojohhi.com/search">
 <link rel="icon" href="icons/icon-192.png">
 <script src="theme.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -81,7 +81,7 @@
       + '<h3>Nothing for "' + esc(q) + '" yet</h3>'
       + '<p>The catalogue is still growing. Tell us what you were looking for and we will prioritise it.</p>'
       + '<div class="k-btnrow" style="justify-content:center;">'
-      + '<a class="k-btn k-btn-brand" href="suggestions.html?topic=' + encodeURIComponent(q) + '">Request this dataset</a>'
+      + '<a class="k-btn k-btn-brand" href="/suggestions?topic=' + encodeURIComponent(q) + '">Request this dataset</a>'
       + '<button class="k-btn" type="button" id="searchShowAll">Show everything</button></div></div>';
     var all = document.getElementById('searchShowAll');
     if (all) all.addEventListener('click', function(){ setQuery(''); });

@@ -1,7 +1,6 @@
-const CACHE = 'kojoh-v7';
+const CACHE = 'kojoh-v8';
 const ASSETS = [
   '/',
-  '/index.html',
   '/manifest.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png'
@@ -28,7 +27,7 @@ self.addEventListener('fetch', e => {
   e.respondWith(
     caches.match(e.request).then(cached => {
       const network = fetch(e.request).then(res => {
-        if(res && res.status === 200){
+        if(res && res.status === 200 && !res.redirected){
           const clone = res.clone();
           caches.open(CACHE).then(c => c.put(e.request, clone));
         }

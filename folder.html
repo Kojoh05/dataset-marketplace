@@ -99,7 +99,7 @@
 
     var fRes = await SUPA.from('folders').select('*').eq('slug', slug).maybeSingle();
     if (fRes.error) { empty(kIcon('alert'), 'Could not load', esc(fRes.error.message)); return; }
-    if (!fRes.data) { empty(kIcon('search'), 'Folder not found', 'That track does not exist yet. <a href="index.html#categories">Back to all folders</a>.'); return; }
+    if (!fRes.data) { empty(kIcon('search'), 'Folder not found', 'That track does not exist yet. <a href="/#categories">Back to all folders</a>.'); return; }
     var folder = fRes.data;
 
     document.getElementById('fdPageTitle').textContent = folder.title;
@@ -120,7 +120,7 @@
     var rows = dRes.data || [];
 
     var html = '';
-    html += '<nav class="k-crumbs" aria-label="Breadcrumb"><a href="index.html#categories">All folders</a><span aria-hidden="true">/</span><span>' + esc(folder.title) + '</span></nav>';
+    html += '<nav class="k-crumbs" aria-label="Breadcrumb"><a href="/#categories">All folders</a><span aria-hidden="true">/</span><span>' + esc(folder.title) + '</span></nav>';
     html += '<div class="page-lead"><h1>' + esc(folder.title) + '</h1>';
     html += '<p>' + esc(folder.description || '') + '</p></div>';
 
@@ -129,8 +129,8 @@
     if (!rows.length) {
       html += '<div class="empty-state"><div class="empty-state-icon">' + kIcon('folder') + '</div>'
            +  '<h3>Nothing in here yet</h3><p>This track is still being built. Tell us the problem you want to practise on and it moves up the list.</p>'
-           +  '<div class="k-btnrow" style="justify-content:center;"><a class="k-btn k-btn-brand" href="suggestions.html?topic=' + encodeURIComponent(folder.title) + '">Suggest a dataset</a>'
-           +  '<a class="k-btn" href="index.html#categories">Other folders</a></div></div>';
+           +  '<div class="k-btnrow" style="justify-content:center;"><a class="k-btn k-btn-brand" href="/suggestions?topic=' + encodeURIComponent(folder.title) + '">Suggest a dataset</a>'
+           +  '<a class="k-btn" href="/#categories">Other folders</a></div></div>';
       root.innerHTML = html;
       return;
     }

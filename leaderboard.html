@@ -12,7 +12,7 @@
 <meta property="og:image" content="https://www.kojohhi.com/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://www.kojohhi.com/og-image.png">
-<link rel="canonical" href="https://www.kojohhi.com/leaderboard.html">
+<link rel="canonical" href="https://www.kojohhi.com/leaderboard">
 <link rel="icon" href="icons/icon-192.png">
 <script src="theme.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -85,7 +85,7 @@
     if (!rows.length) {
       html += '<div class="empty-state" style="margin-bottom:1.25rem;"><div class="empty-state-icon">' + kIcon('trophy') + '</div>'
         + '<h3>The board is empty, for now</h3><p>Finish a challenge, submit your links, and your name goes up first.</p>'
-        + '<div class="k-btnrow" style="justify-content:center;"><a class="k-btn k-btn-brand" href="purchases.html">Go to your library</a></div></div>';
+        + '<div class="k-btnrow" style="justify-content:center;"><a class="k-btn k-btn-brand" href="/purchases">Go to your library</a></div></div>';
       root.innerHTML = html + how;
       return;
     }
@@ -96,11 +96,11 @@
       html += '<div class="lb-me-card"><div><div class="lb-me-rank">#' + nf(me.rank) + '</div>'
         + '<div class="lb-me-sub">' + nf(me.total_points) + ' points across ' + nf(me.challenges_completed) + ' challenge' + (me.challenges_completed === 1 ? '' : 's')
         + (above ? ', ' + nf(above.total_points - me.total_points) + ' behind #' + nf(above.rank) : ', top of the board') + '</div></div>'
-        + '<a href="purchases.html">Climb higher &rarr;</a></div>';
+        + '<a href="/purchases">Climb higher &rarr;</a></div>';
     } else if (myId) {
       html += '<div class="lb-me-card"><div><div class="lb-me-rank" style="font-size:1.2rem;">You are not on the board yet</div>'
         + '<div class="lb-me-sub">Submit a finished challenge to get your first points.</div></div>'
-        + '<a href="purchases.html">Your library &rarr;</a></div>';
+        + '<a href="/purchases">Your library &rarr;</a></div>';
     }
 
     html += '<div class="page-card">';

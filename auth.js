@@ -26,7 +26,7 @@ function kojohAfterAuth(){
     var next = sessionStorage.getItem('kojoh_after_auth');
     if (next) { sessionStorage.removeItem('kojoh_after_auth'); return next; }
   }catch(e){}
-  return 'index.html';
+  return '/';
 }
 
 // Open the tab the sending page asked for.
@@ -224,7 +224,7 @@ function toggleProfession(btn){
 // ---------- Google (sign up) ----------
 function handleGoogleSignup(){
   if (LIVE) {
-    SUPA.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + '/auth.html?google=1' } });
+    SUPA.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + '/auth?google=1' } });
     return;
   }
   // Preview mode: simulate what Google would hand back, then skip straight

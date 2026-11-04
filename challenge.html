@@ -79,7 +79,7 @@
       h += '<p class="chal-frozen-row">Submitted ' + escape(new Date(submission.submitted_at).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'})) + '.</p>';
       if (statusOn) {
         h += '<p class="chal-frozen-row">Points awarded, <span class="chal-points">' + (submission.points == null ? 0 : submission.points) + '</span>'
-          + ' &nbsp; <a href="leaderboard.html">See the leaderboard</a></p>';
+          + ' &nbsp; <a href="/leaderboard">See the leaderboard</a></p>';
       } else {
         h += '<p class="chal-frozen-row k-sub" style="margin:0.5rem 0 0;">Our team checks your repo and post and awards points from here. '
           + 'This page is now locked to how it was when you submitted.</p>';
@@ -127,7 +127,7 @@
 
     var sessRes = await SUPA.auth.getSession();
     var session = sessRes.data && sessRes.data.session;
-    if (!session) { empty(kIcon('lock'), 'Sign in required', 'Please <a href="auth.html">log in</a> to see your challenge.'); return; }
+    if (!session) { empty(kIcon('lock'), 'Sign in required', 'Please <a href="/auth">log in</a> to see your challenge.'); return; }
 
     var dsRes = await SUPA.from('datasets').select('id, title, slug').eq('slug', slug).maybeSingle();
     if (dsRes.error || !dsRes.data) { empty(kIcon('search'), 'Not found', 'This dataset doesn\'t exist.'); return; }
@@ -138,7 +138,7 @@
     if (licRes.error) { empty(kIcon('alert'), 'Could not load', escape(licRes.error.message)); return; }
     if (!licRes.data) {
       empty(kIcon('bag'), 'You don\'t own this yet',
-        'Head to the <a href="dataset.html?slug=' + encodeURIComponent(slug) + '">dataset page</a> to get it first.');
+        'Head to the <a href="/dataset?slug=' + encodeURIComponent(slug) + '">dataset page</a> to get it first.');
       return;
     }
 
@@ -153,8 +153,8 @@
     if (pack.premium) allTasks = allTasks.concat(pack.premium);
 
     var html = '';
-    html += '<nav class="k-crumbs" aria-label="Breadcrumb"><a href="purchases.html">Your library</a><span aria-hidden="true">/</span>'
-          + '<a href="dataset.html?slug=' + encodeURIComponent(ds.slug) + '">' + escape(ds.title) + '</a></nav>';
+    html += '<nav class="k-crumbs" aria-label="Breadcrumb"><a href="/purchases">Your library</a><span aria-hidden="true">/</span>'
+          + '<a href="/dataset?slug=' + encodeURIComponent(ds.slug) + '">' + escape(ds.title) + '</a></nav>';
     html += '<div class="page-lead"><h1>' + escape(ds.title) + '</h1>';
     html += '<p><span class="chal-badge">' + escape(lic.license_code) + '</span>';
     html += '<span class="chal-badge' + (lic.tier === 'premium' ? ' premium' : '') + '">' + (lic.tier === 'premium' ? 'Premium' : 'Standard') + '</span></p>';
@@ -179,7 +179,7 @@
     var checkedCount = allTasks.filter(function(t){ return done[t.id]; }).length;
     html += submitBlock(submission, allTasks, checkedCount);
 
-    html += '<div class="page-card"><p>Need the raw files? They\'re in <a href="purchases.html">Your Library</a>.</p></div>';
+    html += '<div class="page-card"><p>Need the raw files? They\'re in <a href="/purchases">Your Library</a>.</p></div>';
 
     root.innerHTML = html;
     updateProgressBar(allTasks, done);

@@ -12,7 +12,7 @@
 <meta property="og:image" content="https://www.kojohhi.com/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://www.kojohhi.com/og-image.png">
-<link rel="canonical" href="https://www.kojohhi.com/index.html">
+<link rel="canonical" href="https://www.kojohhi.com/">
 <link rel="icon" href="icons/icon-192.png">
 <script>
 // First-time / logged-out visitors land on the welcome page first.
@@ -21,7 +21,7 @@
     var hasSession = !!localStorage.getItem('sb-nkohbeiwdrdgqxwzjlfi-auth-token');
     var skip = sessionStorage.getItem('kojoh_skip_welcome');
     if(!hasSession && !skip){
-      window.location.replace('welcome.html');
+      window.location.replace('/welcome');
     }
   }catch(e){}
 })();
@@ -74,8 +74,8 @@
 
   <!-- MOBILE MENU -->
   <div class="mobile-menu" id="mobileMenu">
-    <a href="index.html">Home</a>
-    <a href="about.html">About</a>
+    <a href="/">Home</a>
+    <a href="/about">About</a>
     <a href="#categories">Datasets</a>
   </div>
 
@@ -158,7 +158,7 @@
   <p class="page-sub" id="foldersSub">Each folder is a job track. Open one to see what's inside.</p>
 
   <div class="folder-grid" id="jobFolders">
-    <a class="folder f-analyst" href="folder.html?slug=data-analyst" data-folder="data-analyst">
+    <a class="folder f-analyst" href="/folder?slug=data-analyst" data-folder="data-analyst">
       <div class="folder-tab"><span class="folder-count">4 datasets</span></div>
       <div class="folder-body">
         <span class="folder-title">Data analyst</span>
@@ -209,7 +209,7 @@
   </div>
 
   <div class="folder-grid" id="practiceFolders" style="display:none;">
-    <a class="folder f-python is-soon" href="suggestions.html">
+    <a class="folder f-python is-soon" href="/suggestions">
       <div class="folder-tab"><span class="folder-count">3 levels</span></div>
       <div class="folder-body">
         <span class="folder-title">Python</span>
@@ -217,7 +217,7 @@
         <span class="folder-link">Coming soon</span>
       </div>
     </a>
-    <a class="folder f-sql is-soon" href="suggestions.html">
+    <a class="folder f-sql is-soon" href="/suggestions">
       <div class="folder-tab"><span class="folder-count">3 levels</span></div>
       <div class="folder-body">
         <span class="folder-title">SQL</span>
@@ -225,7 +225,7 @@
         <span class="folder-link">Coming soon</span>
       </div>
     </a>
-    <a class="folder f-excel is-soon" href="suggestions.html">
+    <a class="folder f-excel is-soon" href="/suggestions">
       <div class="folder-tab"><span class="folder-count">3 levels</span></div>
       <div class="folder-body">
         <span class="folder-title">Excel</span>
@@ -233,7 +233,7 @@
         <span class="folder-link">Coming soon</span>
       </div>
     </a>
-    <a class="folder f-viz is-soon" href="suggestions.html">
+    <a class="folder f-viz is-soon" href="/suggestions">
       <div class="folder-tab"><span class="folder-count">3 levels</span></div>
       <div class="folder-body">
         <span class="folder-title">Visualization</span>
@@ -247,7 +247,7 @@
   <div class="list-card">
     <div class="list-head">
       <h3>Recently added</h3>
-      <a href="search.html">Browse every dataset &rarr;</a>
+      <a href="/search">Browse every dataset &rarr;</a>
     </div>
     <div class="list-cols"><span>Dataset</span><span>Folder</span><span>Price</span></div>
     <div id="recentList">
@@ -266,12 +266,12 @@
       <div class="panel-avatar" id="panelAvatar">YC</div>
       <div class="panel-display-name" id="panelDisplayName">Guest</div>
       <div class="panel-handle" id="panelUsername"></div>
-      <a href="settings.html#profile" class="panel-edit-link" id="panelEditLink">Edit profile</a>
+      <a href="/settings#profile" class="panel-edit-link" id="panelEditLink">Edit profile</a>
     </div>
 
     <div class="panel-section">
       <div class="panel-section-title">ACCOUNT</div>
-      <a href="settings.html#email" class="panel-menu-row" id="panelEmailRow">
+      <a href="/settings#email" class="panel-menu-row" id="panelEmailRow">
         <div class="panel-menu-info">
           <div class="panel-menu-label">Email</div>
           <div class="panel-menu-value" id="panelEmail">Not logged in</div>
@@ -282,7 +282,7 @@
 
     <div class="panel-section">
       <div class="panel-section-title">PREFERENCES</div>
-      <a href="settings.html" class="panel-menu-row panel-menu-link">
+      <a href="/settings" class="panel-menu-row panel-menu-link">
         <span class="panel-menu-icon">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         </span>
@@ -297,7 +297,7 @@
         <span class="panel-menu-text">Log out</span>
       </button>
 
-      <a href="auth.html" class="panel-menu-row panel-menu-link" id="panelLoginBtn">
+      <a href="/auth" class="panel-menu-row panel-menu-link" id="panelLoginBtn">
         <span class="panel-menu-icon">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
         </span>
@@ -347,7 +347,7 @@
     if (e.key !== 'Enter') return;
     e.preventDefault();
     var q = box.value.trim();
-    var url = 'search.html' + (q ? '?q=' + encodeURIComponent(q) : '');
+    var url = '/search' + (q ? '?q=' + encodeURIComponent(q) : '');
     if (window.kojohSoftNav) window.kojohSoftNav(url); else window.location.href = url;
   });
 })();
@@ -374,7 +374,7 @@
       var diff = d.difficulty ? d.difficulty.charAt(0).toUpperCase() + d.difficulty.slice(1) : '';
       var age = Math.floor((Date.now() - new Date(d.created_at).getTime()) / 86400000);
       var fresh = age <= 14 ? '<span class="list-new">New</span>' : '';
-      return '<a class="list-row list-link" href="dataset.html?slug=' + encodeURIComponent(d.slug) + '">'
+      return '<a class="list-row list-link" href="/dataset?slug=' + encodeURIComponent(d.slug) + '">'
         + '<div><div class="ds-name">' + esc(d.title) + fresh + '</div>'
         + '<div class="ds-cat">' + esc(diff) + (diff ? ' &#183; ' : '') + esc(String(d.short_description || '').slice(0, 70)) + (String(d.short_description || '').length > 70 ? '&#8230;' : '') + '</div></div>'
         + '<span class="ds-cat">' + esc(folders[d.folder_id] || '') + '</span>'
@@ -406,14 +406,14 @@
       if (!n) {
         el.textContent = 'Coming soon';
         card.classList.add('is-soon');
-        card.setAttribute('href', 'suggestions.html');
+        card.setAttribute('href', '/suggestions');
         var lk = card.querySelector('.folder-link');
         if (lk) lk.textContent = 'Coming soon, tell us what you need';
         return;
       }
       el.textContent = n + (n === 1 ? ' dataset' : ' datasets');
       if (card.getAttribute('href') === '#categories') {
-        card.setAttribute('href', 'folder.html?slug=' + encodeURIComponent(slug));
+        card.setAttribute('href', '/folder?slug=' + encodeURIComponent(slug));
       }
     });
   });
@@ -525,7 +525,7 @@
     var it = items[i];
     if (!it) return;
     if (!link) build();
-    link.setAttribute('href', 'dataset.html?slug=' + encodeURIComponent(it.ds.slug));
+    link.setAttribute('href', '/dataset?slug=' + encodeURIComponent(it.ds.slug));
     link.setAttribute('title', it.ds.title);
     elRank.textContent = it.badge;
     elRank.className = 'nv-rank' + (it.ranked ? '' : ' nv-rank-new');

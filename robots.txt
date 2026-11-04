@@ -1,9 +1,9 @@
 User-agent: *
 Allow: /
-Disallow: /settings.html
-Disallow: /purchases.html
-Disallow: /saved.html
-Disallow: /challenge.html
-Disallow: /reset-password.html
+Disallow: /settings
+Disallow: /purchases
+Disallow: /saved
+Disallow: /challenge
+Disallow: /reset-password
 
 Sitemap: https://www.kojohhi.com/sitemap.xml

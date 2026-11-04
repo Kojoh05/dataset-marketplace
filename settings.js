@@ -23,7 +23,7 @@ async function loadUser(){
   }
   var res = await SUPA.auth.getSession();
   var session = res.data && res.data.session;
-  if (!session || !session.user) { window.location.href = 'auth.html'; return; }
+  if (!session || !session.user) { window.location.href = '/auth'; return; }
   currentUser = session.user;
   var pr = await SUPA.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
   currentProfile = pr.data || null;
@@ -51,7 +51,7 @@ function markTheme(theme){
   $('themeLabel').textContent = theme === 'dark' ? 'Dark' : 'Light';
 }
 
-// ---------- Hero theme (shared with index.html localStorage) ----------
+// ---------- Hero theme (shared with / localStorage) ----------
 (function initHeroTheme(){
   var saved = 'space';
   try { saved = localStorage.getItem('kojoh-hero-theme') || 'space'; } catch(e){}

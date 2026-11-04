@@ -12,14 +12,14 @@
 <meta property="og:image" content="https://www.kojohhi.com/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://www.kojohhi.com/og-image.png">
-<link rel="canonical" href="https://www.kojohhi.com/welcome.html">
+<link rel="canonical" href="https://www.kojohhi.com/welcome">
 <link rel="icon" href="icons/icon-192.png">
 <script>
 // Logged-in visitors never see this page, so bounce straight to the app.
 (function(){
   try{
     var hasSession = !!localStorage.getItem('sb-nkohbeiwdrdgqxwzjlfi-auth-token');
-    if(hasSession){ window.location.replace('index.html'); }
+    if(hasSession){ window.location.replace('/'); }
   }catch(e){}
 })();
 </script>
@@ -35,8 +35,8 @@
   <header class="w-header">
     <span class="w-brand">KOJOH</span>
     <div class="w-header-actions">
-      <a href="auth.html" class="w-link">Log in</a>
-      <a href="auth.html?tab=signup" class="w-cta-small">Sign up</a>
+      <a href="/auth" class="w-link">Log in</a>
+      <a href="/auth?tab=signup" class="w-cta-small">Sign up</a>
     </div>
   </header>
 
@@ -47,7 +47,7 @@
       <h1>Datasets built from real business problems, not random CSVs.</h1>
       <p class="w-hero-sub">KOJOH is a dataset marketplace for people building a data career. Every dataset starts as an actual problem pulled from Logistics, Sales, Service, Product, E-commerce, or HR, with its own schema, its own story, and a challenge worth solving.</p>
       <div class="w-hero-actions">
-        <a href="auth.html?tab=signup" class="w-cta">Create your account</a>
+        <a href="/auth?tab=signup" class="w-cta">Create your account</a>
         <a href="#" id="browseGuestLink" class="w-cta-outline">Browse datasets without an account</a>
       </div>
     </section>
@@ -129,8 +129,8 @@
     <section class="w-final-cta">
       <h2>Start building a portfolio that looks like real work.</h2>
       <div class="w-hero-actions">
-        <a href="auth.html?tab=signup" class="w-cta">Create your account</a>
-        <a href="auth.html" class="w-cta-outline">Log in</a>
+        <a href="/auth?tab=signup" class="w-cta">Create your account</a>
+        <a href="/auth" class="w-cta-outline">Log in</a>
       </div>
     </section>
 
@@ -138,7 +138,7 @@
 
   <footer class="w-footer">
     <span>© <span id="wYear"></span> KOJOH</span>
-    <nav class="w-foot-links"><a href="pricing.html">Pricing</a><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="refund.html">Refunds</a><a href="shipping.html">Delivery</a><a href="contact.html">Contact</a></nav>
+    <nav class="w-foot-links"><a href="/pricing">Pricing</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="/refund">Refunds</a><a href="/shipping">Delivery</a><a href="/contact">Contact</a></nav>
   </footer>
 
   <script>
@@ -146,7 +146,7 @@
     document.getElementById('browseGuestLink').addEventListener('click', function(e){
       e.preventDefault();
       try{ sessionStorage.setItem('kojoh_skip_welcome', '1'); }catch(err){}
-      window.location.href = 'index.html';
+      window.location.href = '/';
     });
   </script>
 </body>

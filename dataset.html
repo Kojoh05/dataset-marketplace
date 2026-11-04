@@ -276,8 +276,8 @@
     var owned = !!STATE.lic;
     var html = '';
 
-    html += '<nav class="k-crumbs" aria-label="Breadcrumb"><a href="index.html#categories">Folders</a>';
-    if (STATE.folder) html += '<span aria-hidden="true">/</span><a href="folder.html?slug=' + encodeURIComponent(STATE.folder.slug) + '">' + esc(STATE.folder.title) + '</a>';
+    html += '<nav class="k-crumbs" aria-label="Breadcrumb"><a href="/#categories">Folders</a>';
+    if (STATE.folder) html += '<span aria-hidden="true">/</span><a href="/folder?slug=' + encodeURIComponent(STATE.folder.slug) + '">' + esc(STATE.folder.title) + '</a>';
     html += '</nav>';
 
     // one title, typed in on the first render only
@@ -587,7 +587,7 @@
       +  'Tick tasks off as you go, your progress is kept on this device and shows on the challenge page too.</p>'
       +  '<div class="k-btnrow">'
       +  '<button class="k-btn" id="dsPrintChal" type="button">Print this challenge sheet</button>'
-      +  '<a class="k-btn" href="challenge.html?slug=' + encodeURIComponent(ds.slug) + '">Open the full challenge page</a>'
+      +  '<a class="k-btn" href="/challenge?slug=' + encodeURIComponent(ds.slug) + '">Open the full challenge page</a>'
       +  '</div></div>';
 
     h += '<div class="k-printonly"><p>License ' + esc(STATE.lic.license_code) + ', '
@@ -644,7 +644,7 @@
       h += '<p class="chal-frozen-row">Submitted ' + esc(new Date(s.submitted_at).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'})) + '.</p>';
       if (statusOn) {
         h += '<p class="chal-frozen-row">Points awarded, <span class="chal-points">' + esc(s.points == null ? 0 : s.points) + '</span>'
-          + ' &nbsp; <a href="leaderboard.html">See the leaderboard</a></p>';
+          + ' &nbsp; <a href="/leaderboard">See the leaderboard</a></p>';
       } else {
         h += '<p class="chal-frozen-row k-sub" style="margin:0.5rem 0 0;">Our team checks your repo and post and awards points from here, '
           + 'no need to do anything else. This page is now locked to how it was when you submitted.</p>';
@@ -1138,7 +1138,7 @@
       ? 'Free'
       : (charged(ds) ? money(ds) : '<span class="k-strike">' + money(ds) + '</span>&#8377;0');
     document.getElementById('payNote').innerHTML = charged(ds)
-      ? 'Secure payment by Razorpay: UPI, cards, netbanking and wallets. Your license unlocks the moment the payment goes through. By paying you agree to the <a href="terms.html" target="_blank" rel="noopener">Terms</a> and <a href="refund.html" target="_blank" rel="noopener">Refund Policy</a>.'
+      ? 'Secure payment by Razorpay: UPI, cards, netbanking and wallets. Your license unlocks the moment the payment goes through. By paying you agree to the <a href="/terms" target="_blank" rel="noopener">Terms</a> and <a href="/refund" target="_blank" rel="noopener">Refund Policy</a>.'
       : 'Beta pricing. Nothing is charged and no card details are collected while the purchase flow is being tested.';
     document.getElementById('payGo').textContent = charged(ds) ? 'Pay ' + money(ds).replace('&#8377;', '\u20B9') + ' and unlock' : (ds.is_free ? 'Unlock for free' : 'Unlock');
     openDialog('payModal');
@@ -1163,7 +1163,7 @@
       sessionStorage.setItem('kojoh_after_auth', window.location.pathname + window.location.search);
       sessionStorage.setItem('kojoh_auth_tab', tab);
     } catch (e) {}
-    window.location.href = 'auth.html';
+    window.location.href = '/auth';
   }
 
   function loadScript(src){

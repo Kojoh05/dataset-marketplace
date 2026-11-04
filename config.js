@@ -155,7 +155,7 @@ window.kojohDsCard = function(d, opts){
   var esc = window.kojohEsc;
   var pv = d.preview_rows || null;
   var diff = d.difficulty ? d.difficulty.charAt(0).toUpperCase() + d.difficulty.slice(1) : '';
-  var h = '<a class="k-dscard' + (opts.reveal ? ' k-reveal' : '') + '" href="dataset.html?slug=' + encodeURIComponent(d.slug) + '">';
+  var h = '<a class="k-dscard' + (opts.reveal ? ' k-reveal' : '') + '" href="/dataset?slug=' + encodeURIComponent(d.slug) + '">';
   var art = window.kojohArtImg(d, 'k-dscard-art');
   if (art) h += '<div class="k-dscard-artwrap">' + art + '</div>';
   h += '<div class="k-dscard-top">';

@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pricing | KOJOH</title>
 <meta name="description" content="KOJOH dataset prices: free starter datasets, Rs 99 to 149 personal stories, Rs 249 corporate case studies and Rs 449+ premium datasets. One-time payment, no subscription.">
-<link rel="canonical" href="https://www.kojohhi.com/pricing.html">
+<link rel="canonical" href="https://www.kojohhi.com/pricing">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="KOJOH">
 <meta property="og:title" content="Pricing | KOJOH">
 <meta property="og:description" content="KOJOH dataset prices: free starter datasets, Rs 99 to 149 personal stories, Rs 249 corporate case studies and Rs 449+ premium datasets. One-time payment, no subscription.">
-<meta property="og:url" content="https://www.kojohhi.com/pricing.html">
+<meta property="og:url" content="https://www.kojohhi.com/pricing">
 <meta property="og:image" content="https://www.kojohhi.com/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://www.kojohhi.com/og-image.png">
@@ -69,7 +69,7 @@
   </div>
   <div class="page-card">
     <h2>Payment</h2>
-    <p>Payments are handled securely by Razorpay (UPI, cards, netbanking and wallets). Your dataset unlocks instantly. See the <a href="refund.html">Refund Policy</a> and <a href="shipping.html">Delivery Policy</a>.</p>
+    <p>Payments are handled securely by Razorpay (UPI, cards, netbanking and wallets). Your dataset unlocks instantly. See the <a href="/refund">Refund Policy</a> and <a href="/shipping">Delivery Policy</a>.</p>
   </div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
@@ -96,7 +96,7 @@ window.kReady(async function(){
       h += '<tr class="grp"><td colspan="2">' + esc(g) + '</td></tr>';
       groups[g].forEach(function(d){
         var free = d.is_free || Number(d.price) <= 0;
-        h += '<tr><td><a href="dataset.html?slug=' + encodeURIComponent(d.slug) + '">' + esc(d.title) + '</a></td><td class="num">' + (free ? 'Free' : '&#8377;' + Number(d.price).toFixed(0)) + '</td></tr>';
+        h += '<tr><td><a href="/dataset?slug=' + encodeURIComponent(d.slug) + '">' + esc(d.title) + '</a></td><td class="num">' + (free ? 'Free' : '&#8377;' + Number(d.price).toFixed(0)) + '</td></tr>';
       });
     });
     host.innerHTML = h + '</tbody></table>';

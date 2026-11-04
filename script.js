@@ -304,7 +304,7 @@ function setHeroCharacter(character){
 // Cycle the 3 working-pose frames for a subtle idle animation loop.
 // Guarded against soft-navigation re-runs: clear any interval from a
 // previous execution of this script before starting a new one, otherwise
-// repeated visits to index.html would stack multiple concurrent intervals
+// repeated visits to / would stack multiple concurrent intervals
 // all animating the same (or now-detached) frames.
 (function(){
   if (window.__kojohFrameInterval) {

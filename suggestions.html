@@ -80,7 +80,7 @@
     if (msg.length < 6) { note('A little more detail helps. At least a few words, please.', 'error'); return; }
     if (!LIVE) { note('Preview mode. Connect Supabase to send suggestions.', 'error'); return; }
     var s = await SUPA.auth.getSession();
-    if (!s.data.session) { noteEl.hidden = false; noteEl.className = 'page-note error'; noteEl.innerHTML = 'Please <a href="auth.html">log in</a> first so we can follow up if needed.'; return; }
+    if (!s.data.session) { noteEl.hidden = false; noteEl.className = 'page-note error'; noteEl.innerHTML = 'Please <a href="/auth">log in</a> first so we can follow up if needed.'; return; }
     var uid = s.data.session.user.id;
     var btn = this.querySelector('.page-submit');
     btn.disabled = true; btn.textContent = 'Sending';

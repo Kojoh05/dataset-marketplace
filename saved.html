@@ -48,7 +48,7 @@
   function draw(){
     if (!ROWS.length) {
       empty(kIcon('bookmark'), 'No bookmarks yet', 'Tap Bookmark on any dataset and it lands here, on every device you sign in on.'
-        + '<br><br><a class="k-btn k-btn-brand" href="search.html">Find something to save</a>');
+        + '<br><br><a class="k-btn k-btn-brand" href="/search">Find something to save</a>');
       return;
     }
     el.innerHTML = '<p class="k-resultmeta">' + ROWS.length + (ROWS.length === 1 ? ' dataset' : ' datasets') + ' saved</p><div class="k-dsgrid">'
@@ -84,7 +84,7 @@
   async function load(){
     if (!LIVE) { empty(kIcon('plug'), 'Preview mode', 'Connect Supabase to see your bookmarks.'); return; }
     var s = await SUPA.auth.getSession();
-    if (!s.data.session) { empty(kIcon('lock'), 'Sign in required', 'Please <a href="auth.html">log in</a> to see your saved datasets.'); return; }
+    if (!s.data.session) { empty(kIcon('lock'), 'Sign in required', 'Please <a href="/auth">log in</a> to see your saved datasets.'); return; }
     UID = s.data.session.user.id;
     var r = await Promise.all([
       SUPA.from('bookmarks').select('dataset_id, created_at, datasets(id, title, short_description, slug, price, is_free, difficulty, preview_rows, art_boy_url, art_girl_url)').order('created_at', { ascending: false }),

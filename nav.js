@@ -8,19 +8,19 @@
 (function () {
   var PAGES = [
     { group: 'BROWSE', items: [
-      { href: 'index.html', label: 'Home', icon: 'home' },
-      { href: 'search.html', label: 'Search datasets', icon: 'search' },
-      { href: 'recommendations.html', label: 'Recommended', icon: 'star' },
-      { href: 'saved.html', label: 'Saved datasets', icon: 'bookmark' },
-      { href: 'purchases.html', label: 'Your purchases', icon: 'bag' },
-      { href: 'leaderboard.html', label: 'Leaderboard', icon: 'trophy' }
+      { href: '/', label: 'Home', icon: 'home' },
+      { href: '/search', label: 'Search datasets', icon: 'search' },
+      { href: '/recommendations', label: 'Recommended', icon: 'star' },
+      { href: '/saved', label: 'Saved datasets', icon: 'bookmark' },
+      { href: '/purchases', label: 'Your purchases', icon: 'bag' },
+      { href: '/leaderboard', label: 'Leaderboard', icon: 'trophy' }
     ]},
     { group: 'MORE', items: [
-      { href: 'settings.html', label: 'Settings', icon: 'gear' },
-      { href: 'pricing.html', label: 'Pricing', icon: 'tag' },
-      { href: 'about.html', label: 'About KOJOH', icon: 'info' },
-      { href: 'help.html', label: 'Help & contact', icon: 'help' },
-      { href: 'suggestions.html', label: 'Suggestions', icon: 'bulb' }
+      { href: '/settings', label: 'Settings', icon: 'gear' },
+      { href: '/pricing', label: 'Pricing', icon: 'tag' },
+      { href: '/about', label: 'About KOJOH', icon: 'info' },
+      { href: '/help', label: 'Help & contact', icon: 'help' },
+      { href: '/suggestions', label: 'Suggestions', icon: 'bulb' }
     ]}
   ];
 
@@ -46,8 +46,9 @@
   }
 
   function currentFile() {
-    var p = window.location.pathname.split('/').pop();
-    return p || 'index.html';
+    var p = window.location.pathname.replace(/\.html$/, '').replace(/\/+$/, '');
+    if (p === '' || p === '/index') return '/';
+    return p;
   }
 
   function isExpandedPref() {
@@ -64,7 +65,7 @@
     html += '  <button type="button" class="ksb-hamburger" id="ksbToggle" aria-label="Toggle navigation">';
     html += '    <span></span><span></span><span></span>';
     html += '  </button>';
-    html += '  <a href="index.html" class="ksb-wordmark" data-ksb-link>KOJOH</a>';
+    html += '  <a href="/" class="ksb-wordmark" data-ksb-link>KOJOH</a>';
     html += '  <button type="button" class="ksb-collapse-btn" id="ksbCollapseBtn" aria-label="Collapse navigation">' + svg('chevronLeft', 16, 2) + '</button>';
     html += '</div>';
     html += '<nav class="ksb-nav">';
@@ -312,7 +313,7 @@
     });
 
     // A handful of pages keep a small page-specific <style> block in their
-    // own <head> instead of a separate stylesheet (e.g. purchases.html).
+    // own <head> instead of a separate stylesheet (e.g. /purchases).
     // That block lives in the <head> we never touch on a soft nav, so
     // without this it silently vanishes until a hard refresh brings the
     // whole document back. Copy any block this page doesn't already have.
@@ -404,7 +405,7 @@
   });
 
   window.addEventListener('popstate', function () {
-    swapTo(window.location.pathname.split('/').pop() || 'index.html', false);
+    swapTo((window.location.pathname || '/') + window.location.search, false);
   });
 
   // ---------- Ready helper other page scripts can use so their init logic
@@ -431,8 +432,8 @@
     f.id = 'kLegalFoot';
     f.className = 'k-legal-foot';
     f.innerHTML = '<span class="c">&copy; ' + new Date().getFullYear() + ' KOJOH</span>'
-      + '<a href="pricing.html">Pricing</a><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a>'
-      + '<a href="refund.html">Refunds</a><a href="shipping.html">Delivery</a><a href="contact.html">Contact</a>';
+      + '<a href="/pricing">Pricing</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a>'
+      + '<a href="/refund">Refunds</a><a href="/shipping">Delivery</a><a href="/contact">Contact</a>';
     document.body.appendChild(f);
   }
   window.kReady(ensureLegalFooter);

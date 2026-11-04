@@ -1,4 +1,4 @@
-// === PROFILE / SESSION (index.html) ===
+// === PROFILE / SESSION (/) ===
 
 (function () {
   var LIVE = !!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase);
@@ -54,7 +54,7 @@
     if (!LIVE) { setGuestState(); return; }
     try { await SUPA.auth.signOut(); } catch (e) { console.warn('Logout error', e); }
     try { sessionStorage.removeItem('kojoh_skip_welcome'); } catch (e) {}
-    window.location.href = 'welcome.html';
+    window.location.href = '/welcome';
   };
 
   async function materializeProfileIfMissing(user) {
