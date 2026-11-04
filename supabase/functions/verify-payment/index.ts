@@ -62,11 +62,27 @@ Deno.serve(async (req) => {
     }
     if (pay.status !== "captured") return json({ error: "Payment is not complete yet." }, 400);
 
+    const alreadyPaid = p.status === "paid";
     await admin.from("payments").update({ razorpay_payment_id, status: "paid", paid_at: new Date().toISOString() }).eq("id", p.id);
-    const { data: lic, error } = await admin.rpc("grant_license", {
-      p_user: user.id, p_dataset: p.dataset_id, p_price: p.amount_paise / 100, p_ref: razorpay_payment_id,
-    });
-    if (error) return json({ error: "Paid, but the license could not be issued: " + error.message + ". Contact support with payment " + razorpay_payment_id }, 500);
+
+    let lic: any = null, passExpires: string | null = null;
+    if (p.kind === "pass") {
+      // Extend from today, or from the current expiry if the pass is still running. Only once per payment.
+      const { data: cur } = await admin.from("practice_passes").select("expires_at").eq("user_id", user.id).maybeSingle();
+      passExpires = cur?.expires_at ?? null;
+      if (!alreadyPaid) {
+        const from = Math.max(Date.now(), cur ? new Date(cur.expires_at).getTime() : 0);
+        passExpires = new Date(from + Number(p.pass_days || 30) * 86400000).toISOString();
+        const up = await admin.from("practice_passes").upsert({ user_id: user.id, expires_at: passExpires });
+        if (up.error) return json({ error: "Paid, but the pass could not be activated: " + up.error.message + ". Contact support with payment " + razorpay_payment_id }, 500);
+      }
+    } else {
+      const g = await admin.rpc("grant_license", {
+        p_user: user.id, p_dataset: p.dataset_id, p_price: p.amount_paise / 100, p_ref: razorpay_payment_id,
+      });
+      if (g.error) return json({ error: "Paid, but the license could not be issued: " + g.error.message + ". Contact support with payment " + razorpay_payment_id }, 500);
+      lic = g.data;
+    }
 
     // Mark the reward code used on this order as redeemed (only now that payment succeeded).
     if (p.discount_code_id) {
@@ -91,7 +107,7 @@ Deno.serve(async (req) => {
         }
       } catch (_) { /* never fail a paid order because of the reward */ }
     }
-    return json({ ok: true, license_code: lic?.license_code, reward });
+    return json({ ok: true, license_code: lic?.license_code, pass_expires_at: passExpires, reward });
   } catch (e) {
     return json({ error: String((e as Error)?.message ?? e) }, 500);
   }

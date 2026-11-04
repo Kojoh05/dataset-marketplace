@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KOJOH | Practice SQL and Python for data roles</title>
+<meta name="description" content="Practise SQL and Python on realistic business datasets for Data Analyst, Business Analyst, Data Scientist and Data Engineer roles. Runs in your browser, checks your answer instantly.">
+<link rel="canonical" href="https://www.kojohhi.com/practice">
+<script src="theme.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="pages.css">
+<link rel="stylesheet" href="nav.css">
+<link rel="stylesheet" href="kojoh-ui.css">
+<link rel="stylesheet" href="practice.css">
+<script src="nav.js"></script>
+</head>
+<body>
+
+<header class="page-header">
+  <span class="page-title">Practice</span>
+</header>
+
+<main class="page-wrap pr-wrap" id="prApp">
+  <div class="pr-loading">Loading practice</div>
+</main>
+
+<!-- pass checkout -->
+<div class="k-modal" id="passModal" hidden>
+  <div class="k-dialog">
+    <button class="k-modal-close" id="passClose" type="button" aria-label="Close">&#215;</button>
+    <h3 class="k-dialog-title" id="passTitle">Practice pass</h3>
+    <div class="k-order">
+      <div class="k-order-row"><span id="passItem">Practice pass</span><span id="passPrice"></span></div>
+      <div class="k-order-row"><span>Includes</span><span>Every role, every task, solutions</span></div>
+      <div class="k-order-row"><span>Bonus</span><span>20% off portfolio projects</span></div>
+      <div class="k-order-row k-order-total"><span>Total</span><span id="passTotal"></span></div>
+    </div>
+    <div class="k-dialog-actions">
+      <button class="k-btn k-btn-brand k-btn-lg k-btn-block" id="passGo" type="button">Pay</button>
+    </div>
+    <p class="k-dialog-note" id="passNote">One-time payment, no auto-renewal. Secure payment by Razorpay: UPI, cards, netbanking and wallets. By paying you agree to the <a href="/terms" target="_blank" rel="noopener">Terms</a> and <a href="/refund" target="_blank" rel="noopener">Refund Policy</a>.</p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="supabase-config.js"></script>
+<script src="config.js"></script>
+<script src="practice-engine.js"></script>
+<script src="practice.js"></script>
+</body>
+</html>

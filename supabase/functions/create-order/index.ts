@@ -9,6 +9,12 @@ const cors = {
 };
 // Reward rules. Price never drops below the project's first-purchase offer price (datasets.price).
 const MEMBER_PCT = 20; // Practice pass: % off MRP
+// Practice passes (time passes, no auto-renew).
+const PASSES: Record<string, { days: number; price: number; label: string }> = {
+  "30": { days: 30, price: 199, label: "KOJOH Practice pass, 30 days" },
+  "90": { days: 90, price: 499, label: "KOJOH Practice pass, 90 days" },
+  "365": { days: 365, price: 1499, label: "KOJOH Practice pass, 1 year" },
+};
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors, "Content-Type": "application/json" } });
@@ -27,8 +33,27 @@ Deno.serve(async (req) => {
     const { data: { user } } = await userClient.auth.getUser();
     if (!user) return json({ error: "Please sign in again." }, 401);
 
-    const { dataset_id, code, quote } = await req.json();
+    const { dataset_id, code, quote, pass } = await req.json();
     const admin = createClient(url, service);
+
+    if (pass !== undefined && pass !== null && pass !== "") {
+      const pl = PASSES[String(pass)];
+      if (!pl) return json({ error: "Unknown pass." }, 400);
+      const amount = pl.price * 100;
+      if (quote) return json({ quote: true, amount, list_price: pl.price, days: pl.days });
+      const r = await fetch("https://api.razorpay.com/v1/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: "Basic " + btoa(`${keyId}:${keySecret}`) },
+        body: JSON.stringify({ amount, currency: "INR", receipt: ("kojoh_" + crypto.randomUUID()).slice(0, 40),
+                               notes: { user_id: user.id, pass_days: String(pl.days) } }),
+      });
+      const o = await r.json();
+      if (!r.ok) return json({ error: o?.error?.description ?? "Could not create the order." }, 502);
+      const ins = await admin.from("payments").insert({ user_id: user.id, dataset_id: null, kind: "pass", pass_days: pl.days,
+        amount_paise: amount, razorpay_order_id: o.id, status: "created" });
+      if (ins.error) return json({ error: ins.error.message }, 500);
+      return json({ order_id: o.id, amount, currency: "INR", key_id: keyId, title: pl.label, email: user.email });
+    }
     const { data: ds } = await admin.from("datasets").select("id, title, price, is_free, is_published, meta").eq("id", dataset_id).maybeSingle();
     if (!ds || !ds.is_published) return json({ error: "Dataset not found." }, 404);
     if (ds.is_free || Number(ds.price) <= 0) return json({ error: "This dataset is free, no payment needed." }, 400);

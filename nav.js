@@ -12,6 +12,7 @@
       { href: '/search', label: 'Search datasets', icon: 'search' },
       { href: '/recommendations', label: 'Recommended', icon: 'star' },
       { href: '/saved', label: 'Saved datasets', icon: 'bookmark' },
+      { href: '/practice', label: 'Practice', icon: 'code' },
       { href: '/purchases', label: 'Your purchases', icon: 'bag' },
       { href: '/leaderboard', label: 'Leaderboard', icon: 'trophy' }
     ]},
@@ -25,6 +26,7 @@
   ];
 
   var ICONS = {
+    code: '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
     home: '<path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/>',
     search: '<circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/>',
     star: '<polygon points="12 2 15 8 22 9 17 14 18 21 12 18 6 21 7 14 2 9 9 8 12 2"/>',
