@@ -66,6 +66,24 @@ function populateCountries(defaultCountry){
 }
 populateCountries('India');
 
+// Profession chips come from the folders on the site, so new folders appear here automatically.
+(function loadProfessionChips(){
+  if (!LIVE || !window.kojohProfessionFolders) return;
+  window.kojohProfessionFolders().then(function(fs){
+    if (!fs.length) return;
+    var host = document.getElementById('professionChips');
+    if (!host) return;
+    host.innerHTML = '';
+    fs.forEach(function(f){
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'chip-choice'; b.dataset.value = f.name; b.textContent = f.name;
+      b.onclick = function(){ toggleProfession(b); };
+      if (selectedProfessions.indexOf(f.name) !== -1) b.classList.add('selected');
+      host.appendChild(b);
+    });
+  });
+})();
+
 // ---------- URL params: ?tab=signup (from links elsewhere on the site),
 // ?google=1 (the page Supabase redirects back to after Google OAuth) ----------
 (function handleUrlParams(){
@@ -360,7 +378,8 @@ function handleSignup(){
         auth_provider: payload.provider
       }).then(function(profileRes){
         if (profileRes.error) { errEl.textContent = profileRes.error.message; return Promise.reject(); }
-        return SUPA.from('job_titles').select('id, name').in('name', payload.professions)
+        return (window.kojohProfessionJobs ? window.kojohProfessionJobs(payload.professions) : Promise.resolve(payload.professions))
+          .then(function(names){ return SUPA.from('job_titles').select('id, name').in('name', names); })
           .then(function(jtRes){
             if (jtRes.error || !jtRes.data || jtRes.data.length === 0) return;
             var rows = jtRes.data.map(function(jt){ return { profile_id: userId, job_title_id: jt.id }; });

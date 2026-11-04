@@ -74,7 +74,8 @@
       }).select().maybeSingle();
       if (insertRes.error) { console.warn('Profile materialize error', insertRes.error); return null; }
       if (pending.professions && pending.professions.length) {
-        var jt = await SUPA.from('job_titles').select('id, name').in('name', pending.professions);
+        var jobNames = window.kojohProfessionJobs ? await window.kojohProfessionJobs(pending.professions) : pending.professions;
+        var jt = await SUPA.from('job_titles').select('id, name').in('name', jobNames);
         if (jt.data && jt.data.length) {
           var rows = jt.data.map(function(j){ return { profile_id: user.id, job_title_id: j.id }; });
           await SUPA.from('profile_job_titles').insert(rows);

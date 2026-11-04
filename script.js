@@ -296,8 +296,7 @@ function setHeroCharacter(character){
   try{ localStorage.setItem('kojoh-hero-character', character); }catch(e){}
 }
 (function(){
-  var saved = 'male';
-  try{ saved = localStorage.getItem('kojoh-hero-character') || 'male'; }catch(e){}
+  var saved = (window.kojohArt && window.kojohArt() === 'girl') ? 'female' : 'male';
   setHeroCharacter(saved);
 })();
 

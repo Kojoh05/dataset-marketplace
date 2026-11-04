@@ -248,6 +248,41 @@ window.kojohLinkCheck = function(input, kind){
 
 
 // ---------------------------------------------------------------------------
+// Professions = the folders on the site. A new folder in the admin shows up
+// at signup automatically. Folder titles map to job titles for recommendations;
+// a folder can override that with meta.job_titles in the admin.
+// ---------------------------------------------------------------------------
+window.kojohTitleCase = function(s){
+  return String(s || '').toLowerCase().replace(/(^|[\s\/(-])([a-z])/g, function(m, p, ch){ return p + ch.toUpperCase(); });
+};
+window.kojohProfessionFolders = function(){
+  var s = window.kojohSupa && window.kojohSupa();
+  if (!s) return Promise.resolve([]);
+  return s.from('folders').select('title, slug, meta').order('sort_order', { ascending: true }).then(function(r){
+    if (r.error) return s.from('folders').select('title, slug, meta').order('title');
+    return r;
+  }).then(function(r){
+    return (r.data || []).map(function(f){
+      var name = window.kojohTitleCase(f.title);
+      var jobs = (f.meta && Array.isArray(f.meta.job_titles) && f.meta.job_titles.length) ? f.meta.job_titles
+        : (/business|ops/i.test(f.title) ? ['Business Analyst', 'Operations Analyst', 'Supply Chain Analyst'] : [name]);
+      return { name: name, slug: f.slug, jobs: jobs };
+    });
+  }).catch(function(){ return []; });
+};
+// Turn picked profession names into job-title names for profile_job_titles.
+window.kojohProfessionJobs = function(picked){
+  return window.kojohProfessionFolders().then(function(fs){
+    var out = [];
+    (picked || []).forEach(function(p){
+      var f = fs.filter(function(x){ return x.name === p; })[0];
+      (f ? f.jobs : [p]).forEach(function(j){ if (out.indexOf(j) === -1) out.push(j); });
+    });
+    return out;
+  });
+};
+
+// ---------------------------------------------------------------------------
 // Gender-aware character art. Male sees the boy, female sees the girl, and
 // "other" picks once (stored on profiles.art_pref). Guests see the boy.
 // ---------------------------------------------------------------------------
@@ -269,6 +304,11 @@ window.kojohLinkCheck = function(input, kind){
   };
   window.kojohApplyArt = function(){
     var who = window.kojohArt();
+    for (var i = 1; i <= 3; i++) {
+      var fr = document.getElementById('wtFrame' + i);
+      var src = 'icons/scene/person_' + (who === 'girl' ? 'female' : 'male') + '_' + i + '.png';
+      if (fr && fr.getAttribute('src') !== src) fr.setAttribute('src', src);
+    }
     Array.prototype.forEach.call(document.querySelectorAll('img[data-art]'), function(im){
       var u = im.getAttribute(who === 'girl' ? 'data-girl' : 'data-boy') || im.getAttribute('data-boy') || im.getAttribute('data-girl');
       if (u && im.getAttribute('src') !== u) im.setAttribute('src', u);
