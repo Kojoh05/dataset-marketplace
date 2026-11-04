@@ -216,8 +216,8 @@ function showFolderView(view){
     if(practiceBtn) practiceBtn.classList.add('active');
     if(jobsBtn) jobsBtn.setAttribute('aria-selected', 'false');
     if(practiceBtn) practiceBtn.setAttribute('aria-selected', 'true');
-    if(titleEl) titleEl.textContent = 'Practice by tool';
-    if(subEl) subEl.textContent = 'Pick a tool. Each folder has Beginner, Intermediate, and Hard tasks.';
+    if(titleEl) titleEl.textContent = 'Practice by role';
+    if(subEl) subEl.textContent = 'Real business questions in SQL and Python. Your code runs in the browser and is checked instantly. 5 SQL and 5 Python tasks free in every role.';
   } else {
     jobs.style.display = '';
     practice.style.display = 'none';
