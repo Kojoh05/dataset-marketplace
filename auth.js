@@ -219,6 +219,7 @@ document.getElementById('suPassword').addEventListener('input', function(){
   if (pwValid) {
     reveal('stepCountry');
     reveal('stepName');
+    checkNameStep(); // Google signups arrive with the name already filled in
   }
 });
 
