@@ -88,10 +88,56 @@ window.kojohEsc = function(s){
     .replace(/[<>&"]/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]; });
 };
 
+// ---------------------------------------------------------------------------
+// Prices. datasets.price is the first-purchase offer; datasets.meta.mrp is the
+// regular price. A viewer's first paid dataset is at the offer price, every
+// later one at MRP. The server (create-order) enforces the same rule.
+// Both versions are rendered; <html class="k-repeat"> switches which one shows.
+// ---------------------------------------------------------------------------
+window.kojohMrp = function(d){
+  var m = d && d.meta && Number(d.meta.mrp);
+  return (m && m > Number(d.price)) ? m : 0;
+};
+window.kojohIsRepeat = function(){ return document.documentElement.classList.contains('k-repeat'); };
+window.kojohPriceFor = function(d){
+  var mrp = window.kojohMrp(d);
+  return (mrp && window.kojohIsRepeat()) ? mrp : Number(d.price) || 0;
+};
 window.kojohMoney = function(d){
   if (!d) return '';
-  return d.is_free || !Number(d.price) ? 'Free' : '&#8377;' + Number(d.price).toFixed(0);
+  if (d.is_free || !Number(d.price)) return 'Free';
+  var p = '&#8377;' + Number(d.price).toFixed(0), mrp = window.kojohMrp(d);
+  if (!mrp) return p;
+  var m = '&#8377;' + mrp.toFixed(0);
+  return '<span class="k-price"><span class="k-p-offer"><s class="k-mrp">' + m + '</s> ' + p + '</span>'
+    + '<span class="k-p-full">' + m + '</span></span>';
 };
+(function(){
+  var KEY = 'kojoh-repeat-buyer';
+  function set(v){
+    document.documentElement.classList.toggle('k-repeat', !!v);
+    try { localStorage.setItem(KEY, v ? '1' : '0'); } catch(e){}
+  }
+  try { if (localStorage.getItem(KEY) === '1') document.documentElement.classList.add('k-repeat'); } catch(e){}
+  if (!document.getElementById('kPriceCss')) {
+    var st = document.createElement('style'); st.id = 'kPriceCss';
+    st.textContent = '.k-mrp{opacity:.55;font-weight:500;margin-right:.15em}.k-p-full{display:none}'
+      + 'html.k-repeat .k-p-offer{display:none}html.k-repeat .k-p-full{display:inline}'
+      + '.k-offer-badge{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.02em;padding:.2rem .55rem;border-radius:999px;background:var(--text);color:var(--bg);vertical-align:middle}'
+      + 'html.k-repeat .k-offer-badge{display:none}';
+    (document.head || document.documentElement).appendChild(st);
+  }
+  window.kojohRefreshBuyer = function(){
+    var s = window.kojohSupa && window.kojohSupa();
+    if (!s) return Promise.resolve();
+    return s.auth.getSession().then(function(r){
+      var u = r.data && r.data.session && r.data.session.user;
+      if (!u) { set(false); return; }
+      return s.from('purchases').select('id', { count: 'exact', head: true }).eq('user_id', u.id).gt('price_paid', 0)
+        .then(function(q){ if (!q.error) set((q.count || 0) > 0); });
+    }).catch(function(){});
+  };
+})();
 
 // A short notice in the corner. kind: 'ok' (default) or 'error'.
 // Pass action + onAction for an inline button, for example Undo.
@@ -368,6 +414,6 @@ window.kojohProfessionJobs = function(picked){
       });
     }).catch(function(){});
   };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', window.kojohArtInit);
-  else window.kojohArtInit();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ window.kojohArtInit(); window.kojohRefreshBuyer(); });
+  else { window.kojohArtInit(); window.kojohRefreshBuyer(); }
 })();

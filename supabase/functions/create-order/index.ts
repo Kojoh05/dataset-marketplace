@@ -26,14 +26,19 @@ Deno.serve(async (req) => {
 
     const { dataset_id } = await req.json();
     const admin = createClient(url, service);
-    const { data: ds } = await admin.from("datasets").select("id, title, price, is_free, is_published").eq("id", dataset_id).maybeSingle();
+    const { data: ds } = await admin.from("datasets").select("id, title, price, is_free, is_published, meta").eq("id", dataset_id).maybeSingle();
     if (!ds || !ds.is_published) return json({ error: "Dataset not found." }, 404);
     if (ds.is_free || Number(ds.price) <= 0) return json({ error: "This dataset is free, no payment needed." }, 400);
 
     const { data: owned } = await admin.from("purchases").select("id").eq("user_id", user.id).eq("dataset_id", ds.id).maybeSingle();
     if (owned) return json({ owned: true });
 
-    const amount = Math.round(Number(ds.price) * 100);
+    // First paid dataset at the offer price (datasets.price); every later one at MRP (datasets.meta.mrp).
+    const { count: paidBefore } = await admin.from("purchases").select("id", { count: "exact", head: true })
+      .eq("user_id", user.id).gt("price_paid", 0);
+    const mrp = Number((ds as any).meta?.mrp) || 0;
+    const unit = (paidBefore && mrp > Number(ds.price)) ? mrp : Number(ds.price);
+    const amount = Math.round(unit * 100);
     const res = await fetch("https://api.razorpay.com/v1/orders", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: "Basic " + btoa(`${keyId}:${keySecret}`) },
@@ -46,7 +51,7 @@ Deno.serve(async (req) => {
     const ins = await admin.from("payments").insert({ user_id: user.id, dataset_id: ds.id, amount_paise: amount, razorpay_order_id: order.id, status: "created" });
     if (ins.error) return json({ error: ins.error.message }, 500);
 
-    return json({ order_id: order.id, amount, currency: "INR", key_id: keyId, title: ds.title, email: user.email });
+    return json({ order_id: order.id, amount, currency: "INR", key_id: keyId, title: ds.title, email: user.email, first_offer: !paidBefore });
   } catch (e) {
     return json({ error: String((e as Error)?.message ?? e) }, 500);
   }

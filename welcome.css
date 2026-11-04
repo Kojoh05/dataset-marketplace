@@ -136,3 +136,4 @@ body{overflow-x:hidden;}
 .w-ds-foot span{color:var(--muted);}
 .w-ds-more{text-align:center; margin-top:1.75rem; font-size:.875rem; color:var(--muted);}
 .w-ds-more a{color:var(--text); font-weight:600;}
+.w-mrp{opacity:.5;font-weight:500;font-size:.85em;margin-right:.2em}

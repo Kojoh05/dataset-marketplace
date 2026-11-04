@@ -181,8 +181,10 @@
     return esc(text).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   }
   function money(ds){
-    return ds.is_free ? 'Free' : ('&#8377;' + Number(ds.price).toFixed(0));
+    return ds.is_free ? 'Free' : window.kojohMoney(ds);
   }
+  // Plain rupee amount this viewer will actually pay (offer on first purchase, MRP after).
+  function payAmount(ds){ return '\u20B9' + window.kojohPriceFor(ds).toFixed(0); }
   function reduced(){
     return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   }
@@ -407,7 +409,7 @@
   function charged(ds){ return !!STATE.live && !ds.is_free && Number(ds.price) > 0; }
   function priceHtml(ds, small){
     if (ds.is_free || !(Number(ds.price) > 0)) return 'Free';
-    if (STATE.live) return money(ds);
+    if (STATE.live) return money(ds) + (window.kojohMrp(ds) && !small ? ' <span class="k-offer-badge">First purchase offer</span>' : '');
     return '&#8377;0' + (small ? ' ' : '') + '<span class="k-buy-was"' + (small ? ' style="font-size:0.8rem;"' : '') + '>' + money(ds) + '</span>';
   }
 
@@ -1136,11 +1138,11 @@
     document.getElementById('payItemPrice').innerHTML = money(ds);
     document.getElementById('payTotal').innerHTML = ds.is_free
       ? 'Free'
-      : (charged(ds) ? money(ds) : '<span class="k-strike">' + money(ds) + '</span>&#8377;0');
+      : (charged(ds) ? payAmount(ds) : '<span class="k-strike">' + payAmount(ds) + '</span>&#8377;0');
     document.getElementById('payNote').innerHTML = charged(ds)
       ? 'Secure payment by Razorpay: UPI, cards, netbanking and wallets. Your license unlocks the moment the payment goes through. By paying you agree to the <a href="/terms" target="_blank" rel="noopener">Terms</a> and <a href="/refund" target="_blank" rel="noopener">Refund Policy</a>.'
       : 'Beta pricing. Nothing is charged and no card details are collected while the purchase flow is being tested.';
-    document.getElementById('payGo').textContent = charged(ds) ? 'Pay ' + money(ds).replace('&#8377;', '\u20B9') + ' and unlock' : (ds.is_free ? 'Unlock for free' : 'Unlock');
+    document.getElementById('payGo').textContent = charged(ds) ? 'Pay ' + payAmount(ds) + ' and unlock' : (ds.is_free ? 'Unlock for free' : 'Unlock');
     openDialog('payModal');
   }
 
@@ -1249,6 +1251,7 @@
     STATE.submission = null;
 
     STATE.lic = licRes.data;
+    if (window.kojohRefreshBuyer) window.kojohRefreshBuyer();
     btn.disabled = false;
     btn.textContent = 'Unlocked';
     closeDialog('payModal');

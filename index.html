@@ -361,7 +361,7 @@
   var SUPA = window.kojohSupa();
   var esc = window.kojohEsc;
   Promise.all([
-    SUPA.from('datasets').select('slug, title, short_description, price, is_free, difficulty, created_at, folder_id').order('created_at', { ascending:false }).limit(5),
+    SUPA.from('datasets').select('slug, title, short_description, price, is_free, meta, difficulty, created_at, folder_id').order('created_at', { ascending:false }).limit(5),
     SUPA.from('folders').select('id, title')
   ]).then(function(r){
     var rows = (r[0] && r[0].data) || [];
@@ -449,7 +449,7 @@
   }
 
   Promise.all([
-    SUPA.from('datasets').select('id, slug, title, difficulty, price, is_free, preview_rows'),
+    SUPA.from('datasets').select('id, slug, title, difficulty, price, is_free, meta, preview_rows'),
     SUPA.from('hypes').select('dataset_id, created_at').order('created_at', { ascending:false }).limit(12),
     SUPA.rpc('dataset_shelf')
   ]).then(function(res){
