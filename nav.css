@@ -384,3 +384,4 @@ html { scrollbar-width: thin; scrollbar-color: rgba(120, 116, 110, 0.35) transpa
 .ksb-nav { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; overscroll-behavior: contain; }
 .ksb-nav::-webkit-scrollbar { width: 0; height: 0; }
 .ksb-me { flex-shrink: 0; margin-top: 0.25rem; }
+.ksb-nav > * { flex-shrink: 0; }
