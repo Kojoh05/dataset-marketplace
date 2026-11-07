@@ -18,7 +18,9 @@
   function setGuestState() {
     setText('navAvatar', '?');
     setText('navAvatarMobile', '?');
-    setText('navName', 'Guest');
+    setText('navName', 'Log in');
+    var ml = $('menuLogin'); if (ml) ml.hidden = false;
+    var ww = $('welcomeWord'); if (ww) ww.hidden = true;
     setText('panelAvatar', '?');
     setText('panelDisplayName', 'Guest');
     setText('panelUsername', 'Not signed in');
@@ -39,6 +41,8 @@
     setText('navAvatar', initialsText);
     setText('navAvatarMobile', initialsText);
     setText('navName', displayName);
+    var ml = $('menuLogin'); if (ml) ml.hidden = true;
+    var ww = $('welcomeWord'); if (ww) ww.hidden = false;
     setText('panelAvatar', initialsText);
     setText('panelDisplayName', [first, last].filter(Boolean).join(' ') || displayName);
     setText('panelUsername', username ? '@' + username : '');

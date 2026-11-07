@@ -13,12 +13,12 @@
       { href: '/recommendations', label: 'Recommended', icon: 'star' },
       { href: '/saved', label: 'Saved datasets', icon: 'bookmark' },
       { href: '/practice', label: 'Practice', icon: 'code' },
+      { href: '/pricing', label: 'Pricing', icon: 'tag' },
       { href: '/purchases', label: 'Your purchases', icon: 'bag' },
       { href: '/leaderboard', label: 'Leaderboard', icon: 'trophy' }
     ]},
     { group: 'MORE', items: [
       { href: '/settings', label: 'Settings', icon: 'gear' },
-      { href: '/pricing', label: 'Pricing', icon: 'tag' },
       { href: '/about', label: 'About KOJOH', icon: 'info' },
       { href: '/help', label: 'Help & contact', icon: 'help' },
       { href: '/suggestions', label: 'Suggestions', icon: 'bulb' }

@@ -1,5 +1,5 @@
 // KOJOH global config
-window.KOJOH_VERSION = '0.3.1';
+window.KOJOH_VERSION = '0.4.0';
 
 // ---------------------------------------------------------------------------
 // One shared Supabase client, so pages stop spinning up duplicates.

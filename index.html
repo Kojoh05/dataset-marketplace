@@ -54,8 +54,7 @@
     </div>
     <div class="topnav">
       <div class="nv-tick">
-        <span class="nv-live"><span class="nv-livedot"></span>Live</span>
-        <div class="nv-slot" id="navSlot"><span class="nv-empty">Reading the shelf</span></div>
+                <div class="nv-slot" id="navSlot"><span class="nv-empty">Latest datasets</span></div>
         <button class="nv-next" id="navNext" type="button" aria-label="Show the next dataset">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
@@ -64,26 +63,28 @@
     </div>
     <div class="topnav-profile" style="display:flex;align-items:center;gap:0.75rem;">
       <div class="profile-trigger" onclick="openPanel()">
-        <div class="avatar" id="navAvatar">YC</div>
-        <div class="name" id="navName">Yash</div>
+        <div class="avatar" id="navAvatar">?</div>
+        <div class="name" id="navName">Log in</div>
       </div>
       <div class="avatar-only" onclick="openPanel()">
-        <div class="avatar" id="navAvatarMobile">YC</div>
+        <div class="avatar" id="navAvatarMobile">?</div>
       </div>
     </div>
   </div>
 
   <!-- MOBILE MENU -->
   <div class="mobile-menu" id="mobileMenu">
-    <a href="/">Home</a>
-    <a href="/about">About</a>
     <a href="#categories">Datasets</a>
+    <a href="/practice">Practice</a>
+    <a href="/pricing">Pricing</a>
+    <a href="/about">About</a>
+    <a href="/auth" id="menuLogin">Log in</a>
   </div>
 
   <!-- WELCOME -->
   <div class="topbar">
     <div class="brand-row">
-      <span class="welcome">Welcome</span>
+      <span class="welcome" id="welcomeWord" hidden>Welcome</span>
       <span class="name" id="welcomeName"></span>
     </div>
   </div>
@@ -95,7 +96,8 @@
       <h1 class="hero-ghost">Datasets nobody else's portfolio is built on.</h1>
       <h1 id="heroTitle"><span id="typeTarget"></span><span class="cursor"></span><span class="face-layer" id="faceLayer"></span></h1>
     </div>
-    <p>Every dataset here starts as a real business problem, not a random CSV. Get the data, the story, and the challenge. Pick a folder below and see what's inside.</p>
+    <p>Every dataset here is built around a business problem, not a random CSV. Get the data, the story and the challenge.</p>
+    <div class="hero-cta"><a class="k-btn k-btn-brand k-btn-lg" id="heroFreeBtn" href="/dataset?slug=kirana-store-sales-free">Try a free dataset</a></div>
 
     <div class="hero-scene" aria-hidden="true">
       <img class="scene-planet" src="icons/scene/planet.png" alt="">
@@ -144,7 +146,6 @@
     <div class="searchbox">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7A7772" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
       <input id="homeSearch" type="search" placeholder="Search by role, tool or topic" aria-label="Search datasets" enterkeyhint="search" autocomplete="off">
-      <kbd class="searchbox-hint">Enter</kbd>
     </div>
   </div>
 
@@ -167,23 +168,23 @@
         <span class="folder-link">View datasets &rarr;</span>
       </div>
     </a>
-    <a class="folder f-viz" href="#categories" data-folder="data-scientist">
-      <div class="folder-tab"><span class="folder-count">1 dataset</span></div>
+    <a class="folder f-viz" href="/folder?slug=data-scientist" data-folder="data-scientist">
+      <div class="folder-tab"><span class="folder-count">1 dataset &middot; more coming</span></div>
       <div class="folder-body">
         <span class="folder-title">Data scientist</span>
         <p class="folder-desc">Prediction done properly: honest labels, leak-free features, time-based tests and models worth rupees.</p>
         <span class="folder-link">View datasets &rarr;</span>
       </div>
     </a>
-    <a class="folder f-sql" href="#categories" data-folder="business-ops">
-      <div class="folder-tab"><span class="folder-count">2 datasets</span></div>
+    <a class="folder f-sql" href="/folder?slug=business-ops" data-folder="business-ops">
+      <div class="folder-tab"><span class="folder-count">2 datasets &middot; more coming</span></div>
       <div class="folder-body">
         <span class="folder-title">Business / Ops</span>
         <p class="folder-desc">Procurement, logistics and operations: transit trackers, cash plans and why things run late.</p>
         <span class="folder-link">View datasets &rarr;</span>
       </div>
     </a>
-    <a class="folder f-engineer" href="#categories" data-folder="data-engineer">
+    <a class="folder f-engineer" href="/folder?slug=data-engineer" data-folder="data-engineer">
       <div class="folder-tab"><span class="folder-count">3 datasets</span></div>
       <div class="folder-body">
         <span class="folder-title">Data engineer</span>
@@ -191,7 +192,7 @@
         <span class="folder-link">View datasets &rarr;</span>
       </div>
     </a>
-    <a class="folder f-product" href="#categories" data-folder="product-analyst">
+    <a class="folder f-product" href="/folder?slug=product-analyst" data-folder="product-analyst">
       <div class="folder-tab"><span class="folder-count">3 datasets</span></div>
       <div class="folder-body">
         <span class="folder-title">Product analyst</span>
@@ -199,7 +200,7 @@
         <span class="folder-link">View datasets &rarr;</span>
       </div>
     </a>
-    <a class="folder f-qa" href="#categories" data-folder="quality-analyst">
+    <a class="folder f-qa" href="/folder?slug=quality-analyst" data-folder="quality-analyst">
       <div class="folder-tab"><span class="folder-count">3 datasets</span></div>
       <div class="folder-body">
         <span class="folder-title">Quality analyst</span>
@@ -323,7 +324,7 @@
       <div class="panel-feedback-note" id="panelFeedbackNote"></div>
     </div>
 
-    <div class="panel-version">KOJOH <span id="panelVersion">v0.0.0</span></div>
+    <div class="panel-version">KOJOH <span id="panelVersion">v0.4.0</span></div>
 
     <div class="panel-install-wrap">
       <button class="panel-install-btn" id="panelInstallBtn" onclick="triggerInstall()">
@@ -351,6 +352,14 @@
     var url = '/search' + (q ? '?q=' + encodeURIComponent(q) : '');
     if (window.kojohSoftNav) window.kojohSoftNav(url); else window.location.href = url;
   });
+})();
+
+// Hero button: point at the newest free dataset.
+(function(){
+  var btn = document.getElementById('heroFreeBtn');
+  if (!btn || !(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase)) return;
+  window.kojohSupa().from('datasets').select('slug').eq('is_free', true).order('created_at', { ascending:false }).limit(1)
+    .then(function(r){ var d = r && r.data && r.data[0]; if (d) btn.setAttribute('href', '/dataset?slug=' + encodeURIComponent(d.slug)); });
 })();
 
 // Recently added, read live from the catalogue.
@@ -413,6 +422,7 @@
         return;
       }
       el.textContent = n + (n === 1 ? ' dataset' : ' datasets');
+      if (n < 3) { el.textContent += ' \u00b7 more coming'; card.classList.add('is-thin'); }
       if (card.getAttribute('href') === '#categories') {
         card.setAttribute('href', '/folder?slug=' + encodeURIComponent(slug));
       }
