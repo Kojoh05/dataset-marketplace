@@ -80,8 +80,9 @@
       if (statusOn) {
         h += '<p class="chal-frozen-row">Points awarded, <span class="chal-points">' + (submission.points == null ? 0 : submission.points) + '</span>'
           + ' &nbsp; <a href="/leaderboard">See the leaderboard</a></p>';
+        if (submission._cert) h += '<p class="chal-frozen-row"><a class="k-btn k-btn-brand" href="/certificate?id=' + encodeURIComponent(submission._cert) + '">View your certificate &rarr;</a></p>';
       } else {
-        h += '<p class="chal-frozen-row k-sub" style="margin:0.5rem 0 0;">Our team checks your repo and post and awards points from here. '
+        h += '<p class="chal-frozen-row k-sub" style="margin:0.5rem 0 0;">Our team checks your repo and post and awards points from here. Once it is reviewed you also get a verified certificate. '
           + 'This page is now locked to how it was when you submitted.</p>';
       }
       h += '</div></div>';
@@ -146,6 +147,12 @@
     var subRes = await SUPA.from('challenge_submissions').select('*').eq('license_id', lic.id).maybeSingle();
     if (subRes.error) { empty(kIcon('alert'), 'Could not load', escape(subRes.error.message)); return; }
     var submission = subRes.data;
+    if (submission && submission.status === 'reviewed') {
+      try {
+        var cr = await SUPA.from('practice_certificates').select('code').eq('user_id', lic.user_id || (await SUPA.auth.getUser()).data.user.id).eq('role', slug).eq('level', 'project').eq('status', 'issued').maybeSingle();
+        if (cr.data) submission._cert = cr.data.code;
+      } catch (e) {}
+    }
     var pack = lic.task_pack;
     var done = loadProgress(lic.license_code);
     var allTasks = [];

@@ -83,6 +83,18 @@
     </form>
   </section>
 
+  <!-- GOAL -->
+  <section class="settings-section" id="goal">
+    <h2 class="settings-section-title">Your goal</h2>
+    <p class="settings-hint" style="margin:0 0 0.8rem;">We use this to suggest the right practice and projects for you.</p>
+    <div class="pill-group" id="goalPills">
+      <button type="button" class="pill-choice" data-goal="student">Student or beginner</button>
+      <button type="button" class="pill-choice" data-goal="job_seeker">Looking for a job</button>
+      <button type="button" class="pill-choice" data-goal="switcher">Switching careers</button>
+    </div>
+    <div class="settings-note" id="goalNote" hidden></div>
+  </section>
+
   <!-- EMAIL -->
   <section class="settings-section" id="email">
     <h2 class="settings-section-title">Email address</h2>
@@ -129,6 +141,29 @@
 <script src="config.js"></script>
 <script src="settings.js"></script>
 <script src="forms.js"></script>
+<script>
+(function(){
+  var SUPA = window.kojohSupa && window.kojohSupa(), box = document.getElementById('goalPills'), note = document.getElementById('goalNote');
+  function mark(g){ Array.prototype.forEach.call(box.children, function(b){ b.classList.toggle('selected', b.getAttribute('data-goal') === g); }); }
+  try { mark(localStorage.getItem('kojoh-goal')); } catch (e) {}
+  if (SUPA) SUPA.auth.getSession().then(function(r){
+    var u = r.data && r.data.session && r.data.session.user; if (!u) return;
+    SUPA.from('profiles').select('goal').eq('id', u.id).maybeSingle().then(function(p){ if (p.data && p.data.goal) { mark(p.data.goal); try { localStorage.setItem('kojoh-goal', p.data.goal); } catch (e) {} } });
+  });
+  box.addEventListener('click', async function(e){
+    var b = e.target.closest('[data-goal]'); if (!b) return;
+    var g = b.getAttribute('data-goal'); mark(g);
+    try { localStorage.setItem('kojoh-goal', g); } catch (e) {}
+    note.hidden = false; note.className = 'settings-note'; note.textContent = 'Saving…';
+    try {
+      var u = (await SUPA.auth.getUser()).data.user;
+      var r = await SUPA.from('profiles').update({ goal: g }).eq('id', u.id);
+      if (r.error) throw r.error;
+      note.className = 'settings-note ok'; note.textContent = 'Saved. Your recommendations now follow this goal.';
+    } catch (err) { note.className = 'settings-note error'; note.textContent = /goal|schema cache|column/i.test(err.message || '') ? 'Saved on this device. (Run supabase/schema-goals-certs.sql to save it to your account.)' : (err.message || 'Could not save.'); }
+  });
+})();
+</script>
 <script>
 (function(){
   var SUPA = window.kojohSupa && window.kojohSupa();

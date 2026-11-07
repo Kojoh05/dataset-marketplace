@@ -125,3 +125,15 @@
 /* Account: log out */
 .settings-logout{background:transparent !important; color:#C2410C !important; border:1.5px solid #C2410C !important;}
 .settings-logout:hover{background:#C2410C !important; color:#fff !important; opacity:1;}
+
+/* Goal pills (same look as sign-up) */
+.pill-group, .chip-group{display:flex; flex-wrap:wrap; gap:0.5rem;}
+.pill-choice, .chip-choice{
+  font-family:inherit; font-size:0.8125rem; font-weight:600; cursor:pointer;
+  padding:0.5rem 1rem; border-radius:999px; border:1px solid var(--line);
+  background:var(--card); color:var(--text);
+  transition:background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.pill-choice.selected, .chip-choice.selected{
+  background:var(--text); color:var(--bg); border-color:var(--text);
+}

@@ -75,6 +75,7 @@ html[data-theme="dark"] .sk-review .ok{color:#6FCF97;} html[data-theme="dark"] .
 <script src="supabase-config.js"></script>
 <script src="config.js"></script>
 <script src="skills-data.js"></script>
+<script src="recs.js"></script>
 <script>
 (function(){
   var SK = window.KOJOH_SKILLS || [], app = document.getElementById('skApp');
@@ -139,7 +140,8 @@ html[data-theme="dark"] .sk-review .ok{color:#6FCF97;} html[data-theme="dark"] .
         return '<li><div><span class="' + (ok ? 'ok' : 'no') + '">' + (ok ? '&#10003; Right' : '&#10007; Not quite') + '</span> &middot; ' + q.q + '</div>'
           + (ok ? '' : '<div class="sk-why">Answer: <b style="color:var(--text)">' + esc(q.o[q.a]) + '</b></div>')
           + '<div class="sk-why">' + esc(q.why) + '</div></li>';
-      }).join('') + '</ul></div>';
+      }).join('') + '</ul></div><div id="skRecs"></div>';
+    if (window.kojohRecs) window.kojohRecs(document.getElementById('skRecs'), { skill: sk.id, title: 'To grow your ' + sk.name + ': try this for your portfolio' });
     window.scrollTo(0, 0);
   }
 

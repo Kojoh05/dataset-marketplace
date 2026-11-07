@@ -26,6 +26,7 @@
 <main class="page-wrap pr-wrap" id="prApp">
   <div class="pr-loading">Loading practice</div>
 </main>
+<div class="page-wrap pr-wrap" id="prRecs" style="padding-top:0"></div>
 
 <!-- pass checkout -->
 <div class="k-modal" id="passModal" hidden>
@@ -50,5 +51,14 @@
 <script src="config.js"></script>
 <script src="practice-engine.js"></script>
 <script src="practice.js"></script>
+<script src="recs.js"></script>
+<script>
+(function(){
+  var el = document.getElementById('prRecs'); if (!el || !window.kojohRecs) return;
+  var role = new URLSearchParams(location.search).get('role') || '';
+  var sk = role === 'data-scientist' ? 'python' : (role === 'data-engineer' || role === 'business-analyst' || role === 'data-analyst' ? 'sql' : '');
+  (window.kReady || function(f){ f(); })(function(){ window.kojohRecs(el, { skill: sk, title: 'Put your practice into a portfolio project', practice: false }); });
+})();
+</script>
 </body>
 </html>

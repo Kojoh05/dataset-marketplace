@@ -132,6 +132,17 @@
             </div>
           </div>
 
+          <!-- Step 6b: goal -->
+          <div class="auth-step" id="stepGoal" hidden>
+            <label class="field-label">Where are you right now?</label>
+            <p class="field-hint">We use this to suggest the right practice and projects. You can change it later in Settings.</p>
+            <div class="pill-group" id="goalGroup">
+              <button type="button" class="pill-choice" data-value="student" onclick="selectGoal('student')">Student or beginner</button>
+              <button type="button" class="pill-choice" data-value="job_seeker" onclick="selectGoal('job_seeker')">Looking for a job</button>
+              <button type="button" class="pill-choice" data-value="switcher" onclick="selectGoal('switcher')">Switching careers</button>
+            </div>
+          </div>
+
           <!-- Step 7: professions -->
           <div class="auth-step" id="stepProfessions" hidden>
             <label class="field-label">Interested professions</label>

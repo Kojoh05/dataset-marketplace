@@ -19,7 +19,7 @@
 .cert-tools{display:flex; gap:0.5rem; justify-content:flex-end; flex-wrap:wrap; margin:0 0 1rem;}
 .cert{--acc:#8DB89A; position:relative; aspect-ratio:297/210; width:100%; background:#F4F1EA center/cover no-repeat; color:#1C1A1E;
   border-radius:6px; box-shadow:0 10px 40px rgba(0,0,0,0.12); overflow:hidden; container-type:inline-size;}
-.cert.lv-intermediate{--acc:#8BB3D9;} .cert.lv-hard{--acc:#D98B5F;}
+.cert.lv-intermediate{--acc:#8BB3D9;} .cert.lv-hard{--acc:#D98B5F;} .cert.lv-project{--acc:#C9A44C;}
 .cert.plain::before{content:''; position:absolute; inset:3.4cqw; border:0.25cqw solid var(--acc); outline:0.12cqw solid #1C1A1E; outline-offset:0.7cqw; border-radius:0.4cqw; pointer-events:none;}
 .cert.plain::after{content:''; position:absolute; inset:0; background-image:linear-gradient(rgba(28,26,30,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(28,26,30,0.035) 1px, transparent 1px); background-size:3cqw 3cqw; pointer-events:none;}
 .cert-in{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; text-align:center; padding:7cqw 9cqw 0; z-index:1;}
@@ -66,19 +66,21 @@
   if (!/^KJ-[A-Z0-9]{8}$/.test(code)) return fail('Check the certificate ID. It looks like KJ-1A2B3C4D.');
   var r = await window.kojohSupa().from('practice_certificates').select('code, name, role, role_title, level, skipped, score, issued_at, status').eq('code', code).eq('status', 'issued').maybeSingle();
   if (r.error || !r.data) return fail('There is no issued certificate with ID ' + code + '.');
-  var c = r.data, lvName = { beginner: 'Beginner', intermediate: 'Intermediate', hard: 'Hard' }[c.level] || c.level;
+  var c = r.data, isProject = c.level === 'project', lvName = { beginner: 'Beginner', intermediate: 'Intermediate', hard: 'Hard', project: 'Portfolio project' }[c.level] || c.level;
   var role = c.role_title || c.role.replace(/-/g, ' ').replace(/\b\w/g, function (x) { return x.toUpperCase(); });
   var url = 'https://www.kojohhi.com/certificate?id=' + c.code;
-  document.title = 'KOJOH | ' + c.name + ', ' + role + ' ' + lvName;
+  document.title = 'KOJOH | ' + c.name + ', ' + role + (isProject ? '' : ' ' + lvName);
   app.innerHTML = '<div class="cert-tools"><button class="k-btn" type="button" id="cCopy">Copy link</button>'
-    + '<a class="k-btn" target="_blank" rel="noopener" href="https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=' + encodeURIComponent('KOJOH Practice: ' + role + ', ' + lvName) + '&organizationName=KOJOH&issueYear=' + new Date(c.issued_at).getFullYear() + '&issueMonth=' + (new Date(c.issued_at).getMonth() + 1) + '&certUrl=' + encodeURIComponent(url) + '&certId=' + c.code + '">Add to LinkedIn</a>'
+    + '<a class="k-btn" target="_blank" rel="noopener" href="https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=' + encodeURIComponent(isProject ? 'KOJOH Portfolio Project: ' + role : 'KOJOH Practice: ' + role + ', ' + lvName) + '&organizationName=KOJOH&issueYear=' + new Date(c.issued_at).getFullYear() + '&issueMonth=' + (new Date(c.issued_at).getMonth() + 1) + '&certUrl=' + encodeURIComponent(url) + '&certId=' + c.code + '">Add to LinkedIn</a>'
     + '<button class="k-btn k-btn-brand" type="button" onclick="window.print()">Download PDF</button></div>'
     + '<div class="cert plain lv-' + esc(c.level) + '" id="cert"><div class="cert-in">'
     + '<div class="c-brand">KOJOH</div><div class="c-kind">Certificate of completion</div>'
     + '<div class="c-pre">This certifies that</div><div class="c-name">' + esc(c.name) + '</div>'
-    + '<div class="c-what">' + (c.skipped ? 'has unlocked the' : 'has completed the') + ' <b>' + esc(lvName) + ' level</b> of KOJOH Practice for <b>' + esc(role) + '</b>'
-    + (c.skipped ? '.' : ', solving real business questions on a full case project.') + '</div>'
-    + (c.skipped ? '<div class="c-score"><small>Level unlocked</small></div>' : '<div class="c-score">' + c.score + '%<small>Final score</small></div>')
+    + (isProject
+      ? '<div class="c-what">has completed the KOJOH portfolio project <b>' + esc(role) + '</b>, with the work reviewed by the KOJOH team.</div><div class="c-score"><small>Reviewed project</small></div>'
+      : '<div class="c-what">' + (c.skipped ? 'has unlocked the' : 'has completed the') + ' <b>' + esc(lvName) + ' level</b> of KOJOH Practice for <b>' + esc(role) + '</b>'
+        + (c.skipped ? '.' : ', solving real business questions on a full case project.') + '</div>'
+        + (c.skipped ? '<div class="c-score"><small>Level unlocked</small></div>' : '<div class="c-score">' + c.score + '%<small>Final score</small></div>'))
     + '</div><div class="c-foot"><div class="c-meta"><b>Issued</b>' + new Date(c.issued_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
     + '<b style="margin-top:0.6cqw">Certificate ID</b>' + esc(c.code) + '<br>kojohhi.com/certificate</div>'
     + '<div class="c-qr" id="cQr"></div><div class="c-sign"><div class="c-seal">VERIFIED</div><span>Founder, KOJOH</span></div></div></div>'

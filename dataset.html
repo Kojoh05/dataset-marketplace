@@ -32,6 +32,7 @@
 <main class="page-wrap ds-wide">
   <div id="dsRoot">
   </div>
+  <div id="dsRecs"></div>
 </main>
 
 <!-- sign in required -->
@@ -146,6 +147,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="supabase-config.js"></script>
 <script src="config.js"></script>
+<script src="recs.js"></script>
 <script src="icons.js"></script>
 <script>
 (function(){
@@ -279,6 +281,12 @@
     STATE.folder = (extra[0] && extra[0].data) || null;
     STATE.shelf = (extra[1] || {})[STATE.ds.id] || null;
     render();
+    // Free projects: suggest the next, paid step for the learner's goal.
+    if (STATE.ds.is_free && window.kojohRecs) {
+      var tg = (STATE.tags || []).map(function(t){ return String(t).toLowerCase(); });
+      var sk = tg.indexOf('sql') > -1 ? 'sql' : (tg.indexOf('python') > -1 ? 'python' : (tg.indexOf('power bi') > -1 ? 'powerbi' : ''));
+      window.kojohRecs(document.getElementById('dsRecs'), { skill: sk, title: 'Finished this one? Your next portfolio project' });
+    }
   }
 
   // Hype count, my own hype and my bookmark. Tolerant of a missing table so

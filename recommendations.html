@@ -22,16 +22,19 @@
 
 <main class="page-wrap">
   <div class="page-lead">
-    <h1>For your job track</h1>
+    <h1>Recommended for you</h1>
     <p id="recSub">Ranked using the professions you picked at signup and the KOJOH job-title ontology, not an AI black box.</p>
   </div>
 
+  <div id="recGoal" style="margin:-2.25rem 0 2.25rem"></div>
+  <h2 class="section-title" style="margin:0 0 0.9rem;font-size:1.05rem;">Everything for your job tracks</h2>
   <div id="recResults"></div>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="supabase-config.js"></script>
 <script src="config.js"></script>
+<script src="recs.js"></script>
 <script src="icons.js"></script>
 <script>
   var LIVE = !!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase);
@@ -84,7 +87,7 @@
     }
     el.innerHTML = h;
   }
-  window.kReady(load);
+  window.kReady(function(){ load(); if (window.kojohRecs) window.kojohRecs(document.getElementById('recGoal'), { title: 'Picked for your goal', cert: true, certHref: '#recResults' }); });
 </script>
 </body>
 </html>

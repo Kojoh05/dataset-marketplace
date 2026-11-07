@@ -236,6 +236,16 @@ function selectGender(value){
   document.querySelectorAll('#genderGroup .pill-choice').forEach(function(btn){
     btn.classList.toggle('selected', btn.dataset.value === value);
   });
+  reveal('stepGoal');
+}
+
+var selectedGoal = null;
+function selectGoal(value){
+  selectedGoal = value;
+  document.querySelectorAll('#goalGroup .pill-choice').forEach(function(btn){
+    btn.classList.toggle('selected', btn.dataset.value === value);
+  });
+  try { localStorage.setItem('kojoh-goal', value); } catch (e) {}
   reveal('stepProfessions');
 }
 
@@ -299,6 +309,7 @@ function handleSignup(){
     lastName: document.getElementById('suLastName').value.trim(),
     gender: selectedGender,
     professions: selectedProfessions.slice(),
+    goal: selectedGoal,
     provider: googleMode ? 'google' : 'email'
   };
 
@@ -345,7 +356,8 @@ function handleSignup(){
               gender: payload.gender,
               country: payload.country,
               auth_provider: payload.provider,
-              professions: payload.professions
+              professions: payload.professions,
+              goal: payload.goal
             }
           }
         }
@@ -379,6 +391,8 @@ function handleSignup(){
         auth_provider: payload.provider
       }).then(function(profileRes){
         if (profileRes.error) { errEl.textContent = profileRes.error.message; return Promise.reject(); }
+        // Separate write so sign-up still works if the goal column is not there yet.
+        if (payload.goal) SUPA.from('profiles').update({ goal: payload.goal }).eq('id', userId).then(function(){}, function(){});
         return (window.kojohProfessionJobs ? window.kojohProfessionJobs(payload.professions) : Promise.resolve(payload.professions))
           .then(function(names){ return SUPA.from('job_titles').select('id, name').in('name', names); })
           .then(function(jtRes){

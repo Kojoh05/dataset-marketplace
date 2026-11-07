@@ -79,6 +79,7 @@
         auth_provider: pending.auth_provider || 'email'
       }).select().maybeSingle();
       if (insertRes.error) { console.warn('Profile materialize error', insertRes.error); return null; }
+      if (pending.goal) { try { await SUPA.from('profiles').update({ goal: pending.goal }).eq('id', user.id); } catch (e) {} }
       if (pending.professions && pending.professions.length) {
         var jobNames = window.kojohProfessionJobs ? await window.kojohProfessionJobs(pending.professions) : pending.professions;
         var jt = await SUPA.from('job_titles').select('id, name').in('name', jobNames);
