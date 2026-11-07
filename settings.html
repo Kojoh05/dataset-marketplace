@@ -115,6 +115,13 @@
     </form>
   </section>
 
+  <!-- ACCOUNT -->
+  <section class="settings-section" id="account">
+    <h2 class="settings-section-title">Account</h2>
+    <p class="settings-hint" style="margin:0 0 0.9rem;">Signed in as <b id="acctEmail">…</b></p>
+    <button type="button" class="settings-submit settings-logout" id="settingsLogout">Log out</button>
+  </section>
+
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
@@ -122,6 +129,20 @@
 <script src="config.js"></script>
 <script src="settings.js"></script>
 <script src="forms.js"></script>
+<script>
+(function(){
+  var SUPA = window.kojohSupa && window.kojohSupa();
+  var btn = document.getElementById('settingsLogout'), em = document.getElementById('acctEmail');
+  if (SUPA) SUPA.auth.getSession().then(function(r){ var u = r.data && r.data.session && r.data.session.user; if (u && em) em.textContent = u.email; });
+  btn.addEventListener('click', async function(){
+    btn.disabled = true; btn.textContent = 'Logging out…';
+    if (window.kojohSetMe) window.kojohSetMe(null);
+    try { if (SUPA) await SUPA.auth.signOut(); } catch (e) {}
+    try { sessionStorage.removeItem('kojoh_skip_welcome'); } catch (e) {}
+    window.location.href = '/welcome';
+  });
+})();
+</script>
 <script>
 // Profile photo: crop to a 256px square, upload to the avatars bucket, save on the profile.
 (function(){

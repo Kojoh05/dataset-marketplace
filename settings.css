@@ -121,3 +121,7 @@
 .settings-photo-actions{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;}
 .settings-photo-btn{display:inline-flex;align-items:center;cursor:pointer;margin:0;}
 .settings-photo-remove{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit;font-size:.85rem;}
+
+/* Account: log out */
+.settings-logout{background:transparent !important; color:#C2410C !important; border:1.5px solid #C2410C !important;}
+.settings-logout:hover{background:#C2410C !important; color:#fff !important; opacity:1;}

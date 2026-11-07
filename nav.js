@@ -7,18 +7,20 @@
 
 (function () {
   var PAGES = [
-    { group: 'BROWSE', items: [
+    { group: 'EXPLORE', items: [
       { href: '/', label: 'Home', icon: 'home' },
-      { href: '/search', label: 'Search datasets', icon: 'search' },
-      { href: '/recommendations', label: 'Recommended', icon: 'star' },
-      { href: '/saved', label: 'Saved datasets', icon: 'bookmark' },
+      { href: '/search', label: 'Datasets', icon: 'search' },
       { href: '/practice', label: 'Practice', icon: 'code' },
-      { href: '/pricing', label: 'Pricing', icon: 'tag' },
-      { href: '/purchases', label: 'Your purchases', icon: 'bag' },
-      { href: '/leaderboard', label: 'Leaderboard', icon: 'trophy' }
+      { href: '/pricing', label: 'Pricing', icon: 'tag' }
+    ]},
+    { group: 'YOU', items: [
+      { href: '/recommendations', label: 'Recommended for you', icon: 'star' },
+      { href: '/saved', label: 'Saved', icon: 'bookmark' },
+      { href: '/purchases', label: 'Purchases', icon: 'bag' },
+      { href: '/leaderboard', label: 'Leaderboard', icon: 'trophy' },
+      { href: '/settings', label: 'Settings', icon: 'gear' }
     ]},
     { group: 'MORE', items: [
-      { href: '/settings', label: 'Settings', icon: 'gear' },
       { href: '/about', label: 'About KOJOH', icon: 'info' },
       { href: '/help', label: 'Help & contact', icon: 'help' },
       { href: '/suggestions', label: 'Suggestions', icon: 'bulb' }
@@ -35,7 +37,7 @@
     gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
     info: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
     help: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
-    bulb: '<path d="M12 2 2 22h20L12 2z"/><line x1="12" y1="9" x2="12" y2="14"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+    bulb: '<path d="M9 18h6"/><path d="M10 21.5h4"/><path d="M12 2.5a6 6 0 0 0-3.5 10.9c.6.45.9 1 .9 1.6v.5h5.2v-.5c0-.6.3-1.15.9-1.6A6 6 0 0 0 12 2.5z"/>',
     trophy: '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 5H4a2 2 0 0 0 0 4h1M17 5h3a2 2 0 0 1 0 4h-1"/>',
     tag: '<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
     chevronLeft: '<polyline points="15 18 9 12 15 6"/>'
@@ -50,6 +52,8 @@
   function currentFile() {
     var p = window.location.pathname.replace(/\.html$/, '').replace(/\/+$/, '');
     if (p === '' || p === '/index') return '/';
+    if (p === '/folder' || p === '/dataset' || p === '/challenge') return '/search';
+    if (p === '/certificate') return '/practice';
     return p;
   }
 
