@@ -378,3 +378,9 @@ html { scrollbar-width: thin; scrollbar-color: rgba(120, 116, 110, 0.35) transpa
 /* Rail items never squash when the rail is taller than the screen (it scrolls instead). */
 .ksb-rail > * { flex-shrink: 0; }
 .ksb-me { flex-shrink: 0; min-height: 46px; }
+
+/* Rail: the top bar and the profile chip stay put; only the list scrolls. */
+.ksb-rail { overflow-y: hidden; }
+.ksb-nav { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; overscroll-behavior: contain; }
+.ksb-nav::-webkit-scrollbar { width: 0; height: 0; }
+.ksb-me { flex-shrink: 0; margin-top: 0.25rem; }
