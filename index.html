@@ -97,7 +97,7 @@
       <h1 id="heroTitle"><span id="typeTarget"></span><span class="cursor"></span><span class="face-layer" id="faceLayer"></span></h1>
     </div>
     <p>Every dataset here is built around a business problem, not a random CSV. Get the data, the story and the challenge.</p>
-    <div class="hero-cta"><a class="k-btn k-btn-brand k-btn-lg" id="heroFreeBtn" href="/dataset?slug=kirana-store-sales-free">Try a free dataset</a></div>
+    <div class="hero-cta"><a class="k-btn k-btn-brand k-btn-lg" id="heroFreeBtn" href="/free">Try a free dataset</a></div>
 
     <div class="hero-scene" aria-hidden="true">
       <img class="scene-planet" src="icons/scene/planet.png" alt="">
@@ -352,14 +352,6 @@
     var url = '/search' + (q ? '?q=' + encodeURIComponent(q) : '');
     if (window.kojohSoftNav) window.kojohSoftNav(url); else window.location.href = url;
   });
-})();
-
-// Hero button: point at the newest free dataset.
-(function(){
-  var btn = document.getElementById('heroFreeBtn');
-  if (!btn || !(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase)) return;
-  window.kojohSupa().from('datasets').select('slug').eq('is_free', true).order('created_at', { ascending:false }).limit(1)
-    .then(function(r){ var d = r && r.data && r.data[0]; if (d) btn.setAttribute('href', '/dataset?slug=' + encodeURIComponent(d.slug)); });
 })();
 
 // Recently added, read live from the catalogue.
