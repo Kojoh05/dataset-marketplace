@@ -11,6 +11,7 @@
       { href: '/', label: 'Home', icon: 'home' },
       { href: '/search', label: 'Datasets', icon: 'search' },
       { href: '/practice', label: 'Practice', icon: 'code' },
+      { href: '/skills', label: 'Skill check', icon: 'target' },
       { href: '/pricing', label: 'Pricing', icon: 'tag' }
     ]},
     { group: 'YOU', items: [
@@ -28,6 +29,7 @@
   ];
 
   var ICONS = {
+    target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/>',
     code: '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
     home: '<path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/>',
     search: '<circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/>',

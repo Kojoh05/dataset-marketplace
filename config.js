@@ -149,8 +149,10 @@ window.kojohMoney = function(d){
     return s.auth.getSession().then(function(r){
       var u = r.data && r.data.session && r.data.session.user;
       if (!u) { set(false); setMember(false); return; }
-      var pass = s.from('practice_passes').select('expires_at').eq('user_id', u.id).gt('expires_at', new Date().toISOString()).limit(1)
-        .then(function(q){ setMember(!q.error && q.data && q.data.length > 0); }, function(){ setMember(false); });
+      // Member price needs a running 30-day-or-longer pass (the 7-day pass is Practice only).
+      var pass = s.from('payments').select('paid_at, pass_days').eq('user_id', u.id).eq('kind', 'pass').eq('status', 'paid').gte('pass_days', 30)
+        .order('paid_at', { ascending: false }).limit(10)
+        .then(function(q){ setMember(!q.error && (q.data || []).some(function(x){ return x.paid_at && new Date(x.paid_at).getTime() + x.pass_days * 86400000 > Date.now(); })); }, function(){ setMember(false); });
       var buy = s.from('purchases').select('id', { count: 'exact', head: true }).eq('user_id', u.id).gt('price_paid', 0)
         .then(function(q){ if (!q.error) set((q.count || 0) > 0); });
       return Promise.all([pass, buy]);

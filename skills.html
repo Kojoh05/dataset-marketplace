@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KOJOH | Free skill check: SQL, Excel, Python, Power BI, Statistics</title>
+<meta name="description" content="Free 5-minute skill check for data jobs. Answer 10 questions in SQL, Excel, Python, Power BI or Statistics, see your level, and get a clear next step.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="KOJOH">
+<meta property="og:title" content="KOJOH | Free skill check for data jobs">
+<meta property="og:description" content="10 questions, 5 minutes. Find out where you stand in SQL, Excel, Python, Power BI or Statistics.">
+<meta property="og:image" content="https://www.kojohhi.com/og-image.png">
+<link rel="canonical" href="https://www.kojohhi.com/skills">
+<link rel="icon" href="icons/icon-192.png">
+<script src="theme.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="pages.css">
+<link rel="stylesheet" href="nav.css">
+<link rel="stylesheet" href="kojoh-ui.css">
+<script src="nav.js"></script>
+<style>
+.sk-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(min(100%, 15rem), 1fr)); gap:0.9rem; margin-top:1.5rem;}
+.sk-card{display:flex; flex-direction:column; gap:0.45rem; text-align:left; font:inherit; color:inherit; cursor:pointer; background:var(--card, #fff); border:1px solid var(--line); border-radius:18px; padding:1.15rem 1.2rem; transition:transform .15s, border-color .15s;}
+.sk-card:hover{transform:translateY(-2px); border-color:var(--text);}
+.sk-card h3{font-family:'Space Grotesk', sans-serif; font-size:1.2rem; margin:0;}
+.sk-card p{margin:0; color:var(--muted); font-size:0.875rem; line-height:1.5;}
+.sk-card small{color:var(--muted); font-size:0.75rem; margin-top:auto; padding-top:0.4rem;}
+.sk-last{display:inline-block; align-self:flex-start; font-size:0.7rem; font-weight:600; padding:0.15rem 0.55rem; border-radius:999px; background:var(--text); color:var(--bg);}
+.sk-box{background:var(--card, #fff); border:1px solid var(--line); border-radius:20px; padding:1.5rem; margin-top:1.25rem;}
+.sk-top{display:flex; justify-content:space-between; align-items:center; gap:1rem; font-size:0.8125rem; color:var(--muted);}
+.sk-bar{height:6px; background:var(--line); border-radius:999px; overflow:hidden; margin:0.6rem 0 1.4rem;}
+.sk-bar i{display:block; height:100%; background:var(--text); border-radius:999px; transition:width .25s;}
+.sk-q{font-size:1.05rem; line-height:1.55; margin:0 0 0.9rem; font-weight:500;}
+.sk-q code, .sk-why code{font-family:'IBM Plex Mono', monospace; font-size:0.9em; background:var(--bg); padding:0.05rem 0.3rem; border-radius:4px;}
+.sk-code{font-family:'IBM Plex Mono', monospace; font-size:0.85rem; background:#141317; color:#EDEBE6; padding:0.9rem 1rem; border-radius:12px; white-space:pre-wrap; margin:0 0 1rem; overflow-x:auto;}
+.sk-opts{display:flex; flex-direction:column; gap:0.55rem;}
+.sk-opt{text-align:left; font:inherit; font-size:0.9rem; line-height:1.45; color:var(--text); background:var(--bg); border:1.5px solid var(--line); border-radius:12px; padding:0.75rem 0.95rem; cursor:pointer;}
+.sk-opt:hover{border-color:var(--muted);}
+.sk-opt.on{border-color:var(--text); background:var(--card, #fff); box-shadow:inset 0 0 0 1px var(--text);}
+.sk-opt.mono{font-family:'IBM Plex Mono', monospace; font-size:0.82rem;}
+.sk-nav{display:flex; justify-content:space-between; gap:0.6rem; margin-top:1.25rem;}
+.sk-level{font-family:'Space Grotesk', sans-serif; font-size:2rem; font-weight:700; margin:0.2rem 0 0.3rem;}
+.sk-meter{display:grid; grid-template-columns:repeat(3, 1fr); gap:0.35rem; margin:0.9rem 0 1.1rem;}
+.sk-meter span{height:8px; border-radius:999px; background:var(--line);}
+.sk-meter span.on{background:var(--text);}
+.sk-meter-l{display:grid; grid-template-columns:repeat(3, 1fr); font-size:0.7rem; color:var(--muted); margin-top:-0.7rem; margin-bottom:1rem;}
+.sk-next{background:var(--bg); border-radius:14px; padding:1rem 1.1rem; margin:0.4rem 0 1rem; font-size:0.9rem; line-height:1.6;}
+.sk-ctas{display:flex; flex-wrap:wrap; gap:0.55rem;}
+.sk-pass{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:0.8rem; border:1.5px dashed var(--line); border-radius:14px; padding:0.9rem 1.1rem; margin-top:1.1rem; font-size:0.875rem;}
+.sk-pass b{font-weight:600;}
+.sk-review{list-style:none; margin:1.4rem 0 0; padding:0; display:flex; flex-direction:column; gap:0.7rem;}
+.sk-review li{border:1px solid var(--line); border-radius:12px; padding:0.8rem 0.95rem; font-size:0.85rem; line-height:1.5;}
+.sk-review .ok{color:#2F7D4F; font-weight:600;} .sk-review .no{color:#B5562A; font-weight:600;}
+html[data-theme="dark"] .sk-review .ok{color:#6FCF97;} html[data-theme="dark"] .sk-review .no{color:#E8A87C;}
+.sk-why{color:var(--muted); margin-top:0.25rem;}
+.sk-h{font-size:0.6875rem; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); margin:1.5rem 0 0;}
+</style>
+</head>
+<body>
+
+<header class="page-header"><span class="page-title">Skill check</span></header>
+
+<main class="page-wrap" id="skApp">
+  <div class="page-lead">
+    <h1>Where do you stand?</h1>
+    <p>Pick a skill and answer 10 questions, from easy to hard. It takes about 5 minutes, it's free and you don't need an account. You get your level and a clear next step.</p>
+  </div>
+  <div class="sk-grid" id="skGrid"></div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="supabase-config.js"></script>
+<script src="config.js"></script>
+<script src="skills-data.js"></script>
+<script>
+(function(){
+  var SK = window.KOJOH_SKILLS || [], app = document.getElementById('skApp');
+  var PTS = [1,1,1,1,2,2,2,3,3,3], MAX = 19, KEY = 'kojoh-skillcheck';
+  var LV = { beginner: 'Beginner', intermediate: 'Intermediate', advanced: 'Advanced' };
+  var S = null;
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]; }); }
+  function saved(){ try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { return {}; } }
+  function save(id, r){ try { var all = saved(); all[id] = r; localStorage.setItem(KEY, JSON.stringify(all)); } catch (e) {} }
+  function shuffle(n){ var a = []; for (var i = 0; i < n; i++) a.push(i); for (var j = n - 1; j > 0; j--) { var k = Math.floor(Math.random() * (j + 1)); var t = a[j]; a[j] = a[k]; a[k] = t; } return a; }
+  function levelOf(p){ return p >= 15 ? 'advanced' : (p >= 8 ? 'intermediate' : 'beginner'); }
+  function isCode(t){ return /[()=\[\]';]|SELECT|df\b/.test(t) && t.length < 140; }
+  function setUrl(id){ try { history.replaceState(null, '', id ? '/skills?s=' + id : '/skills'); } catch (e) {} }
+
+  function home(){
+    S = null; setUrl('');
+    var last = saved();
+    app.innerHTML = '<div class="page-lead"><h1>Where do you stand?</h1><p>Pick a skill and answer 10 questions, from easy to hard. It takes about 5 minutes, it\'s free and you don\'t need an account. You get your level and a clear next step.</p></div>'
+      + '<div class="sk-grid">' + SK.map(function(s){
+        var r = last[s.id];
+        return '<button class="sk-card" type="button" data-s="' + s.id + '">' + (r ? '<span class="sk-last">Last time: ' + LV[r.level] + '</span>' : '')
+          + '<h3>' + esc(s.name) + '</h3><p>' + esc(s.blurb) + '</p><small>10 questions &middot; about 5 min</small></button>';
+      }).join('') + '</div>';
+    window.scrollTo(0, 0);
+  }
+
+  function start(id){
+    var sk = SK.filter(function(s){ return s.id === id; })[0];
+    if (!sk) return home();
+    S = { sk: sk, i: 0, pick: [], order: sk.qs.map(function(q){ return shuffle(q.o.length); }) };
+    setUrl(id); question();
+  }
+
+  function question(){
+    var q = S.sk.qs[S.i], ord = S.order[S.i], mine = S.pick[S.i];
+    app.innerHTML = '<div class="sk-box"><div class="sk-top"><b style="color:var(--text)">' + esc(S.sk.name) + ' skill check</b><span>Question ' + (S.i + 1) + ' of 10</span></div>'
+      + '<div class="sk-bar"><i style="width:' + (S.i * 10) + '%"></i></div>'
+      + '<p class="sk-q">' + q.q + '</p>' + (q.code ? '<pre class="sk-code">' + esc(q.code) + '</pre>' : '')
+      + '<div class="sk-opts">' + ord.map(function(oi){
+        return '<button type="button" class="sk-opt' + (isCode(q.o[oi]) ? ' mono' : '') + (mine === oi ? ' on' : '') + '" data-o="' + oi + '">' + esc(q.o[oi]) + '</button>';
+      }).join('') + '</div>'
+      + '<div class="sk-nav"><button type="button" class="k-btn" data-act="' + (S.i ? 'back' : 'quit') + '">' + (S.i ? '&larr; Back' : 'Change skill') + '</button>'
+      + '<button type="button" class="k-btn k-btn-brand" data-act="next"' + (mine === undefined ? ' disabled' : '') + '>' + (S.i === 9 ? 'See my level' : 'Next &rarr;') + '</button></div></div>';
+    window.scrollTo(0, 0);
+  }
+
+  function result(){
+    var sk = S.sk, pts = 0, right = 0;
+    sk.qs.forEach(function(q, i){ if (S.pick[i] === q.a) { pts += PTS[i]; right++; } });
+    var lv = levelOf(pts), nx = sk.next[lv], step = { beginner: 1, intermediate: 2, advanced: 3 }[lv];
+    save(sk.id, { level: lv, right: right, at: Date.now() });
+    app.innerHTML = '<div class="sk-box"><div class="sk-top"><b style="color:var(--text)">' + esc(sk.name) + ' skill check</b><span>' + right + ' of 10 correct</span></div>'
+      + '<div class="sk-level">' + LV[lv] + '</div>'
+      + '<p style="margin:0;color:var(--muted);font-size:0.875rem">Harder questions count more, so this is based on which ones you got right, not just how many.</p>'
+      + '<div class="sk-meter"><span class="' + (step >= 1 ? 'on' : '') + '"></span><span class="' + (step >= 2 ? 'on' : '') + '"></span><span class="' + (step >= 3 ? 'on' : '') + '"></span></div>'
+      + '<div class="sk-meter-l"><span>Beginner</span><span style="text-align:center">Intermediate</span><span style="text-align:right">Advanced</span></div>'
+      + '<p class="sk-h" style="margin-top:0">Your next step</p><div class="sk-next">' + esc(nx.text) + '</div>'
+      + '<div class="sk-ctas"><a class="k-btn k-btn-brand" href="' + nx.practice + '">Practise in your browser &rarr;</a><a class="k-btn" href="' + nx.project + '">' + (nx.project === '/free' ? 'Try a free project' : 'See matching projects') + '</a><button type="button" class="k-btn" data-act="home">Check another skill</button></div>'
+      + '<div class="sk-pass"><span>Want every Practice question, all levels, for a week? <b>7-day pass, &#8377;45.</b></span><a class="k-btn" href="/practice#pass">See the pass</a></div>'
+      + '<p class="sk-h">Your answers</p><ul class="sk-review">' + sk.qs.map(function(q, i){
+        var ok = S.pick[i] === q.a;
+        return '<li><div><span class="' + (ok ? 'ok' : 'no') + '">' + (ok ? '&#10003; Right' : '&#10007; Not quite') + '</span> &middot; ' + q.q + '</div>'
+          + (ok ? '' : '<div class="sk-why">Answer: <b style="color:var(--text)">' + esc(q.o[q.a]) + '</b></div>')
+          + '<div class="sk-why">' + esc(q.why) + '</div></li>';
+      }).join('') + '</ul></div>';
+    window.scrollTo(0, 0);
+  }
+
+  app.addEventListener('click', function(e){
+    var c = e.target.closest('[data-s]'); if (c) return start(c.getAttribute('data-s'));
+    var o = e.target.closest('[data-o]');
+    if (o && S) { S.pick[S.i] = +o.getAttribute('data-o'); Array.prototype.forEach.call(app.querySelectorAll('.sk-opt'), function(b){ b.classList.toggle('on', b === o); }); var n = app.querySelector('[data-act="next"]'); if (n) n.disabled = false; return; }
+    var a = e.target.closest('[data-act]'); if (!a) return;
+    var act = a.getAttribute('data-act');
+    if (act === 'next') { if (S.i === 9) result(); else { S.i++; question(); } }
+    else if (act === 'back') { S.i--; question(); }
+    else if (act === 'quit' || act === 'home') home();
+  });
+
+  var q = new URLSearchParams(location.search).get('s');
+  if (q) start(q); else home();
+})();
+</script>
+</body>
+</html>

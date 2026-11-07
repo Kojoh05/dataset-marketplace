@@ -26,7 +26,8 @@
 .pr-pass p{color:var(--muted); font-size:0.875rem; margin:0;}
 .pr-pass-on{border-color:var(--text);}
 .pr-perks{margin:0; padding-left:1.1rem; color:var(--muted); font-size:0.875rem; line-height:1.7;}
-.pr-pass-plans{display:grid; grid-template-columns:repeat(3, 1fr); gap:0.6rem;}
+.pr-pass-plans{display:grid; grid-template-columns:repeat(4, 1fr); gap:0.6rem;}
+@media (max-width:60rem) and (min-width:40.01rem){ .pr-pass-plans{grid-template-columns:repeat(2, 1fr);} }
 .pr-pass-on .pr-pass-plans{grid-template-columns:1fr;}
 .pr-plan{position:relative; display:flex; flex-direction:column; gap:0.2rem; align-items:center; font:inherit; color:var(--text); cursor:pointer;
   background:var(--bg); border:1px solid var(--line); border-radius:14px; padding:1rem 0.5rem 0.85rem;}

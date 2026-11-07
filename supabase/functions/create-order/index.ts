@@ -11,6 +11,7 @@ const cors = {
 const MEMBER_PCT = 20; // Practice pass: % off MRP
 // Practice passes (time passes, no auto-renew).
 const PASSES: Record<string, { days: number; price: number; label: string }> = {
+  "7": { days: 7, price: 45, label: "KOJOH Practice pass, 7 days" },
   "30": { days: 30, price: 199, label: "KOJOH Practice pass, 30 days" },
   "90": { days: 90, price: 499, label: "KOJOH Practice pass, 90 days" },
   "365": { days: 365, price: 1499, label: "KOJOH Practice pass, 1 year" },
@@ -97,7 +98,10 @@ Deno.serve(async (req) => {
 
     // Practice pass (member) discount and one-time reward code. They stack, but never go below the offer price.
     const nowIso = new Date().toISOString();
-    const { data: pass } = await admin.from("practice_passes").select("expires_at").eq("user_id", user.id).gt("expires_at", nowIso).maybeSingle();
+    // Member discount needs a running 30-day-or-longer pass. The 7-day pass unlocks Practice only.
+    const { data: longPasses } = await admin.from("payments").select("paid_at, pass_days").eq("user_id", user.id)
+      .eq("kind", "pass").eq("status", "paid").gte("pass_days", 30).order("paid_at", { ascending: false }).limit(10);
+    const pass = (longPasses || []).some((x: any) => x.paid_at && new Date(x.paid_at).getTime() + Number(x.pass_days) * 86400000 > Date.now());
     const memberPct = pass ? MEMBER_PCT : 0;
     const calc = (pct: number) => (mrp > price && pct > 0)
       ? Math.min(unit, Math.max(price, Math.round(mrp * (100 - pct) / 100))) : unit;

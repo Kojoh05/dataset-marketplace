@@ -12,6 +12,7 @@
   var app = document.getElementById('prApp');
 
   var PASSES = [
+    { key: '7', days: 7, price: 45, label: '7 days', per: 'try everything for a week' },
     { key: '30', days: 30, price: 199, label: '30 days', per: 'one month of practice' },
     { key: '90', days: 90, price: 499, label: '90 days', per: 'about ₹166 a month' },
     { key: '365', days: 365, price: 1499, label: '1 year', per: 'about ₹125 a month' }
@@ -200,10 +201,10 @@
       + '<ul class="pr-perks"><li>Beginner, Intermediate and Hard levels for 4 roles, each a full case project</li>'
       + '<li>SQL, Python, written case answers, plus Excel and Power BI for Data Analyst</li>'
       + '<li>A certificate for every level you complete, with your score</li>'
-      + '<li>20% off every portfolio project while your pass is active</li><li>One-time payment, no auto-renewal</li></ul></div>'
+      + '<li>20% off every portfolio project with a 30-day or longer pass</li><li>One-time payment, no auto-renewal</li></ul></div>'
       + '<div class="pr-pass-plans">' + PASSES.map(function (p, i) {
-        return '<button class="pr-plan' + (i === 1 ? ' pr-plan-pop' : '') + '" type="button" data-pass="' + p.key + '">'
-          + (i === 1 ? '<span class="pr-plan-tag">Most popular</span>' : '')
+        return '<button class="pr-plan' + (p.key === '30' ? ' pr-plan-pop' : '') + '" type="button" data-pass="' + p.key + '">'
+          + (p.key === '30' ? '<span class="pr-plan-tag">Most popular</span>' : '')
           + '<span class="pr-plan-len">' + p.label + '</span><span class="pr-plan-price">' + fmtRs(p.price) + '</span>'
           + '<span class="pr-plan-per">' + p.per + '</span></button>';
       }).join('') + '</div></section>';
@@ -575,7 +576,7 @@
   }
   function openPass(key) {
     var p = PASSES.filter(function (x) { return x.key === key; })[0];
-    openPay({ body: { pass: p.key }, title: 'Practice pass', label: 'Practice pass, ' + p.label, price: p.price, incl: 'Every role, level and question', bonus: '20% off portfolio projects' });
+    openPay({ body: { pass: p.key }, title: 'Practice pass', label: 'Practice pass, ' + p.label, price: p.price, incl: 'Every role, level and question', bonus: p.days >= 30 ? '20% off portfolio projects' : 'Practice only' });
   }
   function openSkip(levelKey) {
     var pack = S.packs[S.role + ':pro'], lv = pack && levelOf(pack, levelKey);
