@@ -90,8 +90,8 @@ window.kojohEsc = function(s){
 
 // ---------------------------------------------------------------------------
 // Prices. datasets.price is the first-purchase offer; datasets.meta.mrp is the
-// regular price. A viewer's first paid dataset is at the offer price, every
-// later one at MRP. The server (create-order) enforces the same rule.
+// regular price, shown struck through. Everyone pays the offer price; Practice-pass members
+// and reward codes take a % off the offer price. The server (create-order) enforces the same rule.
 // Both versions are rendered; <html class="k-repeat"> switches which one shows.
 // ---------------------------------------------------------------------------
 window.kojohMrp = function(d){
@@ -99,48 +99,47 @@ window.kojohMrp = function(d){
   return (m && m > Number(d.price)) ? m : 0;
 };
 window.kojohIsRepeat = function(){ return document.documentElement.classList.contains('k-repeat'); };
-// Practice-pass members get this % off MRP on later purchases (never below the offer price). Server enforces it too.
+// Practice-pass members (30-day pass or longer) get this % off the offer price. Server enforces it too.
 window.kojohMemberPct = 20;
 window.kojohIsMember = function(){ return document.documentElement.classList.contains('k-member'); };
 window.kojohMemberPrice = function(d){
-  var offer = Number(d.price) || 0, mrp = window.kojohMrp(d);
-  return mrp ? Math.max(offer, Math.round(mrp * (100 - window.kojohMemberPct) / 100)) : offer;
+  var offer = Number(d.price) || 0;
+  return Math.max(1, Math.round(offer * (100 - window.kojohMemberPct) / 100));
 };
 window.kojohPriceFor = function(d){
-  var mrp = window.kojohMrp(d);
-  if (mrp && window.kojohIsRepeat()) return window.kojohIsMember() ? window.kojohMemberPrice(d) : mrp;
-  return Number(d.price) || 0;
+  return window.kojohIsMember() ? window.kojohMemberPrice(d) : (Number(d.price) || 0);
+};
+// "31% off" against MRP, or '' when there is no MRP.
+window.kojohOffPct = function(d){
+  var mrp = window.kojohMrp(d), p = window.kojohPriceFor(d);
+  return mrp ? Math.round((1 - p / mrp) * 100) : 0;
 };
 window.kojohMoney = function(d){
   if (!d) return '';
   if (d.is_free || !Number(d.price)) return 'Free';
   var p = '&#8377;' + Number(d.price).toFixed(0), mrp = window.kojohMrp(d);
-  if (!mrp) return p;
-  var m = '&#8377;' + mrp.toFixed(0);
-  return '<span class="k-price"><span class="k-p-offer"><s class="k-mrp">' + m + '</s> ' + p + '</span>'
-    + '<span class="k-p-full">' + m + '</span>'
-    + '<span class="k-p-mem"><s class="k-mrp">' + m + '</s> &#8377;' + window.kojohMemberPrice(d).toFixed(0) + '</span></span>';
+  var was = '<s class="k-mrp">&#8377;' + (mrp || Number(d.price)).toFixed(0) + '</s> ';
+  return '<span class="k-price"><span class="k-p-offer">' + (mrp ? was : '') + p + '</span>'
+    + '<span class="k-p-mem">' + was + '&#8377;' + window.kojohMemberPrice(d).toFixed(0) + '</span></span>';
 };
 (function(){
   var KEY = 'kojoh-repeat-buyer';
   var MKEY = 'kojoh-member';
-  function set(v){
-    document.documentElement.classList.toggle('k-repeat', !!v);
-    try { localStorage.setItem(KEY, v ? '1' : '0'); } catch(e){}
+  function set(v){   // repeat buyers no longer pay more; the class is kept off
+    document.documentElement.classList.remove('k-repeat');
+    try { localStorage.removeItem(KEY); } catch(e){}
   }
   function setMember(v){
     document.documentElement.classList.toggle('k-member', !!v);
     try { localStorage.setItem(MKEY, v ? '1' : '0'); } catch(e){}
   }
-  try { if (localStorage.getItem(KEY) === '1') document.documentElement.classList.add('k-repeat'); } catch(e){}
   try { if (localStorage.getItem(MKEY) === '1') document.documentElement.classList.add('k-member'); } catch(e){}
   if (!document.getElementById('kPriceCss')) {
     var st = document.createElement('style'); st.id = 'kPriceCss';
-    st.textContent = '.k-mrp{opacity:.55;font-weight:500;margin-right:.15em}.k-p-full,.k-p-mem{display:none}'
-      + 'html.k-repeat.k-member .k-p-full{display:none}html.k-repeat.k-member .k-p-mem{display:inline}'
-      + 'html.k-repeat .k-p-offer{display:none}html.k-repeat .k-p-full{display:inline}'
+    st.textContent = '.k-mrp{opacity:.55;font-weight:500;margin-right:.15em}.k-p-mem{display:none}'
+      + 'html.k-member .k-p-offer{display:none}html.k-member .k-p-mem{display:inline}'
       + '.k-offer-badge{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.02em;padding:.2rem .55rem;border-radius:999px;background:var(--text);color:var(--bg);vertical-align:middle}'
-      + 'html.k-repeat .k-offer-badge{display:none}';
+      + '';
     (document.head || document.documentElement).appendChild(st);
   }
   window.kojohRefreshBuyer = function(){
@@ -153,9 +152,8 @@ window.kojohMoney = function(d){
       var pass = s.from('payments').select('paid_at, pass_days').eq('user_id', u.id).eq('kind', 'pass').eq('status', 'paid').gte('pass_days', 30)
         .order('paid_at', { ascending: false }).limit(10)
         .then(function(q){ setMember(!q.error && (q.data || []).some(function(x){ return x.paid_at && new Date(x.paid_at).getTime() + x.pass_days * 86400000 > Date.now(); })); }, function(){ setMember(false); });
-      var buy = s.from('purchases').select('id', { count: 'exact', head: true }).eq('user_id', u.id).gt('price_paid', 0)
-        .then(function(q){ if (!q.error) set((q.count || 0) > 0); });
-      return Promise.all([pass, buy]);
+      set(false);
+      return pass;
     }).catch(function(){});
   };
 })();

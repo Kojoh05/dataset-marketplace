@@ -56,7 +56,7 @@
 <main class="page-wrap legal">
   <div class="page-lead">
     <h1>Pricing</h1>
-    <p>Pay once per dataset. No subscription, no hidden fees. The offer price applies to your first paid dataset; MRP after that. Prices are in Indian Rupees and include applicable taxes.</p>
+    <p>Pay once per dataset. No subscription, no hidden fees. You pay the offer price shown, below the struck-through MRP. Prices are in Indian Rupees and include applicable taxes.</p>
     <p class="legal-meta">Last updated: 4 November 2026</p>
   </div>
 
@@ -65,17 +65,17 @@
     <div class="tier-grid"><div class="tier"><div class="p">Free</div><div class="n">Starter datasets</div><p>Full data and challenges, free forever. The best way to try KOJOH.</p></div><div class="tier"><div class="p"><s class="k-mrp">&#8377;145</s> &#8377;99</div><div class="n">Personal stories</div><p>Everyday-life data. The first 100 buyers get a unique personalised pack; after that, the standard challenge.</p></div><div class="tier"><div class="p"><s class="k-mrp">&#8377;349</s> &#8377;249</div><div class="n">Corporate case studies</div><p>Messy multi-file company data. Each personalised pack is shared by at most 5 buyers.</p></div><div class="tier"><div class="p"><s class="k-mrp">&#8377;649</s> &#8377;449</div><div class="n">Premium</div><p>The deepest datasets, with a challenge pack unique to every buyer.</p></div></div>
   </div>
   <div class="page-card">
-    <h2>First purchase offer</h2>
-    <p>Your <strong>first paid dataset</strong> is charged at the offer price. Every dataset after that is charged at its MRP, shown struck through below. Checkout always shows the exact amount before you pay.</p>
+    <h2>Offer price</h2>
+    <p>Every paid dataset is charged at its offer price, shown next to the struck-through MRP. Checkout always shows the exact amount before you pay.</p>
   </div>
   <div class="page-card">
     <h2>Practice pass</h2>
     <div class="tier-grid"><div class="tier"><div class="p">&#8377;45</div><div class="n">7 days</div><p>Try every Practice question for a week. Practice only, no project discount.</p></div><div class="tier"><div class="p">&#8377;199</div><div class="n">30 days</div><p>Every SQL and Python task for Data Analyst, Business Analyst, Data Scientist and Data Engineer, with full solutions.</p></div><div class="tier"><div class="p">&#8377;499</div><div class="n">90 days</div><p>Same access for three months, about &#8377;166 a month.</p></div><div class="tier"><div class="p">&#8377;1,499</div><div class="n">1 year</div><p>Same access for a year, about &#8377;125 a month.</p></div></div>
-    <p>One-time payment, no auto-renewal; buying again extends your pass. While a 30-day or longer pass is active you get <strong>20% off MRP</strong> on portfolio projects (never below the offer price). The first 5 SQL and 5 Python tasks in every role are free. <a href="/practice">Open Practice</a>.</p>
+    <p>One-time payment, no auto-renewal; buying again extends your pass. While a 30-day or longer pass is active you get <strong>20% off the offer price</strong> on portfolio projects. The first 5 SQL and 5 Python tasks in every role are free. <a href="/practice">Open Practice</a>.</p>
   </div>
   <div class="page-card">
     <h2>Reward code</h2>
-    <p>Every paid purchase gives you a one-time code for <strong>10% off MRP</strong> on your next portfolio project, valid for 7 days. It is applied automatically at checkout and shown in Your library. A new purchase replaces any unused code. Codes and member discounts can stack, but a project is never charged below its first-purchase offer price.</p>
+    <p>Every paid purchase gives you a one-time code for <strong>10% off the offer price</strong> on your next portfolio project, valid for 7 days. It is applied automatically at checkout and shown in Your library. A new purchase replaces any unused code. Codes and the member discount stack, up to 30% off the offer price.</p>
   </div>
   <div class="page-card">
     <h2>Every dataset</h2>
@@ -105,7 +105,7 @@ window.kReady(async function(){
     var groups = {};
     r[0].data.forEach(function(d){ var g = fname[d.folder_id] || 'Other'; (groups[g] = groups[g] || []).push(d); });
     var esc = window.kojohEsc || function(x){ return String(x); };
-    var h = '<table class="price-table"><thead><tr><th>Dataset</th><th style="text-align:right">Offer / MRP</th></tr></thead><tbody>';
+    var h = '<table class="price-table"><thead><tr><th>Dataset</th><th style="text-align:right">Price</th></tr></thead><tbody>';
     Object.keys(groups).sort().forEach(function(g){
       h += '<tr class="grp"><td colspan="2">' + esc(g) + '</td></tr>';
       groups[g].forEach(function(d){

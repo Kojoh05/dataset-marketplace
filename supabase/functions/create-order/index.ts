@@ -8,7 +8,7 @@ const cors = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 // Reward rules. Price never drops below the project's first-purchase offer price (datasets.price).
-const MEMBER_PCT = 20; // Practice pass: % off MRP
+const MEMBER_PCT = 20; // Practice pass (30 days or longer): % off the offer price
 // Practice passes (time passes, no auto-renew).
 const PASSES: Record<string, { days: number; price: number; label: string }> = {
   "7": { days: 7, price: 45, label: "KOJOH Practice pass, 7 days" },
@@ -89,22 +89,18 @@ Deno.serve(async (req) => {
     const { data: owned } = await admin.from("purchases").select("id").eq("user_id", user.id).eq("dataset_id", ds.id).maybeSingle();
     if (owned) return json({ owned: true });
 
-    // First paid dataset at the offer price (datasets.price); every later one at MRP (datasets.meta.mrp).
-    const { count: paidBefore } = await admin.from("purchases").select("id", { count: "exact", head: true })
-      .eq("user_id", user.id).gt("price_paid", 0);
     const price = Number(ds.price);
     const mrp = Number((ds as any).meta?.mrp) || 0;
-    const unit = (paidBefore && mrp > price) ? mrp : price;
+    const unit = price;   // everyone pays the offer price; MRP is only shown struck through
 
-    // Practice pass (member) discount and one-time reward code. They stack, but never go below the offer price.
+    // Practice pass (member) discount and one-time reward code: a % off the offer price. They stack.
     const nowIso = new Date().toISOString();
     // Member discount needs a running 30-day-or-longer pass. The 7-day pass unlocks Practice only.
     const { data: longPasses } = await admin.from("payments").select("paid_at, pass_days").eq("user_id", user.id)
       .eq("kind", "pass").eq("status", "paid").gte("pass_days", 30).order("paid_at", { ascending: false }).limit(10);
     const pass = (longPasses || []).some((x: any) => x.paid_at && new Date(x.paid_at).getTime() + Number(x.pass_days) * 86400000 > Date.now());
     const memberPct = pass ? MEMBER_PCT : 0;
-    const calc = (pct: number) => (mrp > price && pct > 0)
-      ? Math.min(unit, Math.max(price, Math.round(mrp * (100 - pct) / 100))) : unit;
+    const calc = (pct: number) => pct > 0 ? Math.max(1, Math.round(unit * (100 - pct) / 100)) : unit;
 
     let codeRow: any = null, codeMsg = "";
     const codeIn = String(code ?? "").trim().toUpperCase();
@@ -127,7 +123,7 @@ Deno.serve(async (req) => {
       return json({
         quote: true, amount, list_price: unit, member: !!pass, member_pct: memberPct,
         member_saving: unit - afterMember, code_ok: !!codeRow, code_pct: codeRow ? Number(codeRow.percent) : 0,
-        code_saving: afterMember - final, code_msg: codeMsg, first_offer: !paidBefore,
+        code_saving: afterMember - final, code_msg: codeMsg, first_offer: false, mrp,
       });
     }
     const res = await fetch("https://api.razorpay.com/v1/orders", {
@@ -143,7 +139,7 @@ Deno.serve(async (req) => {
       discount_code_id: codeRow ? codeRow.id : null, discount_amount: unit - final });
     if (ins.error) return json({ error: ins.error.message }, 500);
 
-    return json({ order_id: order.id, amount, currency: "INR", key_id: keyId, title: ds.title, email: user.email, first_offer: !paidBefore, code_msg: codeMsg });
+    return json({ order_id: order.id, amount, currency: "INR", key_id: keyId, title: ds.title, email: user.email, first_offer: false, code_msg: codeMsg });
   } catch (e) {
     return json({ error: String((e as Error)?.message ?? e) }, 500);
   }

@@ -10,7 +10,7 @@ const cors = {
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors, "Content-Type": "application/json" } });
 
-const CODE_PCT = 10;      // reward code: % off MRP on the next project
+const CODE_PCT = 10;      // reward code: % off the offer price on the next project
 const CODE_DAYS = 7;      // reward code lifetime
 const ALPHA = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 function makeCode() {

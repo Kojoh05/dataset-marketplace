@@ -213,7 +213,7 @@
   function money(ds){
     return ds.is_free ? 'Free' : window.kojohMoney(ds);
   }
-  // Plain rupee amount this viewer will actually pay (offer on first purchase, MRP after).
+  // Plain rupee amount this viewer will actually pay (offer price, or the member price).
   function payAmount(ds){ return '\u20B9' + window.kojohPriceFor(ds).toFixed(0); }
   function reduced(){
     return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -453,7 +453,7 @@
   function charged(ds){ return !!STATE.live && !ds.is_free && Number(ds.price) > 0; }
   function priceHtml(ds, small){
     if (ds.is_free || !(Number(ds.price) > 0)) return 'Free';
-    if (STATE.live) return money(ds) + (window.kojohMrp(ds) && !small ? ' <span class="k-offer-badge">First purchase offer</span>' : '');
+    if (STATE.live) return money(ds) + (window.kojohMrp(ds) && !small ? ' <span class="k-offer-badge">' + window.kojohOffPct(ds) + '% off</span>' : '');
     return '&#8377;0' + (small ? ' ' : '') + '<span class="k-buy-was"' + (small ? ' style="font-size:0.8rem;"' : '') + '>' + money(ds) + '</span>';
   }
 
