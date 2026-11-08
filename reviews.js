@@ -63,7 +63,7 @@
     async function load() {
       var r = await Promise.all([
         S.from('dataset_review_stats').select('*').eq('dataset_id', opts.datasetId).maybeSingle(),
-        S.from('reviews').select('id, user_id, rating, body, reviewer_name, verified_owner, added_by_admin, featured, admin_reply, created_at, status')
+        S.from('reviews').select('*')
           .eq('dataset_id', opts.datasetId).eq('status', 'visible')
           .order('featured', { ascending: false }).order('rating', { ascending: false }).order('created_at', { ascending: false }).limit(5),
         uid ? S.from('reviews').select('id, rating, body, status, created_at').eq('dataset_id', opts.datasetId).eq('user_id', uid).maybeSingle() : Promise.resolve({ data: null })
@@ -73,7 +73,7 @@
       return true;
     }
     async function loadAll() {
-      var r = await S.from('reviews').select('id, user_id, rating, body, reviewer_name, verified_owner, added_by_admin, featured, admin_reply, created_at')
+      var r = await S.from('reviews').select('*')
         .eq('dataset_id', opts.datasetId).eq('status', 'visible').order('created_at', { ascending: false }).limit(60);
       all = r.data || [];
     }
@@ -81,6 +81,7 @@
       return '<li class="krv-item"><div class="krv-head">' + stars(v.rating) + '<b>' + esc(v.reviewer_name || 'KOJOH learner') + '</b>'
         + (v.verified_owner ? '<span class="krv-tag v">Verified owner</span>' : '')
         + (v.added_by_admin ? '<span class="krv-tag">Added by the KOJOH team</span>' : '')
+        + (v.gifted ? '<span class="krv-tag">Got free access</span>' : '')
         + '<time>' + fmtDate(v.created_at) + '</time></div>'
         + '<p class="krv-body">' + esc(v.body) + '</p>'
         + (v.admin_reply ? '<div class="krv-reply"><b>Reply from KOJOH</b>' + esc(v.admin_reply) + '</div>' : '') + '</li>';
