@@ -4,3 +4,6 @@
 # Local screenshots Claude sends you (not part of the site)
 Claude outputs/
 assets/art-src/
+
+# Private notes, never deploy
+KOJOH_Project.md

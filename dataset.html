@@ -248,7 +248,7 @@
       description: STATE.ds.seo_description || STATE.ds.short_description,
       keywords: STATE.ds.seo_keywords,
       image: STATE.ds.og_image_url,
-      canonical: STATE.ds.canonical_url,
+      canonical: STATE.ds.canonical_url || ('https://www.kojohhi.com/projects/' + STATE.ds.slug),
       type: 'product'
     });
 
