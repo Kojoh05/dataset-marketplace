@@ -32,6 +32,7 @@
 <main class="page-wrap ds-wide">
   <div id="dsRoot">
   </div>
+  <div id="dsReviews"></div>
   <div id="dsRecs"></div>
 </main>
 
@@ -148,6 +149,7 @@
 <script src="supabase-config.js"></script>
 <script src="config.js"></script>
 <script src="recs.js"></script>
+<script src="reviews.js"></script>
 <script src="icons.js"></script>
 <script>
 (function(){
@@ -281,6 +283,7 @@
     STATE.folder = (extra[0] && extra[0].data) || null;
     STATE.shelf = (extra[1] || {})[STATE.ds.id] || null;
     render();
+    mountReviews();
     // Free projects: suggest the next, paid step for the learner's goal.
     if (STATE.ds.is_free && window.kojohRecs) {
       var tg = (STATE.tags || []).map(function(t){ return String(t).toLowerCase(); });
@@ -307,6 +310,13 @@
   }
 
   // ---------------------------------------------------------------- render
+  function mountReviews(){
+    var old = document.getElementById('dsReviews');
+    if (!old || !window.kojohReviews || !STATE.ds) return;
+    var fresh = old.cloneNode(false); old.parentNode.replaceChild(fresh, old);   // drop old listeners
+    window.kojohReviews(fresh, { datasetId: STATE.ds.id, owned: !!STATE.lic });
+  }
+
   function render(){
     var ds = STATE.ds;
     var owned = !!STATE.lic;
@@ -1369,6 +1379,7 @@
     closeDialog('payModal');
     STATE.tab = 'summary';
     render();
+    mountReviews();
     if (window.kojohToast) window.kojohToast('Unlocked. Your license is ' + STATE.lic.license_code + '.');
     if (STATE.reward) showReward(STATE.reward);
   }
