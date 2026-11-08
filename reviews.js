@@ -6,18 +6,20 @@
     if (document.getElementById('kRevCss')) return;
     var st = document.createElement('style'); st.id = 'kRevCss';
     st.textContent = ''
+      + ':root{--k-star:#1F9D55}html[data-theme="dark"]{--k-star:#3DD68C}'
       + '.krv{margin-top:2.5rem;border-top:1px solid var(--line);padding-top:2rem}'
       + '.krv h2{font-family:"Space Grotesk",sans-serif;font-size:1.35rem;margin:0 0 1rem}'
       + '.krv-sum{display:grid;grid-template-columns:auto minmax(0,1fr);gap:1.5rem 2rem;align-items:center;background:var(--card,#fff);border:1px solid var(--line);border-radius:18px;padding:1.25rem 1.4rem}'
       + '@media (max-width:36rem){.krv-sum{grid-template-columns:1fr}}'
       + '.krv-avg{font-family:"Space Grotesk",sans-serif;font-size:2.6rem;font-weight:700;line-height:1}'
       + '.krv-avg small{display:block;font-family:inherit;font-size:.8rem;font-weight:500;color:var(--muted);margin-top:.35rem}'
-      + '.krv-stars{color:#E0A526;letter-spacing:.08em;font-size:1rem;white-space:nowrap}'
+      + '.krv-count{display:block;font-size:.8rem;color:var(--muted);margin-top:.3rem}'
+      + '.krv-stars{color:var(--k-star);letter-spacing:.08em;font-size:1rem;white-space:nowrap}'
       + '.krv-stars .off{color:var(--line)}'
       + '.krv-bars{display:flex;flex-direction:column;gap:.3rem}'
       + '.krv-bar{display:grid;grid-template-columns:2.2rem 1fr 2rem;gap:.6rem;align-items:center;font-size:.78rem;color:var(--muted)}'
       + '.krv-bar i{display:block;height:6px;border-radius:999px;background:var(--line);overflow:hidden}'
-      + '.krv-bar i b{display:block;height:100%;background:#E0A526;border-radius:999px}'
+      + '.krv-bar i b{display:block;height:100%;background:var(--k-star);border-radius:999px}'
       + '.krv-list{list-style:none;margin:1.1rem 0 0;padding:0;display:flex;flex-direction:column;gap:.8rem}'
       + '.krv-item{background:var(--card,#fff);border:1px solid var(--line);border-radius:16px;padding:1rem 1.15rem}'
       + '.krv-head{display:flex;flex-wrap:wrap;align-items:center;gap:.35rem .7rem;font-size:.85rem}'
@@ -33,7 +35,7 @@
       + '.krv-form h3{margin:0;font-size:1rem}'
       + '.krv-pick{display:flex;gap:.2rem}'
       + '.krv-pick button{font:inherit;font-size:1.6rem;line-height:1;background:none;border:0;cursor:pointer;color:var(--line);padding:0 .1rem}'
-      + '.krv-pick button.on{color:#E0A526}'
+      + '.krv-pick button.on{color:var(--k-star)}'
       + '.krv-form textarea{font:inherit;font-size:.9rem;min-height:6.5rem;border:1px solid var(--line);border-radius:12px;padding:.7rem .85rem;background:var(--bg);color:var(--text);resize:vertical}'
       + '.krv-row{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;justify-content:space-between}'
       + '.krv-row small{color:var(--muted);font-size:.78rem}'
@@ -109,7 +111,7 @@
         var bars = '';
         for (var s = 5; s >= 1; s--) { var c = stats['r' + s] || 0; bars += '<div class="krv-bar"><span>' + s + ' &#9733;</span><i><b style="width:' + Math.round(100 * c / n) + '%"></b></i><span>' + c + '</span></div>'; }
         h += '<div class="krv-sum"><div><div class="krv-avg">' + Number(stats.avg_rating).toFixed(1) + '</div>' + stars(stats.avg_rating)
-          + '<small>' + n + ' review' + (n === 1 ? '' : 's') + '</small></div><div class="krv-bars">' + bars + '</div></div>';
+          + '<small class="krv-count">' + n + ' review' + (n === 1 ? '' : 's') + '</small></div><div class="krv-bars">' + bars + '</div></div>';
         var list = showAll && all ? all : top;
         h += '<ul class="krv-list">' + list.map(item).join('') + '</ul>';
         if (n > 5) h += '<p style="margin:.8rem 0 0"><button type="button" class="k-btn" data-rv="all">' + (showAll ? 'Show top 5' : 'Show all ' + n + ' reviews') + '</button></p>';

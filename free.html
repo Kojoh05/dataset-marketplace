@@ -113,7 +113,7 @@
       if (diff) h += '<span class="k-chip">' + esc(diff) + '</span>';
       if (pv.total_rows) h += '<span class="k-chip">' + Number(pv.total_rows).toLocaleString('en-IN') + ' rows</span>';
       if (lp.total_tasks) h += '<span class="k-chip">' + lp.total_tasks + ' tasks</span>';
-      h += '</div><h2 class="fr-title">' + esc(cleanTitle(d.title)) + '</h2><p class="fr-desc">' + esc(d.short_description || '') + '</p>';
+      h += '</div><h2 class="fr-title">' + esc(cleanTitle(d.title)) + '</h2><div class="k-rate" data-rate="' + esc(d.id) + '">' + (window.kojohRateHtml ? window.kojohRateHtml(d.id) : '') + '</div><p class="fr-desc">' + esc(d.short_description || '') + '</p>';
       var ph = (lp.phases || []).map(phase);
       if (ph.length) {
         h += '<p class="fr-h">What you will do</p><ul class="fr-steps">' + ph.slice(0, 5).map(function(p){

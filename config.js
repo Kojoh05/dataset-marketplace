@@ -239,6 +239,7 @@ window.kojohDsCard = function(d, opts){
   h += '</div>';
   h += '<h3 class="k-dscard-title">' + esc(d.title) + '</h3>';
   h += '<p class="k-dscard-desc">' + esc(d.short_description || '') + '</p>';
+  h += '<div class="k-rate" data-rate="' + esc(d.id) + '">' + window.kojohRateHtml(d.id) + '</div>';
   h += '<div class="k-dscard-foot"><span class="k-dscard-price">' + (opts.owned ? 'In your library' : window.kojohMoney(d)) + '</span>';
   h += '<span class="k-dscard-go">' + (opts.owned ? 'Continue' : 'Open project') + ' &rarr;</span></div>';
   return h + '</a>';
@@ -498,3 +499,47 @@ window.kojohFriendly = function(msg){
     return "This isn't available right now. Please try again in a little while.";
   return m;
 };
+
+
+// Average rating and number of reviews per dataset, loaded once and shown on every card.
+(function(){
+  var st = document.createElement('style');
+  st.textContent = ':root{--k-star:#1F9D55}html[data-theme="dark"]{--k-star:#3DD68C}'
+    + '.k-rate{display:flex;align-items:center;gap:.35rem;font-size:.8rem;color:var(--muted);min-height:1.1rem;margin:-.15rem 0 .1rem}'
+    + '.k-rate:empty{display:none}.k-rate .s{color:var(--k-star);letter-spacing:.04em}.k-rate .s i{color:var(--line);font-style:normal}.k-rate b{color:var(--text);font-weight:600}';
+  (document.head || document.documentElement).appendChild(st);
+  window.KOJOH_RATINGS = null;
+  window.kojohRateHtml = function(id){
+    var r = window.KOJOH_RATINGS && window.KOJOH_RATINGS[id];
+    if (!r || !r.review_count) return '';
+    var n = Number(r.avg_rating), s = '';
+    for (var i = 1; i <= 5; i++) s += i <= Math.round(n) ? '&#9733;' : '<i>&#9733;</i>';
+    return '<span class="s" aria-hidden="true">' + s + '</span><b>' + n.toFixed(1) + '</b><span>(' + Number(r.review_count).toLocaleString('en-IN') + ')</span>'
+      + '<span class="k-sr" style="position:absolute;left:-9999px">' + n.toFixed(1) + ' out of 5 from ' + r.review_count + ' reviews</span>';
+  };
+  window.kojohRatings = function(){
+    if (window._kRatingsP) return window._kRatingsP;
+    var s = window.kojohSupa && window.kojohSupa();
+    if (!s) return Promise.resolve({});
+    window._kRatingsP = s.from('dataset_review_stats').select('dataset_id, avg_rating, review_count').then(function(r){
+      var m = {}; ((r && r.data) || []).forEach(function(x){ m[x.dataset_id] = x; });
+      window.KOJOH_RATINGS = m;
+      Array.prototype.forEach.call(document.querySelectorAll('[data-rate]'), function(el){ el.innerHTML = window.kojohRateHtml(el.getAttribute('data-rate')); });
+      return m;
+    }, function(){ return {}; });
+    return window._kRatingsP;
+  };
+  // Cards drawn later (soft navigation, filters) pick the ratings up as they appear.
+  try {
+    var queued = false;
+    new MutationObserver(function(){
+      if (!window.KOJOH_RATINGS || queued) return;
+      queued = true;
+      requestAnimationFrame(function(){
+        queued = false;
+        Array.prototype.forEach.call(document.querySelectorAll('[data-rate]:empty'), function(el){ var h = window.kojohRateHtml(el.getAttribute('data-rate')); if (h) el.innerHTML = h; });
+      });
+    }).observe(document.body || document.documentElement, { childList: true, subtree: true });
+  } catch (e) {}
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ window.kojohRatings(); }); else window.kojohRatings();
+})();
