@@ -124,14 +124,14 @@
     syncUrl(q);
     clearTimeout(debounce);
     if (!q) { browseAll(); return; }
-    if (!LIVE) { results.innerHTML = '<div class="empty-state"><h3>Preview mode</h3><p>Search is not connected.</p></div>'; return; }
+    if (!LIVE) { results.innerHTML = '<div class="empty-state"><h3>Connection problem</h3><p>We couldn\'t connect right now. Check your internet and refresh the page.</p></div>'; return; }
     results.innerHTML = window.kojohSkeleton('list');
     var my = ++seq;
     debounce = setTimeout(function(){
       SUPA.rpc('search_datasets', { query: q }).then(function(res){
         if (my !== seq) return;
         if (res.error) {
-          results.innerHTML = '<div class="empty-state"><h3>Search hit a snag</h3><p>' + esc(res.error.message) + '</p></div>';
+          results.innerHTML = '<div class="empty-state"><h3>Search hit a snag</h3><p>' + esc((window.kojohFriendly || String)(res.error.message)) + '</p></div>';
           return;
         }
         var hits = res.data || [];

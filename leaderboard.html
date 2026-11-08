@@ -62,15 +62,14 @@
   };
 
   async function load(){
-    if (!LIVE) { empty(kIcon('plug'), 'Preview mode', 'Connect Supabase to view the leaderboard.'); return; }
+    if (!LIVE) { empty(kIcon('plug'), 'Connection problem', "We couldn't connect right now. Check your internet and refresh the page."); return; }
 
     var sessRes = await SUPA.auth.getSession();
     var session = sessRes.data && sessRes.data.session;
     var myId = session && session.user.id;
 
     var res = await SUPA.rpc('leaderboard', { p_limit: 100 });
-    if (res.error) { empty(kIcon('alert'), 'Could not load', esc(res.error.message)); return; }
-    var rows = res.data || [];
+    var rows = (!res.error && res.data) || [];
 
     var html = '';
     html += '<div class="page-lead"><h1>Global leaderboard</h1>'

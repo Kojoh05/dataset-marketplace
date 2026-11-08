@@ -127,12 +127,12 @@
     var noteEl = $('panelFeedbackNote');
     var likeBtn = document.querySelector('.panel-vote-btn[data-vote="like"]');
     var disBtn = document.querySelector('.panel-vote-btn[data-vote="dislike"]');
-    if (!LIVE) { if (noteEl) noteEl.textContent = 'Preview mode. Connect Supabase.'; return; }
+    if (!LIVE) { if (noteEl) noteEl.textContent = "We couldn't connect right now. Check your internet and refresh the page."; return; }
     var s = await SUPA.auth.getSession();
     if (!s.data.session) { if (noteEl) noteEl.textContent = 'Sign in to leave a vote.'; return; }
     var uid = s.data.session.user.id;
     var res = await SUPA.from('app_feedback').upsert({ user_id: uid, vote: vote, updated_at: new Date().toISOString() });
-    if (res.error) { if (noteEl) noteEl.textContent = res.error.message; return; }
+    if (res.error) { if (noteEl) noteEl.textContent = (window.kojohFriendly || String)(res.error.message); return; }
     if (likeBtn) likeBtn.classList.toggle('on', vote === 'like');
     if (disBtn) disBtn.classList.toggle('on', vote === 'dislike');
     if (noteEl) noteEl.textContent = 'Thanks for the feedback!';

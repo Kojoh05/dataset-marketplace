@@ -124,7 +124,7 @@
   async function load(){
     var slug = new URLSearchParams(window.location.search).get('slug');
     if (!slug) { empty(kIcon('alert'), 'No dataset specified', 'This link is missing its dataset.'); return; }
-    if (!LIVE) { empty(kIcon('plug'), 'Preview mode', 'Connect Supabase to view your challenge.'); return; }
+    if (!LIVE) { empty(kIcon('plug'), 'Connection problem', "We couldn't connect right now. Check your internet and refresh the page."); return; }
 
     var sessRes = await SUPA.auth.getSession();
     var session = sessRes.data && sessRes.data.session;
@@ -136,7 +136,7 @@
 
     var licRes = await SUPA.from('dataset_licenses').select('id, license_code, tier, task_pack')
       .eq('dataset_id', ds.id).eq('claimed_by', session.user.id).maybeSingle();
-    if (licRes.error) { empty(kIcon('alert'), 'Could not load', escape(licRes.error.message)); return; }
+    if (licRes.error) { empty(kIcon('alert'), 'Could not load', escape((window.kojohFriendly || String)(licRes.error.message))); return; }
     if (!licRes.data) {
       empty(kIcon('bag'), 'You don\'t own this yet',
         'Head to the <a href="/dataset?slug=' + encodeURIComponent(slug) + '">dataset page</a> to get it first.');
@@ -145,7 +145,7 @@
 
     var lic = licRes.data;
     var subRes = await SUPA.from('challenge_submissions').select('*').eq('license_id', lic.id).maybeSingle();
-    if (subRes.error) { empty(kIcon('alert'), 'Could not load', escape(subRes.error.message)); return; }
+    if (subRes.error) { empty(kIcon('alert'), 'Could not load', escape((window.kojohFriendly || String)(subRes.error.message))); return; }
     var submission = subRes.data;
     if (submission && submission.status === 'reviewed') {
       try {
@@ -308,7 +308,7 @@
       btn.textContent = 'Submit challenge';
       err.textContent = /duplicate|unique/i.test(res.error.message)
         ? 'This license has already been submitted.'
-        : res.error.message;
+        : (window.kojohFriendly || String)(res.error.message);
       err.hidden = false;
       return;
     }

@@ -180,7 +180,7 @@
     S.role = u.role; lsSet('kojoh-prac-role', u.role);
     var pack;
     try { pack = await loadPack(u.role); }
-    catch (e) { app.innerHTML = '<div class="empty-state"><h3>Could not load</h3><p>' + esc(e.message) + '</p></div>'; return; }
+    catch (e) { app.innerHTML = '<div class="empty-state"><h3>Could not load</h3><p>' + esc((window.kojohFriendly || String)(e.message)) + '</p></div>'; return; }
     var lv = u.level && levelOf(pack, u.level);
     if (!lv) { renderRole(pack); return; }
     S.level = lv.key;
@@ -462,7 +462,7 @@
         window.XLSX.utils.book_append_sheet(wb, ws, files[i].name.slice(0, 31));
       }
       window.XLSX.writeFile(wb, (lv.company || 'kojoh') + '-practice-data.xlsx');
-    } catch (e) { toast(e.message, 'error'); }
+    } catch (e) { toast((window.kojohFriendly || String)(e.message), 'error'); }
     btn.disabled = false; btn.textContent = label;
   }
   async function downloadCsv(lv, name) {
@@ -542,7 +542,7 @@
         : await SUPA.from('practice_written').insert(row).select().maybeSingle();
       this.disabled = false;
       v.hidden = false;
-      if (r.error) { v.className = 'pr-verdict no'; v.innerHTML = '<strong>Could not submit.</strong> ' + esc(r.error.message); return; }
+      if (r.error) { v.className = 'pr-verdict no'; v.innerHTML = '<strong>Could not submit.</strong> ' + esc((window.kojohFriendly || String)(r.error.message)); return; }
       S.written[t.id] = r.data || row; lsSet('kojoh-prac-wr-' + t.id, null);
       v.className = 'pr-verdict ok'; v.innerHTML = '<strong>Submitted.</strong> You will see your marks here once it is reviewed. ' + nextLink(pack, lv, next);
     };
@@ -556,7 +556,7 @@
     var code = 'KJ-' + Array.from(crypto.getRandomValues(new Uint8Array(5))).map(function (b) { return ('0' + b.toString(16)).slice(-2); }).join('').toUpperCase().slice(0, 8);
     var r = await SUPA.from('practice_certificates').insert({ code: code, user_id: S.session.user.id, name: name, role: pack.id, role_title: pack.title,
       level: levelKey, auto_points: st.auto, auto_max: st.autoMax, status: 'requested' }).select().maybeSingle();
-    if (r.error) { toast(r.error.message, 'error'); return; }
+    if (r.error) { toast((window.kojohFriendly || String)(r.error.message), 'error'); return; }
     S.certs[pack.id + ':' + levelKey] = r.data;
     toast('Certificate requested. It is issued once your written answers are reviewed.');
     route();
@@ -609,7 +609,7 @@
       if (vd.unlocked) toast('Level unlocked. Good luck!');
       await loadUserData();
       route();
-    } catch (e) { go.disabled = false; go.textContent = 'Try again'; note.innerHTML = '<span class="k-err">' + esc(e.message) + '</span>'; }
+    } catch (e) { go.disabled = false; go.textContent = 'Try again'; note.innerHTML = '<span class="k-err">' + esc((window.kojohFriendly || String)(e.message)) + '</span>'; }
   }
 
   // ------------------------------------------------------------------ clicks
@@ -661,7 +661,7 @@
       if (!u.role && !location.hash) { var last = lsGet('kojoh-prac-role', null); if (last && roleMeta(last)) { go(last, null, null, true); return; } }
       route();
     } catch (e) {
-      app.innerHTML = '<div class="empty-state"><h3>Practice is getting ready</h3><p>' + esc(e.message) + ' Check back soon.</p></div>';
+      app.innerHTML = '<div class="empty-state"><h3>Practice is getting ready</h3><p>Check back soon.</p></div>';
     }
   })();
 })();

@@ -18,7 +18,7 @@ function showNote(id, msg, kind){
 // ---------- Guard: must be logged in ----------
 async function loadUser(){
   if (!LIVE) {
-    showNote('usernameNote', 'Preview mode. Connect Supabase to use settings.', 'error');
+    showNote('usernameNote', "We couldn't connect right now. Check your internet and refresh the page.", 'error');
     return;
   }
   var res = await SUPA.auth.getSession();
@@ -102,7 +102,7 @@ $('usernameForm').addEventListener('submit', async function(e){
   var avail = await SUPA.rpc('is_username_available', { p_username: v });
   if (avail.error || !avail.data) { showNote('usernameNote', 'That username is not available.', 'error'); return; }
   var upd = await SUPA.from('profiles').update({ username: v }).eq('id', currentUser.id);
-  if (upd.error) { showNote('usernameNote', upd.error.message, 'error'); return; }
+  if (upd.error) { showNote('usernameNote', (window.kojohFriendly || String)(upd.error.message), 'error'); return; }
   currentProfile.username = v;
   showNote('usernameNote', 'Username updated.', 'ok');
 });
@@ -119,7 +119,7 @@ $('emailForm').addEventListener('submit', async function(e){
   if (reauth.error) { showNote('emailNote', 'Current password is incorrect.', 'error'); return; }
 
   var upd = await SUPA.auth.updateUser({ email: newEmail });
-  if (upd.error) { showNote('emailNote', upd.error.message, 'error'); return; }
+  if (upd.error) { showNote('emailNote', (window.kojohFriendly || String)(upd.error.message), 'error'); return; }
   var pupd = await SUPA.from('profiles').update({ email: newEmail }).eq('id', currentUser.id);
   if (pupd.error) console.warn('profile email sync failed', pupd.error);
   showNote('emailNote', 'Confirmation email sent to your new address. Click the link there to finish the change.', 'ok');
@@ -146,7 +146,7 @@ $('passwordForm').addEventListener('submit', async function(e){
   var reauth = await SUPA.auth.signInWithPassword({ email: currentUser.email, password: oldPw });
   if (reauth.error) { showNote('passwordNote', 'Current password is incorrect.', 'error'); return; }
   var upd = await SUPA.auth.updateUser({ password: newPw });
-  if (upd.error) { showNote('passwordNote', upd.error.message, 'error'); return; }
+  if (upd.error) { showNote('passwordNote', (window.kojohFriendly || String)(upd.error.message), 'error'); return; }
   $('settingsOldPw').value = ''; $('settingsNewPw').value = '';
   document.querySelectorAll('#settingsPwChecklist li').forEach(function(li){ li.classList.remove('met'); });
   showNote('passwordNote', 'Password updated.', 'ok');

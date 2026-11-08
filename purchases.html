@@ -81,7 +81,7 @@
   }
 
   async function load(){
-    if (!LIVE) { empty(kIcon('plug'), 'Preview mode', 'Connect Supabase to see your purchases.'); return; }
+    if (!LIVE) { empty(kIcon('plug'), 'Connection problem', "We couldn't connect right now. Check your internet and refresh the page."); return; }
     var s = await SUPA.auth.getSession();
     if (!s.data.session) { empty(kIcon('lock'), 'Sign in required', 'Please <a href="/auth">log in</a> to see your purchases.'); return; }
     var uid = s.data.session.user.id;
@@ -100,7 +100,7 @@
         + '<span class="k-reward-code">' + esc(rw.code) + '</span></div>';
     }
     var res = r[0];
-    if (res.error) { empty(kIcon('alert'), 'Could not load', esc(res.error.message)); return; }
+    if (res.error) { empty(kIcon('alert'), 'Could not load', esc((window.kojohFriendly || String)(res.error.message))); return; }
     var lics = {}; ((r[1] && r[1].data) || []).forEach(function(l){ lics[l.dataset_id] = l; });
     var subs = {}; ((r[2] && r[2].data) || []).forEach(function(x){ subs[x.license_id] = x; });
     var rows = (res.data || []).filter(function(x){ return x.datasets; });

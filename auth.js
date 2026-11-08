@@ -290,7 +290,7 @@ function handleGoogleLogin(){
     SUPA.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + '/auth?google=1' } });
     return;
   }
-  document.getElementById('loginError').textContent = 'Preview mode. Connect Supabase to enable real Google login.';
+  document.getElementById('loginError').textContent = "We couldn't connect right now. Check your internet and refresh the page.";
   document.getElementById('loginError').style.color = 'var(--muted)';
 }
 
@@ -323,7 +323,7 @@ function handleSignup(){
     console.log('[KOJOH signup - preview payload]', payload);
     var note = document.getElementById('backendNote');
     note.hidden = false;
-    note.textContent = 'Preview mode: no account was created (Supabase isn\'t connected yet). Your form data was logged to the browser console so you can see exactly what will be sent once the backend is live.';
+    note.textContent = "We couldn't connect right now. Check your internet and refresh the page.";
     return;
   }
 
@@ -363,7 +363,7 @@ function handleSignup(){
         }
       })
         .then(function(res){
-          if (res.error) { errEl.textContent = res.error.message; return Promise.reject(); }
+          if (res.error) { errEl.textContent = (window.kojohFriendly || String)(res.error.message); return Promise.reject(); }
           return { userId: res.data.user.id, hasSession: !!res.data.session };
         });
 
@@ -390,7 +390,7 @@ function handleSignup(){
         country: payload.country,
         auth_provider: payload.provider
       }).then(function(profileRes){
-        if (profileRes.error) { errEl.textContent = profileRes.error.message; return Promise.reject(); }
+        if (profileRes.error) { errEl.textContent = (window.kojohFriendly || String)(profileRes.error.message); return Promise.reject(); }
         // Separate write so sign-up still works if the goal column is not there yet.
         if (payload.goal) SUPA.from('profiles').update({ goal: payload.goal }).eq('id', userId).then(function(){}, function(){});
         return (window.kojohProfessionJobs ? window.kojohProfessionJobs(payload.professions) : Promise.resolve(payload.professions))
@@ -423,14 +423,14 @@ function handleLogin(){
   if (!LIVE) {
     console.log('[KOJOH login - preview payload]', { id: id, password: password });
     errEl.style.color = 'var(--muted)';
-    errEl.textContent = 'Preview mode: connect Supabase to enable real login. Payload logged to console.';
+    errEl.textContent = "We couldn't connect right now. Check your internet and refresh the page.";
     return;
   }
 
   var isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(id);
   var loginWithEmail = function(email){
     SUPA.auth.signInWithPassword({ email: email, password: password }).then(function(res){
-      if (res.error) { errEl.textContent = res.error.message; return; }
+      if (res.error) { errEl.textContent = (window.kojohFriendly || String)(res.error.message); return; }
       try{ sessionStorage.setItem('kojoh_skip_welcome', '1'); }catch(e){}
       window.location.href = kojohAfterAuth();
     });

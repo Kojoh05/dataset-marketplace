@@ -230,10 +230,10 @@
   async function load(){
     var slug = new URLSearchParams(window.location.search).get('slug');
     if (!slug) { empty(kIcon('alert'), 'No dataset specified', 'This link is missing its dataset.'); return; }
-    if (!LIVE) { empty(kIcon('plug'), 'Preview mode', 'Connect Supabase to view live datasets.'); return; }
+    if (!LIVE) { empty(kIcon('plug'), 'Connection problem', "We couldn't connect right now. Check your internet and refresh the page."); return; }
 
     var dsRes = await SUPA.from('datasets').select('*').eq('slug', slug).maybeSingle();
-    if (dsRes.error) { empty(kIcon('alert'), 'Could not load', esc(dsRes.error.message)); return; }
+    if (dsRes.error) { empty(kIcon('alert'), 'Could not load', esc((window.kojohFriendly || String)(dsRes.error.message))); return; }
     if (!dsRes.data) { empty(kIcon('search'), 'Not found', 'This dataset does not exist or is not published yet.'); return; }
     STATE.ds = dsRes.data;
     try {
@@ -1027,7 +1027,7 @@
       btn.textContent = 'Submit challenge';
       err.textContent = /duplicate|unique/i.test(res.error.message)
         ? 'This license has already been submitted.'
-        : res.error.message;
+        : (window.kojohFriendly || String)(res.error.message);
       err.hidden = false;
       return;
     }
@@ -1080,11 +1080,11 @@
     if (STATE.hyped) {
       var d = await SUPA.from('hypes').delete().eq('dataset_id', STATE.ds.id).eq('user_id', uid);
       if (!d.error) { STATE.hyped = false; STATE.hypes = Math.max(0, STATE.hypes - 1); }
-      else kToast(d.error.message);
+      else kToast((window.kojohFriendly || String)(d.error.message));
     } else {
       var a = await SUPA.from('hypes').insert({ dataset_id: STATE.ds.id, user_id: uid });
       if (!a.error) { STATE.hyped = true; STATE.hypes++; }
-      else kToast(a.error.message);
+      else kToast((window.kojohFriendly || String)(a.error.message));
     }
 
     btn.disabled = false;
@@ -1111,11 +1111,11 @@
     if (STATE.marked) {
       var d = await SUPA.from('bookmarks').delete().eq('dataset_id', STATE.ds.id).eq('user_id', uid);
       if (!d.error) STATE.marked = false;
-      else kToast(d.error.message);
+      else kToast((window.kojohFriendly || String)(d.error.message));
     } else {
       var a = await SUPA.from('bookmarks').insert({ dataset_id: STATE.ds.id, user_id: uid });
       if (!a.error) STATE.marked = true;
-      else kToast(a.error.message);
+      else kToast((window.kojohFriendly || String)(a.error.message));
     }
 
     btn.disabled = false;
@@ -1337,7 +1337,7 @@
     if (res.error) {
       btn.disabled = false;
       btn.textContent = charged(STATE.ds) ? 'Try again' : 'Unlock';
-      note.innerHTML = '<span class="k-err">' + esc(res.error.message) + '</span>';
+      note.innerHTML = '<span class="k-err">' + esc((window.kojohFriendly || String)(res.error.message)) + '</span>';
       return;
     }
 
@@ -1436,7 +1436,7 @@
       document.getElementById('tmTitle').textContent = csv.name;
       renderPage();
     } catch (e) {
-      body.innerHTML = '<div class="k-modal-loading">Could not read the file. ' + esc(e.message) + '</div>';
+      body.innerHTML = '<div class="k-modal-loading">Could not read the file. ' + esc((window.kojohFriendly || String)(e.message)) + '</div>';
     }
   }
 

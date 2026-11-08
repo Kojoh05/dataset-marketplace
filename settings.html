@@ -160,7 +160,7 @@
       var r = await SUPA.from('profiles').update({ goal: g }).eq('id', u.id);
       if (r.error) throw r.error;
       note.className = 'settings-note ok'; note.textContent = 'Saved. Your recommendations now follow this goal.';
-    } catch (err) { note.className = 'settings-note error'; note.textContent = /goal|schema cache|column/i.test(err.message || '') ? 'Saved on this device. (Run supabase/schema-goals-certs.sql to save it to your account.)' : (err.message || 'Could not save.'); }
+    } catch (err) { note.className = 'settings-note error'; note.textContent = /goal|schema cache|column/i.test(err.message || '') ? 'Saved on this device.' : (window.kojohFriendly || String)(err.message); }
   });
 })();
 </script>
@@ -228,12 +228,12 @@
       say('Photo updated.', 'ok');
     } catch (e) {
       var m = (e && e.message) || String(e);
-      if (/bucket|row-level|avatar_url|schema cache/i.test(m)) m = 'Photo uploads are not switched on yet. Run supabase/schema-avatars.sql once in Supabase.';
+      if (/bucket|row-level|avatar_url|schema cache/i.test(m)) m = "Photo uploads aren't available right now. Please try again later."; else m = (window.kojohFriendly || String)(m);
       say(m, 'error');
     }
   });
   rm.addEventListener('click', async function(){
-    try { await save(null); say('Photo removed.', 'ok'); } catch (e) { say((e && e.message) || 'Could not remove it.', 'error'); }
+    try { await save(null); say('Photo removed.', 'ok'); } catch (e) { say((window.kojohFriendly || String)((e && e.message) || 'Could not remove it.'), 'error'); }
   });
 })();
 </script>

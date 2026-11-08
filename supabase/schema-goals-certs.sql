@@ -36,19 +36,28 @@ begin
 end;
 $$;
 
-drop trigger if exists kojoh_project_certificate on public.challenge_submissions;
-create trigger kojoh_project_certificate
-  after insert or update of status, points on public.challenge_submissions
-  for each row execute function public.kojoh_issue_project_certificate();
-
--- Certificates for submissions you already reviewed before this file was run.
-insert into public.practice_certificates (code, user_id, name, role, role_title, level, status, skipped, score, issued_at)
-select 'KJ-' || upper(substr(replace(gen_random_uuid()::text, '-', ''), 1, 8)),
-       s.user_id,
-       coalesce(nullif(trim(coalesce(p.first_name, '') || ' ' || coalesce(p.last_name, '')), ''), p.username, 'KOJOH learner'),
-       d.slug, regexp_replace(d.title, '\s*\(Free\)\s*$', ''), 'project', 'issued', false, null, coalesce(s.reviewed_at, now())
-from public.challenge_submissions s
-join public.datasets d on d.id = s.dataset_id
-left join public.profiles p on p.id = s.user_id
-where s.status = 'reviewed' and coalesce(s.points, 0) > 0
-on conflict (user_id, role, level) do nothing;
+-- The trigger and the catch-up need the submissions table (supabase/schema-submissions.sql).
+-- If that file has not been run yet, this part is skipped; run this file again afterwards.
+do $do$
+begin
+  if to_regclass('public.challenge_submissions') is null then
+    raise notice 'challenge_submissions not found: run schema-submissions.sql, then run this file again.';
+    return;
+  end if;
+  execute 'drop trigger if exists kojoh_project_certificate on public.challenge_submissions';
+  execute 'create trigger kojoh_project_certificate
+             after insert or update of status, points on public.challenge_submissions
+             for each row execute function public.kojoh_issue_project_certificate()';
+  -- Certificates for submissions you already reviewed before this file was run.
+  insert into public.practice_certificates (code, user_id, name, role, role_title, level, status, skipped, score, issued_at)
+  select 'KJ-' || upper(substr(replace(gen_random_uuid()::text, '-', ''), 1, 8)),
+         s.user_id,
+         coalesce(nullif(trim(coalesce(p.first_name, '') || ' ' || coalesce(p.last_name, '')), ''), p.username, 'KOJOH learner'),
+         d.slug, regexp_replace(d.title, '\s*\(Free\)\s*$', ''), 'project', 'issued', false, null, coalesce(s.reviewed_at, now())
+  from public.challenge_submissions s
+  join public.datasets d on d.id = s.dataset_id
+  left join public.profiles p on p.id = s.user_id
+  where s.status = 'reviewed' and coalesce(s.points, 0) > 0
+  on conflict (user_id, role, level) do nothing;
+end
+$do$;

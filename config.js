@@ -483,3 +483,18 @@ window.kojohLoadMe = function(){
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ window.kojohArtInit(); window.kojohRefreshBuyer(); window.kojohLoadMe(); });
   else { window.kojohArtInit(); window.kojohRefreshBuyer(); window.kojohLoadMe(); }
 })();
+
+
+// Turn raw database / network errors into plain words for visitors.
+// Short, human messages (wrong password and so on) pass through unchanged.
+window.kojohFriendly = function(msg){
+  var m = String(msg || '');
+  if (!m) return 'Something went wrong. Please try again.';
+  if (/failed to fetch|network|load failed|timeout|offline/i.test(m)) return "We couldn't connect. Check your internet and try again.";
+  if (/invalid login credentials/i.test(m)) return "That email and password don't match.";
+  if (/jwt|not authenticated|permission denied|row-level security|not authori[sz]ed/i.test(m)) return 'Please log in again to continue.';
+  if (/duplicate key|already exists|unique constraint/i.test(m)) return "That's already been done.";
+  if (/schema cache|does not exist|relation|function|column|pgrst|syntax|violates|null value|supabase|\.sql|public\.|[a-z]+_[a-z_]+\(/i.test(m))
+    return "This isn't available right now. Please try again in a little while.";
+  return m;
+};

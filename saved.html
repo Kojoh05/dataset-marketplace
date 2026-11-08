@@ -68,21 +68,21 @@
     var res = await SUPA.from('bookmarks').delete().eq('user_id', UID).eq('dataset_id', id);
     if (res.error) {
       ROWS.splice(idx, 0, gone); draw();
-      window.kojohToast('Could not remove it: ' + res.error.message, { kind:'error' });
+      window.kojohToast('Could not remove it: ' + (window.kojohFriendly || String)(res.error.message), { kind:'error' });
       return;
     }
     window.kojohToast('Removed from your bookmarks.', {
       action: 'Undo',
       onAction: async function(){
         var back = await SUPA.from('bookmarks').insert({ user_id: UID, dataset_id: id });
-        if (back.error) { window.kojohToast(back.error.message, { kind:'error' }); return; }
+        if (back.error) { window.kojohToast((window.kojohFriendly || String)(back.error.message), { kind:'error' }); return; }
         ROWS.splice(Math.min(idx, ROWS.length), 0, gone); draw();
       }
     });
   }
 
   async function load(){
-    if (!LIVE) { empty(kIcon('plug'), 'Preview mode', 'Connect Supabase to see your bookmarks.'); return; }
+    if (!LIVE) { empty(kIcon('plug'), 'Connection problem', "We couldn't connect right now. Check your internet and refresh the page."); return; }
     var s = await SUPA.auth.getSession();
     if (!s.data.session) { empty(kIcon('lock'), 'Sign in required', 'Please <a href="/auth">log in</a> to see your saved datasets.'); return; }
     UID = s.data.session.user.id;
@@ -91,7 +91,7 @@
       window.kojohOwned(),
       window.kojohShelf()
     ]);
-    if (r[0].error) { empty(kIcon('alert'), 'Could not load', window.kojohEsc(r[0].error.message)); return; }
+    if (r[0].error) { empty(kIcon('alert'), 'Could not load', window.kojohEsc((window.kojohFriendly || String)(r[0].error.message))); return; }
     ROWS = (r[0].data || []).filter(function(x){ return x.datasets; });
     OWNED = r[1] || {}; SHELF = r[2] || {};
     draw();

@@ -95,10 +95,10 @@
 
   async function load(){
     var slug = new URLSearchParams(window.location.search).get('slug') || 'data-analyst';
-    if (!LIVE) { empty(kIcon('plug'), 'Preview mode', 'Connect Supabase to browse folders.'); return; }
+    if (!LIVE) { empty(kIcon('plug'), 'Connection problem', "We couldn't connect right now. Check your internet and refresh the page."); return; }
 
     var fRes = await SUPA.from('folders').select('*').eq('slug', slug).maybeSingle();
-    if (fRes.error) { empty(kIcon('alert'), 'Could not load', esc(fRes.error.message)); return; }
+    if (fRes.error) { empty(kIcon('alert'), 'Could not load', esc((window.kojohFriendly || String)(fRes.error.message))); return; }
     if (!fRes.data) { empty(kIcon('search'), 'Folder not found', 'That track does not exist yet. <a href="/#categories">Back to all folders</a>.'); return; }
     var folder = fRes.data;
 
@@ -116,7 +116,7 @@
       window.kojohShelf()
     ]);
     var dRes = r[0], OWNED = r[1] || {}, SHELF = r[2] || {};
-    if (dRes.error) { empty(kIcon('alert'), 'Could not load datasets', esc(dRes.error.message)); return; }
+    if (dRes.error) { empty(kIcon('alert'), 'Could not load datasets', esc((window.kojohFriendly || String)(dRes.error.message))); return; }
     var rows = dRes.data || [];
 
     var html = '';

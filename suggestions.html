@@ -78,7 +78,7 @@
     var msg = document.getElementById('sMessage').value.trim();
     if (!msg) { note('Type something first.', 'error'); return; }
     if (msg.length < 6) { note('A little more detail helps. At least a few words, please.', 'error'); return; }
-    if (!LIVE) { note('Preview mode. Connect Supabase to send suggestions.', 'error'); return; }
+    if (!LIVE) { note("We couldn't connect right now. Check your internet and refresh the page.", 'error'); return; }
     var s = await SUPA.auth.getSession();
     if (!s.data.session) { noteEl.hidden = false; noteEl.className = 'page-note error'; noteEl.innerHTML = 'Please <a href="/auth">log in</a> first so we can follow up if needed.'; return; }
     var uid = s.data.session.user.id;
@@ -86,7 +86,7 @@
     btn.disabled = true; btn.textContent = 'Sending';
     var res = await SUPA.from('suggestions').insert({ user_id: uid, message: msg });
     btn.disabled = false; btn.textContent = 'Send suggestion';
-    if (res.error) { note(res.error.message, 'error'); return; }
+    if (res.error) { note((window.kojohFriendly || String)(res.error.message), 'error'); return; }
     document.getElementById('sMessage').value = '';
     note('Thanks, got it! We read every suggestion.', 'ok');
     loadPast(uid);
