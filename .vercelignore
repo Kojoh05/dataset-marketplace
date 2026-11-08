@@ -1,0 +1,4 @@
+supabase/
+KOJOH_Project.md
+*.md
+!README.md
