@@ -32,12 +32,8 @@
       + '.krec-card .k-btn{align-self:flex-start;margin-top:auto}'
       + '.krec-eyebrow{font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}'
       + '.krec-cert{padding:0;aspect-ratio:297/210;min-height:12rem;justify-content:flex-end}'
-      + '.krec-cert-paper{position:absolute;inset:0;background:#F4F1EA;color:#1C1A1E;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:9%;text-align:center;gap:.3rem;filter:blur(1.6px)}'
-      + '.krec-cert-paper::before{content:"";position:absolute;inset:5%;border:2px solid #D98B5F;outline:1px solid #1C1A1E;outline-offset:4px;border-radius:4px}'
-      + '.krec-cert-paper b{font-family:"Space Grotesk",sans-serif;font-size:1.3rem;letter-spacing:.25rem}'
-      + '.krec-cert-paper i{font-style:normal;font-size:.55rem;letter-spacing:.15rem;text-transform:uppercase}'
-      + '.krec-cert-paper em{font-family:"Space Grotesk",sans-serif;font-style:normal;font-size:1.45rem;font-weight:700;border-bottom:1.5px solid #D98B5F;padding:0 .8rem .2rem;margin-top:.5rem}'
-      + '.krec-cert-paper small{font-size:.62rem;color:#5d5a55;max-width:70%}'
+      + '.krec-cert{overflow:hidden}'
+      + '.krec-cert-paper{position:absolute;inset:0;background:#fff url(/assets/cert/teaser.webp) center/cover no-repeat;filter:blur(2.2px);transform:scale(1.03)}'
       + '.krec-cert-over{position:relative;z-index:1;margin:0 .8rem .8rem;background:var(--card,#fff);border:1px solid var(--line);border-radius:14px;padding:.75rem .9rem;box-shadow:0 8px 24px rgba(0,0,0,.14);display:flex;align-items:center;justify-content:space-between;gap:.75rem}'
       + '.krec-cert-over div{display:flex;flex-direction:column;gap:.15rem;min-width:0}'
       + '.krec-cert-over b{font-size:.9rem}'
@@ -76,8 +72,7 @@
 
   // Blurred certificate teaser. href: where the button goes.
   window.kojohCertTeaser = function (href) {
-    return '<div class="krec-card krec-cert"><div class="krec-cert-paper" aria-hidden="true"><b>KOJOH</b><i>Certificate of completion</i>'
-      + '<em>Your name here</em><small>has completed a reviewed KOJOH portfolio project, solving a real business question.</small></div>'
+    return '<div class="krec-card krec-cert"><div class="krec-cert-paper" aria-hidden="true"></div>'
       + '<div class="krec-cert-over"><div><b>Earn a verified certificate</b>'
       + '<span>Finish a paid project, or the free Returns project, and submit it. We review it and you get a certificate with a public link.</span></div>'
       + '<a class="k-btn k-btn-brand" href="' + (href || '/recommendations') + '">See projects</a></div></div>';
