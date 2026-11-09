@@ -1,16 +1,48 @@
 {
+  "buildCommand": "node scripts/apply-keywords.mjs",
+  "outputDirectory": ".",
   "cleanUrls": true,
   "trailingSlash": false,
   "redirects": [
-    { "source": "/Admin", "destination": "/admin", "permanent": false },
-    { "source": "/Admin/:path*", "destination": "/admin/:path*", "permanent": false }
+    {
+      "source": "/Admin",
+      "destination": "/admin",
+      "permanent": false
+    },
+    {
+      "source": "/Admin/:path*",
+      "destination": "/admin/:path*",
+      "permanent": false
+    }
   ],
   "rewrites": [
-    { "source": "/admin", "destination": "https://kojoh-admin.vercel.app/" },
-    { "source": "/admin/:path*", "destination": "https://kojoh-admin.vercel.app/:path*" }
+    {
+      "source": "/admin",
+      "destination": "https://kojoh-admin.vercel.app/"
+    },
+    {
+      "source": "/admin/:path*",
+      "destination": "https://kojoh-admin.vercel.app/:path*"
+    }
   ],
   "headers": [
-    { "source": "/admin/:path*", "headers": [ { "key": "X-Robots-Tag", "value": "noindex, nofollow" } ] },
-    { "source": "/admin", "headers": [ { "key": "X-Robots-Tag", "value": "noindex, nofollow" } ] }
+    {
+      "source": "/admin/:path*",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    },
+    {
+      "source": "/admin",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    }
   ]
 }
