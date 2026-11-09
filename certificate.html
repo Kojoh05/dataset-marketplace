@@ -12,7 +12,7 @@
 <script src="theme.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Pinyon+Script&family=Great+Vibes&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Montserrat:wght@400;500;600;700;800;900&family=Mrs+Saint+Delafield&family=Great+Vibes&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="pages.css">
 <link rel="stylesheet" href="nav.css">
@@ -21,30 +21,28 @@
 <style>
 .cert-wrap{max-width:62rem; margin:0 auto 4rem; padding:0 1.25rem;}
 .cert-tools{display:flex; gap:0.5rem; justify-content:flex-end; flex-wrap:wrap; margin:0 0 1rem;}
-.cert{--acc:#C9A44C; --ink:#F4F1EA; --dim:rgba(244,241,234,0.62); position:relative; aspect-ratio:297/210; width:100%;
-  background:radial-gradient(120% 90% at 85% 15%, #1f1d24 0%, #0d0c10 60%); color:var(--ink); border-radius:10px;
-  box-shadow:0 14px 48px rgba(0,0,0,0.28); overflow:hidden; container-type:inline-size; font-family:'IBM Plex Sans', sans-serif;}
-.cert.lv-beginner{--acc:#8DB89A;} .cert.lv-intermediate{--acc:#8BB3D9;} .cert.lv-hard{--acc:#D98B5F;} .cert.lv-project{--acc:#C9A44C;}
-.c-waves{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; opacity:1;}
-.c-frame{position:absolute; inset:4.2cqw; border:0.1cqw solid color-mix(in srgb, var(--acc) 55%, transparent); border-radius:0.6cqw; pointer-events:none;}
-.c-frame::before{content:''; position:absolute; inset:-1.4cqw; border:0.08cqw solid rgba(244,241,234,0.12); border-radius:1cqw;}
-.c-no{position:absolute; top:2.3cqw; right:5.6cqw; font-size:0.85cqw; color:var(--dim); letter-spacing:0.05cqw;}
-.cert-in{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; text-align:center; padding:7.2cqw 10cqw 0; z-index:1;}
-.c-logo{height:6.2cqw; width:auto;}
-.c-kind{font-family:'Pinyon Script', 'Great Vibes', cursive; font-size:4.2cqw; line-height:1; margin-top:1.6cqw; color:var(--ink);}
-.c-title{font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:3.5cqw; line-height:1.15; margin-top:1.4cqw; max-width:74cqw;}
-.c-rule{width:46cqw; height:0.1cqw; background:linear-gradient(90deg, transparent, var(--acc), transparent); margin:2cqw 0 1.6cqw;}
-.c-pre{font-size:1.35cqw; color:var(--dim);}
-.c-name{font-family:'Great Vibes', 'Pinyon Script', cursive; font-size:6.4cqw; line-height:1.15; color:var(--acc); margin:0.6cqw 0 0.4cqw;}
-.c-what{font-size:1.4cqw; line-height:1.6; max-width:58cqw; color:var(--dim);}
-.c-what b{color:var(--ink); font-weight:600;}
-.c-row{display:flex; gap:9cqw; justify-content:center; margin-top:3.2cqw;}
-.c-cell{min-width:16cqw; border-top:0.1cqw solid rgba(244,241,234,0.25); padding-top:0.8cqw; font-size:1.25cqw;}
-.c-cell small{display:block; font-size:0.95cqw; color:var(--dim); letter-spacing:0.12cqw; text-transform:uppercase; margin-bottom:0.3cqw;}
-.c-sig{font-family:'Great Vibes', cursive; font-size:2.8cqw; line-height:1; color:var(--acc); margin-bottom:0.2cqw;}
-.c-verify{position:absolute; left:5.6cqw; bottom:2.1cqw; font-size:0.9cqw; color:var(--dim); z-index:1;}
-.c-qr{position:absolute; right:6.2cqw; bottom:6.4cqw; width:7.2cqw; height:7.2cqw; background:#F4F1EA; padding:0.45cqw; border-radius:0.4cqw; z-index:1;}
+.cert{position:relative; aspect-ratio:297/210; width:100%; background:#fff; color:#141317; border-radius:6px; box-shadow:0 10px 40px rgba(0,0,0,0.14);
+  overflow:hidden; container-type:inline-size; font-family:'Montserrat', 'Space Grotesk', sans-serif;}
+.px{position:absolute; width:3.8cqw; height:3.8cqw;}
+.cert-in{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; text-align:center; padding:6.4cqw 16cqw 0; z-index:1;}
+.c-logo{height:6.6cqw; width:auto;}
+.c-big{font-weight:900; font-size:8.6cqw; line-height:0.95; letter-spacing:-0.1cqw; margin-top:2.4cqw;}
+.c-sub{font-weight:500; font-size:2.1cqw; letter-spacing:1.25cqw; margin-top:1cqw; padding-left:1.25cqw;}
+.c-pre{font-weight:700; font-size:1.65cqw; letter-spacing:0.08cqw; margin-top:4cqw;}
+.c-name{font-weight:800; font-size:5.6cqw; line-height:1.15; margin-top:1.6cqw; letter-spacing:-0.08cqw;}
+.c-line{width:21cqw; height:0.12cqw; background:#141317; margin:2.2cqw 0 2cqw;}
+.c-what{font-weight:400; font-size:1.75cqw; line-height:1.45; max-width:72cqw;}
+.c-what b{font-weight:700;}
+.c-tools{font-weight:500; font-size:1.45cqw; letter-spacing:0.28cqw; color:#6b6870; margin-top:1.2cqw;}
+.c-foot{position:absolute; left:15.5cqw; right:15.5cqw; bottom:7cqw; display:flex; justify-content:space-between; align-items:flex-end; z-index:1;}
+.c-cell{min-width:18cqw; text-align:center;}
+.c-cell .v{font-weight:800; font-size:1.65cqw; padding-bottom:0.9cqw; border-bottom:0.12cqw solid #141317; text-transform:uppercase;}
+.c-cell .k{font-weight:600; font-size:1.25cqw; letter-spacing:0.2cqw; margin-top:1cqw; text-transform:uppercase;}
+.c-sig{font-family:'Mrs Saint Delafield', 'Great Vibes', cursive; font-size:4.6cqw; line-height:0.8; padding-bottom:0.3cqw; border-bottom:0.12cqw solid #141317;}
+.c-mid{text-align:center;}
+.c-qr{width:6.4cqw; height:6.4cqw; margin:0 auto 0.6cqw;}
 .c-qr img, .c-qr canvas{width:100% !important; height:100% !important;}
+.c-id{font-size:0.95cqw; letter-spacing:0.1cqw; color:#6b6870;}
 .cert-note{font-size:0.875rem; color:var(--muted); text-align:center; margin-top:1rem;}
 @media print{
   @page{size:A4 landscape; margin:0;}
@@ -64,13 +62,16 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 (function () {
-  // flowing line background, drawn once
-  var paths = '';
-  for (var i = 0; i < 26; i++) {
-    var y = 120 + i * 9, a = 60 + i * 3;
-    paths += '<path d="M -20 ' + (y + 140) + ' C 260 ' + (y - a) + ', 520 ' + (y + 240 - a) + ', 760 ' + (y + 40) + ' S 1100 ' + (y - 120) + ', 1220 ' + (y + 60) + '" fill="none" stroke="rgba(244,241,234,' + (0.07 + (i % 5) * 0.02).toFixed(3) + ')" stroke-width="1"/>';
-  }
-  window.KOJOH_WAVES = '<svg class="c-waves" viewBox="0 0 1188 840" preserveAspectRatio="none" aria-hidden="true">' + paths + '</svg>';
+  // pixel corners: [col, row, shade] counted from that corner, 3.8cqw cells
+  var D = '#141317', M = '#4a484e', G = '#7d7b80', L = '#acaaad', P = '#eeedee';
+  var TL = [[0,0,P],[2,0,M],[3,0,G],[4,0,L],[0,1,G],[1,1,L],[3,1,D],[0,2,D],[2,2,P],[0,3,P],[3,4,P],[0,5,P],[1,6,P]];
+  var TR = [[0,0,L],[1,0,G],[2,0,D],[0,1,P],[1,1,M],[3,1,L],[0,2,G],[0,3,L],[1,3,D],[0,4,G],[2,4,P],[1,5,P],[1,6,P],[2,7,P],[1,8,P]];
+  var BL = [[0,0,L],[2,0,G],[0,1,G],[1,1,L],[0,2,D],[1,2,P],[2,3,P],[1,4,P],[0,5,P],[2,5,P],[1,6,P]];
+  var BR = [[0,0,G],[1,0,L],[1,1,D],[0,1,G],[2,1,P],[0,2,M],[1,2,P],[2,3,P],[0,4,P],[1,5,P],[0,6,P]];
+  var h = '', S = 3.8, O = 2.5;
+  function put(list, xk, yk) { list.forEach(function (q) { h += '<div class="px" style="' + xk + ':' + (O + q[0] * S) + 'cqw;' + yk + ':' + (O + q[1] * S) + 'cqw;background:' + q[2] + '"></div>'; }); }
+  put(TL, 'left', 'top'); put(TR, 'right', 'top'); put(BL, 'left', 'bottom'); put(BR, 'right', 'bottom');
+  window.KOJOH_PIXELS = h;
 })();
 (async function () {
   var app = document.getElementById('certApp'), esc = window.kojohEsc;
@@ -82,29 +83,33 @@
   var c = r.data, isProject = c.level === 'project', lvName = { beginner: 'Beginner', intermediate: 'Intermediate', hard: 'Hard', project: 'Portfolio project' }[c.level] || c.level;
   var role = c.role_title || c.role.replace(/-/g, ' ').replace(/\b\w/g, function (x) { return x.toUpperCase(); });
   var url = 'https://www.kojohhi.com/certificate?id=' + c.code;
-  var issued = new Date(c.issued_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  var issued = new Date(c.issued_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
   var title = isProject ? role : role + ' Practice, ' + lvName + ' Level';
   var what = isProject
-    ? 'has successfully completed the KOJOH portfolio project: cleaning the raw data, answering the business questions, building the dashboard and writing the recommendation, with the work <b>reviewed by the KOJOH team</b>.'
-    : (c.skipped ? 'has unlocked the <b>' + esc(lvName) + ' level</b> of KOJOH Practice for <b>' + esc(role) + '</b>.'
-                 : 'has successfully completed the <b>' + esc(lvName) + ' level</b> of KOJOH Practice for <b>' + esc(role) + '</b>, solving real business questions on a full case project with a final score of <b>' + c.score + '%</b>.');
+    ? 'For successfully completing the data project <b>' + esc(role) + '</b>, reviewed by the KOJOH team.'
+    : (c.skipped ? 'For unlocking the <b>' + esc(lvName) + ' level</b> of KOJOH Practice for <b>' + esc(role) + '</b>.'
+                 : 'For completing the <b>' + esc(lvName) + ' level</b> of KOJOH Practice for <b>' + esc(role) + '</b>, with a final score of <b>' + c.score + '%</b>.');
   document.title = 'KOJOH | ' + c.name + ', ' + title;
   app.innerHTML = '<div class="cert-tools"><button class="k-btn" type="button" id="cCopy">Copy link</button>'
     + '<a class="k-btn" target="_blank" rel="noopener" href="https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=' + encodeURIComponent(isProject ? 'KOJOH Portfolio Project: ' + role : 'KOJOH Practice: ' + role + ', ' + lvName) + '&organizationName=KOJOH&issueYear=' + new Date(c.issued_at).getFullYear() + '&issueMonth=' + (new Date(c.issued_at).getMonth() + 1) + '&certUrl=' + encodeURIComponent(url) + '&certId=' + c.code + '">Add to LinkedIn</a>'
     + '<button class="k-btn k-btn-brand" type="button" onclick="window.print()">Download PDF</button></div>'
-    + '<div class="cert lv-' + esc(c.level) + '" id="cert">' + window.KOJOH_WAVES + '<div class="c-frame"></div>'
-    + '<div class="c-no">Certificate No: ' + esc(c.code) + '</div>'
-    + '<div class="cert-in"><img class="c-logo" src="/assets/cert/kojoh-wordmark-light.png" alt="KOJOH">'
-    + '<div class="c-kind">Certificate of Completion</div>'
-    + '<div class="c-title">' + esc(title) + '</div><div class="c-rule"></div>'
-    + '<div class="c-pre">This certificate acknowledges that</div><div class="c-name">' + esc(c.name) + '</div>'
-    + '<div class="c-what">' + what + '</div>'
-    + '<div class="c-row"><div class="c-cell"><small>Issue date</small>' + issued + '</div>'
-    + '<div class="c-cell"><div class="c-sig">Danzai</div><small style="margin:0">Founder, KOJOH</small></div></div></div>'
-    + '<div class="c-qr" id="cQr"></div>'
-    + '<div class="c-verify">Verify at kojohhi.com/certificate?id=' + esc(c.code) + '</div></div>'
+    + '<div class="cert lv-' + esc(c.level) + '" id="cert">' + window.KOJOH_PIXELS
+    + '<div class="cert-in"><img class="c-logo" src="/assets/cert/kojoh-wordmark-dark.png" alt="KOJOH">'
+    + '<div class="c-big">CERTIFICATE</div><div class="c-sub">' + (isProject ? 'OF ACHIEVEMENT' : 'OF COMPLETION') + '</div>'
+    + '<div class="c-pre">THIS CERTIFICATE IS PRESENTED TO</div><div class="c-name">' + esc(c.name) + '</div><div class="c-line"></div>'
+    + '<div class="c-what">' + what + '</div><div class="c-tools" id="cTools">SQL &middot; Python &middot; Excel &middot; Power BI</div></div>'
+    + '<div class="c-foot"><div class="c-cell"><div class="v">' + issued + '</div><div class="k">Date</div></div>'
+    + '<div class="c-mid"><div class="c-qr" id="cQr"></div><div class="c-id">ID ' + esc(c.code) + '</div></div>'
+    + '<div class="c-cell"><div class="c-sig">Danzai</div><div class="k">Founder, KOJOH</div></div></div></div>'
     + '<p class="cert-note">Anyone can verify this certificate at ' + esc(url) + '</p>';
-  try { new QRCode(document.getElementById('cQr'), { text: url, width: 256, height: 256, colorDark: '#0d0c10', colorLight: '#F4F1EA', correctLevel: QRCode.CorrectLevel.M }); } catch (e) {}
+  try { new QRCode(document.getElementById('cQr'), { text: url, width: 256, height: 256, colorDark: '#141317', colorLight: '#FFFFFF', correctLevel: QRCode.CorrectLevel.M }); } catch (e) {}
+  if (isProject) {
+    try {
+      var tg = await window.kojohSupa().from('datasets').select('dataset_tags(tags(name, tag_type))').eq('slug', c.role).maybeSingle();
+      var tools = ((tg.data && tg.data.dataset_tags) || []).map(function (x) { return x.tags; }).filter(function (t) { return t && t.tag_type === 'tool'; }).map(function (t) { return t.name; });
+      if (tools.length) document.getElementById('cTools').innerHTML = tools.map(esc).join(' &middot; ');
+    } catch (e) {}
+  }
   document.getElementById('cCopy').onclick = function () { try { navigator.clipboard.writeText(url); this.textContent = 'Copied'; } catch (e) {} };
 })();
 </script>
