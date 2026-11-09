@@ -68,7 +68,7 @@
   }
 
   function isGithubUrl(v){ return /^https:\/\/(www\.)?github\.com\/[^\s/]+\/[^\s/]+/i.test(String(v || '').trim()); }
-  function isLinkedinUrl(v){ return /^https:\/\/([a-z]{2,3}\.)?linkedin\.com\/.+/i.test(String(v || '').trim()); }
+  function isLinkedinUrl(v){ return /^https?:\/\/(([a-z]{2,3}\.)?linkedin\.com\/.+|lnkd\.in\/.+)/i.test(String(v || '').trim()); }
 
   function submitBlock(submission, allTasks, checked){
     if (submission) {
@@ -271,7 +271,7 @@
       return;
     }
     if (!isLinkedinUrl(li)) {
-      err.textContent = 'That doesn\'t look like a LinkedIn link, it should look like https://www.linkedin.com/posts/...';
+      err.textContent = 'That doesn\'t look like a LinkedIn link, it should look like https://www.linkedin.com/posts/... or https://lnkd.in/...';
       err.hidden = false;
       return;
     }

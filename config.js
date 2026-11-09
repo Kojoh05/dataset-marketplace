@@ -296,7 +296,7 @@ window.kojohLinkCheck = function(input, kind){
   if (!input) return;
   var re = kind === 'github'
     ? /^https:\/\/(www\.)?github\.com\/[^\s/]+\/[^\s/]+/i
-    : /^https:\/\/([a-z]{2,3}\.)?linkedin\.com\/.+/i;
+    : /^https?:\/\/(([a-z]{2,3}\.)?linkedin\.com\/.+|lnkd\.in\/.+)/i;
   var hint = document.createElement('p');
   hint.className = 'chal-submit-hint';
   input.parentNode.appendChild(hint);
@@ -306,7 +306,7 @@ window.kojohLinkCheck = function(input, kind){
     input.classList.toggle('ok', ok);
     input.classList.toggle('bad', !!v && !ok && final);
     hint.textContent = ok ? 'Looks good.'
-      : (v && final ? (kind === 'github' ? 'Use the repo link, like https://github.com/you/project' : 'Use the post link, like https://www.linkedin.com/posts/...') : '');
+      : (v && final ? (kind === 'github' ? 'Use the repo link, like https://github.com/you/project' : 'Use the post link, like https://www.linkedin.com/posts/... or https://lnkd.in/...') : '');
     hint.className = 'chal-submit-hint' + (ok ? ' ok' : (v && final ? ' bad' : ''));
   }
   input.addEventListener('input', function(){ check(false); });
