@@ -58,7 +58,7 @@ create policy "Users insert own submission"
     and tasks_total > 0
     and tasks_done = tasks_total
     and github_url ~* '^https://(www\.)?github\.com/'
-    and linkedin_url ~* '^https://([a-z]{2,3}\.)?linkedin\.com/'
+    and linkedin_url ~* '^https://(([a-z]{2,3}\.)?linkedin\.com|lnkd\.in)/'
     and exists (
       select 1 from public.dataset_licenses dl
       where dl.id = challenge_submissions.license_id
