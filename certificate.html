@@ -25,23 +25,23 @@
 .cert{position:relative; aspect-ratio:297/210; width:100%; background:#fff; color:#141317; border-radius:6px; box-shadow:0 10px 40px rgba(0,0,0,0.14);
   overflow:hidden; container-type:inline-size; font-family:'Montserrat', 'Space Grotesk', sans-serif;}
 .px{position:absolute; width:3.8cqw; height:3.8cqw;}
-.cert-in{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; text-align:center; padding:6.4cqw 16cqw 0; z-index:1;}
+.cert-in{position:absolute; inset:0 0 15cqw 0; display:flex; flex-direction:column; align-items:center; text-align:center; padding:5.6cqw 16cqw 0; z-index:1; overflow:hidden;}
 .c-logo{height:6.6cqw; width:auto;}
-.c-big{font-weight:900; font-size:8.6cqw; line-height:0.95; letter-spacing:-0.1cqw; margin-top:2.4cqw;}
+.c-big{font-weight:900; font-size:8.2cqw; line-height:0.95; letter-spacing:-0.1cqw; margin-top:2cqw;}
 .c-sub{font-weight:500; font-size:2.1cqw; letter-spacing:1.25cqw; margin-top:1cqw; padding-left:1.25cqw;}
-.c-pre{font-weight:700; font-size:1.65cqw; letter-spacing:0.08cqw; margin-top:4cqw;}
+.c-pre{font-weight:700; font-size:1.6cqw; letter-spacing:0.08cqw; margin-top:3.2cqw;}
 .c-name{font-weight:800; font-size:5.6cqw; line-height:1.15; margin-top:1.6cqw; letter-spacing:-0.08cqw;}
-.c-line{width:21cqw; height:0.12cqw; background:#141317; margin:2.2cqw 0 2cqw;}
-.c-what{font-weight:400; font-size:1.75cqw; line-height:1.45; max-width:72cqw;}
+.c-line{width:21cqw; height:0.12cqw; background:#141317; margin:1.8cqw 0 1.7cqw;}
+.c-what{font-weight:400; font-size:1.65cqw; line-height:1.45; max-width:70cqw;}
 .c-what b{font-weight:700;}
 .c-tools{font-weight:500; font-size:1.45cqw; letter-spacing:0.28cqw; color:#6b6870; margin-top:1.2cqw;}
-.c-foot{position:absolute; left:15.5cqw; right:15.5cqw; bottom:7cqw; display:flex; justify-content:space-between; align-items:flex-end; z-index:1;}
+.c-foot{position:absolute; left:15.5cqw; right:15.5cqw; bottom:5.6cqw; display:flex; justify-content:space-between; align-items:flex-end; z-index:1;}
 .c-cell{min-width:18cqw; text-align:center;}
 .c-cell .v{font-weight:800; font-size:1.65cqw; padding-bottom:0.9cqw; border-bottom:0.12cqw solid #141317; text-transform:uppercase;}
 .c-cell .k{font-weight:600; font-size:1.25cqw; letter-spacing:0.2cqw; margin-top:1cqw; text-transform:uppercase;}
 .c-sig{font-family:'Mrs Saint Delafield', 'Great Vibes', cursive; font-size:4.6cqw; line-height:0.8; padding-bottom:0.3cqw; border-bottom:0.12cqw solid #141317;}
 .c-mid{text-align:center;}
-.c-qr{width:6.4cqw; height:6.4cqw; margin:0 auto 0.6cqw;}
+.c-qr{width:6cqw; height:6cqw; margin:0 auto 0.5cqw; background:#fff;}
 .c-qr img, .c-qr canvas{width:100% !important; height:100% !important;}
 .c-id{font-size:0.95cqw; letter-spacing:0.1cqw; color:#6b6870;}
 .cert-note{font-size:0.875rem; color:var(--muted); text-align:center; margin-top:1rem;}
@@ -52,8 +52,8 @@ html.cert-embed .cert-wrap{max-width:none; margin:0; padding:0;}
 html.cert-embed .cert{border-radius:0; box-shadow:none;}
 @media print{
   @page{size:A4 landscape; margin:0;}
-  body{background:#fff !important;}
-  .ksb-rail, .ksb-edge, .page-header, .cert-tools, .cert-note, .k-footer, footer, .ksb-overlay{display:none !important;}
+  body, body.ksb-has-rail, body.ksb-has-rail.ksb-expanded{background:#fff !important; padding:0 !important; margin:0 !important;}
+  .ksb-rail, .ksb-edge, .ksb-mobile-trigger, .k-legal-foot, .page-header, .cert-tools, .cert-note, .k-footer, footer, .ksb-overlay{display:none !important;}
   .cert-wrap{max-width:none; margin:0; padding:0;}
   .cert{width:297mm; height:210mm; border-radius:0; box-shadow:none; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
 }
@@ -92,7 +92,7 @@ html.cert-embed .cert{border-radius:0; box-shadow:none;}
   var issued = new Date(c.issued_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
   var title = isProject ? role : role + ' Practice, ' + lvName + ' Level';
   var what = isProject
-    ? 'For successfully completing the data project <b>' + esc(role) + '</b>, reviewed by the KOJOH team.'
+    ? 'For successfully completing the data project <b>' + esc(String(role).split(': ')[0]) + '</b>, reviewed by the KOJOH team.'
     : (c.skipped ? 'For unlocking the <b>' + esc(lvName) + ' level</b> of KOJOH Practice for <b>' + esc(role) + '</b>.'
                  : 'For completing the <b>' + esc(lvName) + ' level</b> of KOJOH Practice for <b>' + esc(role) + '</b>, with a final score of <b>' + c.score + '%</b>.');
   document.title = 'KOJOH | ' + c.name + ', ' + title;
