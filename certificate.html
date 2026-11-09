@@ -107,7 +107,7 @@ html.cert-embed .cert{border-radius:0; box-shadow:none;}
     + '<div class="c-foot"><div class="c-cell"><div class="v">' + issued + '</div><div class="k">Date</div></div>'
     + '<div class="c-mid"><div class="c-qr" id="cQr"></div><div class="c-id">ID ' + esc(c.code) + '</div></div>'
     + '<div class="c-cell"><div class="c-sig">Danzai</div><div class="k">Founder, KOJOH</div></div></div></div>'
-    + '<p class="cert-note">Anyone can verify this certificate at ' + esc(url) + '</p>';
+    + '';
   try { new QRCode(document.getElementById('cQr'), { text: url, width: 256, height: 256, colorDark: '#141317', colorLight: '#FFFFFF', correctLevel: QRCode.CorrectLevel.M }); } catch (e) {}
   if (isProject) {
     try {
