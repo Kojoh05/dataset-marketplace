@@ -253,3 +253,83 @@ Interview questions it prepares you for: How would you reconcile two systems tha
 
 Phases: Phase 1, SQL: Load, Profile and Match | Phase 2, SQL: Reconcile and Test | Phase 3a, Dashboard: Reconciliation | Phase 3b, Dashboard: Data Quality Board | Phase 4, Documentation
 
+## Returns Are Eating Our Profit: An Online Fashion Store in the US, UK and EU
+URL: https://www.kojohhi.com/projects/returns-eating-profit-free
+Track: Data Analyst | Level: beginner | Price: free | Tools: Excel, SQL, Power BI | Good for: Data Analyst, Business Analyst, E-commerce Analyst
+Dataset: 20,441 rows, 32 columns | Tasks: 18 | Time: about 6 to 10 hours
+
+In short: A free beginner project on a year of orders and returns from a fictional online fashion store selling in the US, UK and EU. The founder thinks returns are eating the profit, and you find out where. You fix three date formats and three currencies, then show returns by product, size, reason and discount code in Excel or SQL and Power BI.
+
+What is messy in the data:
+- Dates month-first in the US file, day-first in the UK file and ISO or dd.mm.yyyy in the EU file
+- Prices as $48.99, £38.99, 45,99 € and 48.99 USD
+- 236 order lines exported twice
+- Countries as USA, U.S., GB, Deutschland, Holland; sizes as Small, SM, W30, EU 38
+- Returns with # order numbers, blank SKUs and 30 that match no order
+- Return reasons in free text: Runs small, changed my mind, Faulty
+
+Project ideas it covers: E-commerce sales and returns analysis; Return rate by product, size and reason; Multi-currency data cleaning; Profit after returns; Discount code impact analysis.
+Interview questions it prepares you for: How would you handle dates written month-first in one file and day-first in another? How do you calculate a return rate, and what goes in the denominator? How would you measure whether discounts attract customers who return more?
+
+Phases: Phase 1, Clean the Orders and Returns | Phase 2, Answer the Business Questions | Phase 3a, Dashboard: Sales | Phase 3b, Dashboard: Returns | Phase 4, Documentation
+
+## The Price Rise That Cost Us: SaaS Subscriptions, MRR and Churn
+URL: https://www.kojohhi.com/projects/price-rise-saas-mrr
+Track: Product Analyst | Level: intermediate | Price: Rs 349 | Tools: Python, SQL, Power BI | Good for: Product Analyst, Data Analyst, Business Analyst
+Dataset: 51,731 rows, 31 columns | Tasks: 20 | Time: about 10 to 15 hours
+
+In short: A product analytics project on two years of billing events, invoices and usage from a fictional B2B SaaS app with customers in over a dozen countries. The CEO says a price rise worked and customer success says it did not. You build MRR, the MRR bridge, churn and cohort retention, then settle the argument with numbers.
+
+What is messy in the data:
+- 137 billing events sent twice by webhook retries, and the file is not in time order
+- Event times in ISO, +00:00 style and Unix seconds
+- Amounts in cents on some rows and dollars on others; yearly plans stored as the yearly amount
+- Event types written three ways each (customer.subscription.deleted, canceled, cancelled)
+- 28 internal test accounts mixed in with customers
+- Account ids as ACC-00123, acc-00123, ACC00123
+
+Project ideas it covers: SaaS MRR and ARR reporting; MRR bridge (new, expansion, contraction, churn); Cohort retention and NRR; Pricing change impact analysis; Involuntary churn and dunning analysis.
+Interview questions it prepares you for: How do you calculate MRR from subscription events? What is the difference between NRR and GRR? How would you tell whether a price rise caused churn?
+
+Phases: Phase 1, Python: Clean the Billing Events | Phase 2, SQL: SaaS Metrics | Phase 3a, Dashboard: Account Lookup | Phase 3b, Dashboard: SaaS Metrics | Phase 4, Documentation
+
+## Empty Chairs: Predicting Clinic Appointment No-Shows
+URL: https://www.kojohhi.com/projects/empty-chairs-clinic-no-shows
+Track: Data Scientist | Level: hard | Price: Rs 449 | Tools: Python, Machine Learning, Statistics | Good for: Data Scientist, Data Analyst
+Dataset: 151,971 rows, 31 columns | Tasks: 20 | Time: about 15 to 25 hours
+
+In short: A data science project on two years of appointments from six fictional outpatient clinics, where about one booked slot in six ends with an empty chair. You define an honest scoring moment and label, remove four planted leaks and validate on months the model has never seen. Then you turn calibrated scores into an overbooking rule worth money.
+
+What is messy in the data:
+- Four leaky columns: check-in time, visit minutes, co-pay collected and a total no-shows count that includes the future
+- Three time formats, including month-first with AM/PM
+- No-shows written as No Show, DNA, noshow
+- Birth years of 1900 and 0, distances of -1 and 9999
+- About 7% of reminders sent after the scoring moment
+- Specialty and clinic names that change between systems
+
+Project ideas it covers: Appointment no-show prediction; Finding and removing data leakage; Time-based model validation; Probability calibration; Overbooking decision rule with costs.
+Interview questions it prepares you for: What is data leakage, and how did you find it in this project? Why use a time-based split instead of a random split? How do you turn model probabilities into a business decision?
+
+Phases: Phase 1, Python: Population, Label and Leaks | Phase 2, Modelling: Honest Validation and Value | Phase 3a, Dashboard: The Call List | Phase 3b, Dashboard: The Model | Phase 4, Documentation
+
+## Cold Fries: Food Delivery Times in Chicago, London and Singapore
+URL: https://www.kojohhi.com/projects/cold-fries-food-delivery
+Track: Business / Ops | Level: intermediate | Price: Rs 349 | Tools: Python, SQL, Power BI | Good for: Operations Analyst, Data Analyst, Business Analyst
+Dataset: 177,728 rows, 31 columns | Tasks: 20 | Time: about 10 to 15 hours
+
+In short: An operations project on four months of food delivery orders in Chicago, London and Singapore, logged on three different clocks. About one order in five arrives late, and each city blames something different. You put every timestamp on one clock, build a six-stage timeline for each order and find where the late minutes really go.
+
+What is messy in the data:
+- Three clocks: UTC, local time with no zone, and Unix epoch milliseconds
+- Daylight saving ends on 26 October in London and 2 November in Chicago
+- Chicago distances in miles, the rest in km; money in $, £ and S$
+- About 1,800 blank Ready times and 3,400 pressed after the courier left
+- 594 duplicate orders and 870 duplicate courier events
+- City codes CHI, LDN, SG and three local date styles
+
+Project ideas it covers: Delivery time and lateness analysis; Time zone and daylight saving data cleaning; Order timeline (stage) analysis; Batching and courier efficiency; Refund cost of late orders.
+Interview questions it prepares you for: How do you combine timestamps logged in UTC, local time and epoch milliseconds? How would you find which stage of a process causes delays? How would you test whether batching orders hurts customers?
+
+Phases: Phase 1, Python: One Clock for Everything | Phase 2, SQL: Where the Minutes Go | Phase 3a, Dashboard: Order Timeline | Phase 3b, Dashboard: Operations | Phase 4, Documentation
+
