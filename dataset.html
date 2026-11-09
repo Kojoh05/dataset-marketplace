@@ -1418,16 +1418,41 @@
       return;
     }
 
-    var links = await Promise.all(listRes.data.map(async function(f){
+    // Sort the files into groups so learners know what each one is for.
+    var GROUPS = [
+      { key: 'start', title: 'Start here', sub: 'Read these two first' },
+      { key: 'dict', title: 'Data dictionary', sub: 'What every column means and the mess to expect' },
+      { key: 'raw', title: 'The data (messy, to clean)', sub: 'CSV files, one per system' },
+      { key: 'ref', title: 'Reference data (clean)', sub: 'Lookups and rates to join with' },
+      { key: 'xlsx', title: 'Excel workbook', sub: 'The same data in one file, one sheet per CSV' },
+      { key: 'other', title: 'Other files', sub: '' }
+    ];
+    function kindOf(n){
+      var l = n.toLowerCase();
+      if (/scenario|story/.test(l)) return ['start', 'The story: the business, the people and what they need from you'];
+      if (/challenge|task/.test(l)) return ['start', 'Your challenges: every phase and task in order'];
+      if (/dictionary/.test(l)) return ['dict', 'Every column, what it means and how it is messy'];
+      if (/\.xlsx?$/.test(l)) return ['xlsx', 'Use this if you work in Excel or Power BI'];
+      if (/\.csv$/.test(l)) return /_raw\.csv$/.test(l) ? ['raw', 'Raw export: clean this first'] : ['ref', 'Clean lookup table'];
+      return ['other', ''];
+    }
+    var items = await Promise.all(listRes.data.map(async function(f){
       var signed = await SUPA.storage.from('datasets').createSignedUrl(path + '/' + f.name, 3600);
-      if (signed.error) return '';
+      if (signed.error) return null;
       var kb = f.metadata && f.metadata.size ? Math.round(f.metadata.size / 1024) : null;
-      return '<a class="k-file" href="' + signed.data.signedUrl + '" download>'
-           + '<span class="k-file-name">' + esc(f.name) + '</span>'
+      var k = kindOf(f.name);
+      return { group: k[0], html: '<a class="k-file" href="' + signed.data.signedUrl + '" download>'
+           + '<span class="k-file-text"><span class="k-file-name">' + esc(f.name) + '</span>' + (k[1] ? '<span class="k-file-desc">' + esc(k[1]) + '</span>' : '') + '</span>'
            + '<span class="k-file-meta">' + (kb ? (kb > 1024 ? (kb/1024).toFixed(1) + ' MB' : kb + ' KB') : 'Download') + '</span>'
-           + '</a>';
+           + '</a>', order: /scenario|story/i.test(f.name) ? 0 : 1 };
     }));
-    box.innerHTML = links.filter(Boolean).join('') || '<p class="k-sub">No files available.</p>';
+    items = items.filter(Boolean);
+    box.innerHTML = GROUPS.map(function(g){
+      var list = items.filter(function(x){ return x.group === g.key; }).sort(function(a, b){ return a.order - b.order; });
+      if (!list.length) return '';
+      return '<div class="k-filegroup"><div class="k-filegroup-head"><b>' + g.title + '</b>' + (g.sub ? '<span>' + g.sub + '</span>' : '') + '</div>'
+        + list.map(function(x){ return x.html; }).join('') + '</div>';
+    }).join('') || '<p class="k-sub">No files available.</p>';
   }
 
   // ---------------------------------------------------------------- table modal

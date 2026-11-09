@@ -959,3 +959,12 @@ h2.chal-phase-head{display:flex; align-items:center; justify-content:space-betwe
 .k-done-score b{font-family:'Space Grotesk', sans-serif; font-size:1.6rem; line-height:1;}
 .k-done-score span{font-size:0.8rem; color:var(--muted);}
 .chal-status-reviewed{background:#1F8A4C !important; border-color:#1F8A4C !important;}
+
+/* Download dialog: grouped files */
+.k-filelist{gap:0.9rem; max-height:min(60vh, 34rem); overflow-y:auto; text-align:left;}
+.k-filegroup{display:flex; flex-direction:column; gap:0.35rem;}
+.k-filegroup-head{display:flex; flex-direction:column; gap:0.05rem; margin:0 0 0.1rem 0.2rem;}
+.k-filegroup-head b{font-size:0.78rem; letter-spacing:0.06em; text-transform:uppercase;}
+.k-filegroup-head span{font-size:0.75rem; color:var(--muted);}
+.k-file-text{display:flex; flex-direction:column; gap:0.1rem; min-width:0;}
+.k-file-desc{font-size:0.72rem; color:var(--muted); font-weight:400;}
