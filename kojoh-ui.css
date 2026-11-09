@@ -946,3 +946,16 @@ h2.chal-phase-head{display:flex; align-items:center; justify-content:space-betwe
 .k-rewardcard{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:0.75rem 1rem; border:1px dashed var(--brand); border-radius:var(--radius); padding:1rem 1.1rem; margin:0 0 1.25rem;}
 .k-rewardcard h3{margin:0 0 0.2rem; font-size:0.95rem;}
 .k-rewardcard p{margin:0; font-size:0.8125rem; color:var(--muted);}
+
+/* Completed projects */
+.k-donebadge{display:inline-flex; align-items:center; gap:0.3rem; font-size:0.72rem; font-weight:700; padding:0.22rem 0.6rem; border-radius:999px; background:#1F8A4C; color:#fff;}
+.k-donebadge-wait{background:var(--bg); color:var(--text); border:1px solid var(--line);}
+.k-dscard.k-is-done, .fr-card.k-is-done{border-color:#1F8A4C;}
+.k-buy-done{border-color:#1F8A4C !important;}
+.k-done-head{color:#1F8A4C;}
+.k-done-tick{display:inline-grid; place-items:center; width:1.35rem; height:1.35rem; border-radius:50%; background:#1F8A4C; color:#fff;}
+.k-done-tick svg{stroke:#fff;}
+.k-done-score{display:flex; align-items:baseline; gap:0.4rem; margin:0.2rem 0 0.6rem;}
+.k-done-score b{font-family:'Space Grotesk', sans-serif; font-size:1.6rem; line-height:1;}
+.k-done-score span{font-size:0.8rem; color:var(--muted);}
+.chal-status-reviewed{background:#1F8A4C !important; border-color:#1F8A4C !important;}

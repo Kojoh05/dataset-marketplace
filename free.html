@@ -109,7 +109,7 @@
       var diff = d.difficulty ? d.difficulty.charAt(0).toUpperCase() + d.difficulty.slice(1) : '';
       var t = tags[d.id] || [], tools = t.filter(function(x){ return TOOLS.indexOf(String(x).toLowerCase()) > -1; });
       var art = window.kojohArtImg ? window.kojohArtImg(d, '') : '';
-      var h = '<a class="fr-card" href="/dataset?slug=' + encodeURIComponent(d.slug) + '">';
+      var h = '<a class="fr-card" data-ds="' + esc(d.id) + '" href="/dataset?slug=' + encodeURIComponent(d.slug) + '">';
       if (art) h += '<div class="fr-art">' + art + '</div>';
       h += '<div class="fr-body"><div class="fr-chips"><span class="k-chip k-chip-brand">Free</span>';
       if (folders[d.folder_id]) h += '<span class="k-chip">' + esc(String(folders[d.folder_id]).charAt(0) + String(folders[d.folder_id]).slice(1).toLowerCase()) + '</span>';

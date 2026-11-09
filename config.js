@@ -220,7 +220,7 @@ window.kojohDsCard = function(d, opts){
   var esc = window.kojohEsc;
   var pv = d.preview_rows || null;
   var diff = d.difficulty ? d.difficulty.charAt(0).toUpperCase() + d.difficulty.slice(1) : '';
-  var h = '<a class="k-dscard' + (opts.reveal ? ' k-reveal' : '') + '" href="/dataset?slug=' + encodeURIComponent(d.slug) + '">';
+  var h = '<a class="k-dscard' + (opts.reveal ? ' k-reveal' : '') + '" data-ds="' + esc(d.id || '') + '" href="/dataset?slug=' + encodeURIComponent(d.slug) + '">';
   var art = window.kojohArtImg(d, 'k-dscard-art');
   if (art) h += '<div class="k-dscard-artwrap">' + art + '</div>';
   h += '<div class="k-dscard-top">';
@@ -552,3 +552,39 @@ window.kojohCertTag = function () {
   return '<div class="k-certtag"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
     + '<circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 22l5-3 5 3-1.5-8"/></svg>Verified certificate on completion</div>';
 };
+
+// Completed projects: a green tick and the score on every card the signed-in learner has finished.
+(function(){
+  var subs = null, loading = null, queued = false;
+  function load(){
+    if (loading) return loading;
+    var S = window.kojohSupa && window.kojohSupa(); if (!S) return Promise.resolve({});
+    loading = S.auth.getSession().then(function(r){
+      if (!r.data || !r.data.session) return {};
+      return S.from('challenge_submissions').select('dataset_id, status, points').eq('user_id', r.data.session.user.id).then(function(q){
+        var m = {}; (q.data || []).forEach(function(x){ m[x.dataset_id] = x; }); return m;
+      }, function(){ return {}; });
+    }, function(){ return {}; }).then(function(m){ subs = m; return m; });
+    return loading;
+  }
+  function mark(){
+    if (!subs) return;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-ds]:not([data-done-marked])'), function(el){
+      el.setAttribute('data-done-marked', '1');
+      var s = subs[el.getAttribute('data-ds')]; if (!s) return;
+      var top = el.querySelector('.k-dscard-top, .fr-chips'); if (!top) return;
+      var b = document.createElement('span');
+      if (s.status === 'reviewed') { b.className = 'k-donebadge'; b.innerHTML = '&#10003; Completed &middot; ' + (s.points || 0) + ' pts'; el.classList.add('k-is-done'); }
+      else { b.className = 'k-donebadge k-donebadge-wait'; b.textContent = 'Submitted, in review'; }
+      top.insertBefore(b, top.firstChild);
+    });
+  }
+  window.kojohMarkDone = function(){ load().then(mark); };
+  try {
+    new MutationObserver(function(){
+      if (queued) return; queued = true;
+      requestAnimationFrame(function(){ queued = false; if (document.querySelector('[data-ds]:not([data-done-marked])')) window.kojohMarkDone(); });
+    }).observe(document.body || document.documentElement, { childList: true, subtree: true });
+  } catch (e) {}
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', window.kojohMarkDone); else window.kojohMarkDone();
+})();

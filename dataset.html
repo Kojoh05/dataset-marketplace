@@ -268,6 +268,12 @@
         var subRes = await SUPA.from('challenge_submissions')
           .select('*').eq('license_id', STATE.lic.id).maybeSingle();
         if (!subRes.error) STATE.submission = subRes.data;
+        if (STATE.submission && STATE.submission.status === 'reviewed') {
+          try {
+            var crt = await SUPA.from('practice_certificates').select('code').eq('user_id', STATE.session.user.id).eq('role', STATE.ds.slug).eq('level', 'project').eq('status', 'issued').maybeSingle();
+            if (crt.data) STATE.cert = crt.data.code;
+          } catch (e) {}
+        }
       }
     }
 
@@ -488,12 +494,17 @@
     var done = loadProgress();
     var n = all.filter(function(t){ return done[t.id]; }).length;
     var pct = all.length ? Math.round(100 * n / all.length) : 0;
-    var h = '<div class="k-buy k-buy-owned">';
-    h += '<div class="k-buy-ownedhead">' + icon(I_CHECK, 16) + '<span>In your library</span></div>';
+    var doneOk = STATE.submission && STATE.submission.status === 'reviewed';
+    var h = '<div class="k-buy k-buy-owned' + (doneOk ? ' k-buy-done' : '') + '">';
+    h += doneOk
+      ? '<div class="k-buy-ownedhead k-done-head"><span class="k-done-tick">' + icon(I_CHECK, 14) + '</span><span>Project completed</span></div>'
+        + '<div class="k-done-score"><b>' + esc(STATE.submission.points || 0) + '</b><span>points scored</span></div>'
+      : '<div class="k-buy-ownedhead">' + icon(I_CHECK, 16) + '<span>In your library</span></div>';
     h += '<p class="k-buy-note" style="margin-bottom:0.5rem;">License ' + esc(STATE.lic.license_code) + '. '
       + (STATE.submission ? (STATE.submission.status === 'reviewed' ? 'Reviewed, ' + esc(STATE.submission.points || 0) + ' points.' : 'Submitted, waiting on review.') : n + ' of ' + all.length + ' tasks done.') + '</p>';
     if (!STATE.submission) h += '<div class="k-progline" style="margin-bottom:0.6rem;"><span class="k-progline-bar"><span style="width:' + pct + '%"></span></span><span>' + pct + '%</span></div>';
-    h += '<button class="k-btn k-btn-brand" type="button" data-goto="challenge">' + (STATE.submission ? 'View submission' : (n ? 'Continue the challenge' : 'Start the challenge')) + '</button>';
+    if (STATE.cert) h += '<a class="k-btn k-btn-brand" href="/certificate?id=' + encodeURIComponent(STATE.cert) + '">View your certificate</a>';
+    h += '<button class="k-btn' + (STATE.cert ? '' : ' k-btn-brand') + '" type="button" data-goto="challenge">' + (STATE.submission ? 'View submission' : (n ? 'Continue the challenge' : 'Start the challenge')) + '</button>';
     h += '<button class="k-btn" type="button" data-goto="files">Download files</button>';
     return h + '</div>';
   }
@@ -687,13 +698,14 @@
       h += '<div class="chal-frozen-head">' + icon(I_LOCK, 15)
         + '<span>Submitted, ' + esc(all.length) + ' / ' + esc(all.length) + ' tasks</span>'
         + '<span class="chal-status' + (statusOn ? ' chal-status-reviewed' : '') + '" style="margin-left:auto;">'
-        + (statusOn ? 'Reviewed' : 'Pending review') + '</span></div>';
+        + (statusOn ? '&#10003; Challenge completed' : 'Pending review') + '</span></div>';
       h += '<p class="chal-frozen-row">GitHub repo, <a href="' + esc(s.github_url) + '" target="_blank" rel="noopener">' + esc(s.github_url) + '</a></p>';
       h += '<p class="chal-frozen-row">LinkedIn post, <a href="' + esc(s.linkedin_url) + '" target="_blank" rel="noopener">' + esc(s.linkedin_url) + '</a></p>';
       h += '<p class="chal-frozen-row">Submitted ' + esc(new Date(s.submitted_at).toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'})) + '.</p>';
       if (statusOn) {
         h += '<p class="chal-frozen-row">Points awarded, <span class="chal-points">' + esc(s.points == null ? 0 : s.points) + '</span>'
           + ' &nbsp; <a href="/leaderboard">See the leaderboard</a></p>';
+        if (STATE.cert) h += '<p class="chal-frozen-row"><a class="k-btn k-btn-brand" href="/certificate?id=' + encodeURIComponent(STATE.cert) + '">View your certificate &rarr;</a></p>';
       } else {
         h += '<p class="chal-frozen-row k-sub" style="margin:0.5rem 0 0;">Our team checks your repo and post and awards points from here, '
           + 'no need to do anything else. This page is now locked to how it was when you submitted.</p>';
