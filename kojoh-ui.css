@@ -968,3 +968,23 @@ h2.chal-phase-head{display:flex; align-items:center; justify-content:space-betwe
 .k-filegroup-head span{font-size:0.75rem; color:var(--muted);}
 .k-file-text{display:flex; flex-direction:column; gap:0.1rem; min-width:0;}
 .k-file-desc{font-size:0.72rem; color:var(--muted); font-weight:400;}
+
+/* Download dialog v2: wide, data first, no inner scroll */
+.k-dialog-wide{max-width:min(62rem, 94vw); max-height:94vh; overflow-y:auto; text-align:left; padding:1.75rem 1.75rem 1.4rem;}
+.k-dialog-wide .k-dialog-icon{margin-left:0;}
+.k-dialog-wide .k-dialog-title{text-align:left;}
+.k-dialog-wide .k-dialog-text{text-align:left; margin-bottom:1rem;}
+.k-dialog-wide .k-filelist{max-height:none; overflow:visible;}
+.k-files-grid{display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr); gap:1.25rem; align-items:start;}
+.k-files-grid.k-files-one{grid-template-columns:1fr;}
+.k-files-col{display:flex; flex-direction:column; gap:0.9rem; padding:0.9rem; border:1px solid var(--line); border-radius:0.8rem;}
+.k-files-col-main{border:2px solid var(--brand); background:var(--brand-soft);}
+.k-colhead{font-family:'Space Grotesk',sans-serif; font-size:0.95rem; font-weight:700;}
+.k-file-data{border-color:var(--brand);}
+.k-tag{font-style:normal; font-size:0.62rem; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; background:var(--brand); color:var(--bg); padding:0.1rem 0.45rem; border-radius:999px; margin-left:0.5rem; vertical-align:middle;}
+.k-coachbar{display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; margin-top:1.1rem; padding:0.9rem 1rem; border:2px solid var(--brand); border-radius:0.8rem; background:var(--card);}
+.k-coachbar > div{display:flex; flex-direction:column; gap:0.2rem; max-width:40rem;}
+.k-coachbar b{font-size:0.9rem;}
+.k-coachbar span{font-size:0.8rem; color:var(--muted); line-height:1.5;}
+.k-coachbar .k-coach-msg{color:var(--text); font-weight:600;}
+@media (max-width:760px){ .k-files-grid{grid-template-columns:1fr;} .k-dialog-wide{border-radius:var(--radius) var(--radius) 0 0;} }
