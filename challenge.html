@@ -68,7 +68,7 @@
   }
 
   function isGithubUrl(v){ return /^https:\/\/(www\.)?github\.com\/[^\s/]+\/[^\s/]+/i.test(String(v || '').trim()); }
-  function isLinkedinUrl(v){ return /^https?:\/\/(([a-z]{2,3}\.)?linkedin\.com\/.+|lnkd\.in\/.+)/i.test(String(v || '').trim()); }
+  function isLinkedinUrl(v){ return /^https:\/\/(([a-z]{2,3}\.)?linkedin\.com\/.+|lnkd\.in\/.+)/i.test(String(v || '').trim()); }
 
   function submitBlock(submission, allTasks, checked){
     if (submission) {

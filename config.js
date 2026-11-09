@@ -296,7 +296,7 @@ window.kojohLinkCheck = function(input, kind){
   if (!input) return;
   var re = kind === 'github'
     ? /^https:\/\/(www\.)?github\.com\/[^\s/]+\/[^\s/]+/i
-    : /^https?:\/\/(([a-z]{2,3}\.)?linkedin\.com\/.+|lnkd\.in\/.+)/i;
+    : /^https:\/\/(([a-z]{2,3}\.)?linkedin\.com\/.+|lnkd\.in\/.+)/i;
   var hint = document.createElement('p');
   hint.className = 'chal-submit-hint';
   input.parentNode.appendChild(hint);
