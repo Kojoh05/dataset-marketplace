@@ -236,6 +236,7 @@ window.kojohDsCard = function(d, opts){
   }
   h += '</div>';
   h += '<h3 class="k-dscard-title">' + esc(d.title) + '</h3>';
+  if (window.kojohGivesCert && window.kojohGivesCert(d)) h += window.kojohCertTag();
   h += '<p class="k-dscard-desc">' + esc(d.short_description || '') + '</p>';
   h += '<div class="k-rate" data-rate="' + esc(d.id) + '">' + window.kojohRateHtml(d.id) + '</div>';
   h += '<div class="k-dscard-foot"><span class="k-dscard-price">' + (opts.owned ? 'In your library' : window.kojohMoney(d)) + '</span>';
@@ -545,3 +546,9 @@ window.kojohFriendly = function(msg){
 // Certificates: every paid project, and only these free ones. Keep in sync with supabase/schema-cert-rules.sql.
 window.KOJOH_CERT_FREE = ['returns-eating-profit-free'];
 window.kojohGivesCert = function (d) { return !!d && (!d.is_free || window.KOJOH_CERT_FREE.indexOf(d.slug) > -1); };
+
+// Tagline shown on every project card that gives a certificate.
+window.kojohCertTag = function () {
+  return '<div class="k-certtag"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+    + '<circle cx="12" cy="9" r="6"/><path d="M8.5 14 7 22l5-3 5 3-1.5-8"/></svg>Verified certificate on completion</div>';
+};

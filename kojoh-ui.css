@@ -261,6 +261,8 @@
   font-family:'Space Grotesk',sans-serif; font-size:1.0625rem; font-weight:700;
   line-height:1.35; margin:0;
 }
+.k-certtag{display:inline-flex; align-items:center; gap:0.35rem; align-self:flex-start; font-size:0.75rem; font-weight:600; color:var(--text);
+  background:var(--bg); border:1px solid var(--line); border-radius:999px; padding:0.2rem 0.6rem 0.2rem 0.5rem;}
 .k-dscard-desc{font-size:0.8125rem; color:var(--muted); line-height:1.6; margin:0; flex:1;}
 .k-dscard-foot{
   display:flex; align-items:center; justify-content:space-between;
