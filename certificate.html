@@ -9,6 +9,7 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <title>KOJOH | Certificate</title>
 <meta name="robots" content="noindex">
+<script>(function(){var q=new URLSearchParams(location.search);if(q.get("embed"))document.documentElement.classList.add("cert-embed");})();</script>
 <script src="theme.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -44,6 +45,11 @@
 .c-qr img, .c-qr canvas{width:100% !important; height:100% !important;}
 .c-id{font-size:0.95cqw; letter-spacing:0.1cqw; color:#6b6870;}
 .cert-note{font-size:0.875rem; color:var(--muted); text-align:center; margin-top:1rem;}
+html.cert-embed, html.cert-embed body{background:transparent !important; margin:0 !important; padding:0 !important; overflow:hidden;}
+html.cert-embed .ksb-rail, html.cert-embed .ksb-edge, html.cert-embed .ksb-overlay, html.cert-embed .ksb-mobile-trigger, html.cert-embed .page-header,
+html.cert-embed .cert-tools, html.cert-embed .cert-note, html.cert-embed .k-legal-foot, html.cert-embed footer{display:none !important;}
+html.cert-embed .cert-wrap{max-width:none; margin:0; padding:0;}
+html.cert-embed .cert{border-radius:0; box-shadow:none;}
 @media print{
   @page{size:A4 landscape; margin:0;}
   body{background:#fff !important;}
@@ -109,6 +115,10 @@
       var tools = ((tg.data && tg.data.dataset_tags) || []).map(function (x) { return x.tags; }).filter(function (t) { return t && t.tag_type === 'tool'; }).map(function (t) { return t.name; });
       if (tools.length) document.getElementById('cTools').innerHTML = tools.map(esc).join(' &middot; ');
     } catch (e) {}
+  }
+  if (new URLSearchParams(location.search).get('print')) {
+    var go = function () { setTimeout(function () { window.print(); }, 400); };
+    (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(go);
   }
   document.getElementById('cCopy').onclick = function () { try { navigator.clipboard.writeText(url); this.textContent = 'Copied'; } catch (e) {} };
 })();

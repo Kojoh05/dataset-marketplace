@@ -87,6 +87,13 @@
     </form>
   </section>
 
+  <!-- CERTIFICATES -->
+  <section class="settings-section" id="certificates">
+    <h2 class="settings-section-title">Your certificates</h2>
+    <p class="settings-hint" style="margin:0 0 0.9rem;">Certificates you have earned. Each one has a public link anyone can use to check it.</p>
+    <div class="cert-list" id="certList"><p class="settings-hint">Loading</p></div>
+  </section>
+
   <!-- GOAL -->
   <section class="settings-section" id="goal">
     <h2 class="settings-section-title">Your goal</h2>
@@ -145,6 +152,33 @@
 <script src="config.js"></script>
 <script src="settings.js"></script>
 <script src="forms.js"></script>
+<script>
+(async function () {
+  var host = document.getElementById('certList'); if (!host || !window.kojohSupa) return;
+  var S = window.kojohSupa(), esc = window.kojohEsc;
+  var ses = await S.auth.getSession(); var u = ses.data && ses.data.session && ses.data.session.user;
+  if (!u) { host.innerHTML = '<p class="settings-hint">Log in to see your certificates.</p>'; return; }
+  var r = await S.from('practice_certificates').select('code, role, role_title, level, skipped, score, issued_at, status').eq('user_id', u.id).eq('status', 'issued').order('issued_at', { ascending: false });
+  var rows = r.data || [];
+  if (!rows.length) {
+    host.innerHTML = '<div class="cert-empty"><b>No certificates yet</b><span>Finish a paid project, or the free Returns project, and submit it. Practice levels earn certificates too.</span>'
+      + '<a class="k-btn k-btn-brand" href="/free">See projects</a></div>';
+    return;
+  }
+  var lv = { beginner: 'Beginner', intermediate: 'Intermediate', hard: 'Hard' };
+  host.innerHTML = rows.map(function (c) {
+    var title = c.level === 'project' ? (c.role_title || c.role) : (c.role_title || c.role) + ' Practice, ' + (lv[c.level] || c.level);
+    var url = '/certificate?id=' + encodeURIComponent(c.code);
+    var d = new Date(c.issued_at);
+    var li = 'https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=' + encodeURIComponent(c.level === 'project' ? 'KOJOH Portfolio Project: ' + title : 'KOJOH Practice: ' + title)
+      + '&organizationName=KOJOH&issueYear=' + d.getFullYear() + '&issueMonth=' + (d.getMonth() + 1) + '&certUrl=' + encodeURIComponent('https://www.kojohhi.com' + url) + '&certId=' + c.code;
+    return '<div class="cert-item"><a class="cert-thumb" href="' + url + '" aria-label="Open certificate"><iframe src="' + url + '&embed=1" loading="lazy" tabindex="-1" title="Certificate preview"></iframe></a>'
+      + '<div class="cert-body"><b>' + esc(title) + '</b><span>' + (c.level === 'project' ? 'Portfolio project' : 'Practice') + ' &middot; issued ' + d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + ' &middot; ID ' + esc(c.code) + '</span>'
+      + '<div class="cert-actions"><a class="k-btn" href="' + url + '">View</a><a class="k-btn k-btn-brand" href="' + url + '&print=1" target="_blank" rel="noopener">Download PDF</a>'
+      + '<a class="k-btn" href="' + li + '" target="_blank" rel="noopener">Add to LinkedIn</a></div></div></div>';
+  }).join('');
+})();
+</script>
 <script>
 (function(){
   var SUPA = window.kojohSupa && window.kojohSupa(), box = document.getElementById('goalPills'), note = document.getElementById('goalNote');
