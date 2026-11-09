@@ -17,6 +17,7 @@ Key facts:
 - [Data science project ideas, with the datasets to build them](https://www.kojohhi.com/data-science-project-ideas)
 - [SQL project ideas, with the datasets to build them](https://www.kojohhi.com/sql-project-ideas)
 - [Power BI and Excel project ideas, with the datasets to build them](https://www.kojohhi.com/power-bi-project-ideas)
+- [Messy datasets for data cleaning practice](https://www.kojohhi.com/messy-datasets-for-data-cleaning-practice)
 
 ## Start here
 - [All projects](https://www.kojohhi.com/projects)

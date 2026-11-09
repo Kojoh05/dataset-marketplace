@@ -7,7 +7,14 @@ URL: https://www.kojohhi.com/projects/late-again-last-mile-fy2526
 Track: Business / Ops | Level: hard | Price: Rs 249 | Tools: Python, SQL, Excel | Good for: Data Analyst, Operations Analyst
 Dataset: 14,750 rows, 41 columns | Tasks: 42 | Time: about 15 to 25 hours
 
-A year of messy dispatch exports from a fictional regional courier serving the small cities of UP, Bihar, Jharkhand and MP: 14,560 shipments, 41 columns, 48 riders, 12 hubs, 6 shippers. Clean it, then settle the argument operations can't: why the on-time number is wrong, why a rider with perfect first attempts is the network's biggest problem, and which hub, which day and which parcel size are quietly costing the business its largest client.
+In short: A logistics analytics project on a year of dispatch data from a regional courier in tier-2 India: 14,750 rows and 41 columns. The on-time number on the dashboard is wrong, and the biggest client is unhappy. You compute on-time delivery properly, find what sits behind the best-looking riders and show which shipments lose money.
+
+What is messy in the data:
+- About 190 shipments entered twice with the same AWB number
+- Six date columns in five formats; a few deliveries dated before pickup
+- The month label blank on about 40% of rows
+- Each shipper under about 5 spellings; pincodes as 273001, 273001.0, 273 001
+- Weights as 0.5, 0.50 kg, 500 g, 500gm, and some zero weights
 
 Project ideas it covers: Last-mile delivery performance; Measuring on-time delivery correctly; Rider and hub performance; COD vs prepaid failures and RTO; Profitability by weight, zone and service.
 Interview questions it prepares you for: How should on-time delivery be measured, and how can it be gamed? How would you find a rider whose good numbers hide a problem? Which shipments lose money and how did you find them?
@@ -19,7 +26,14 @@ URL: https://www.kojohhi.com/projects/slow-boat-from-ningbo-fy2526
 Track: Business / Ops | Level: hard | Price: Rs 449 | Tools: Python, SQL, Excel, Power BI | Good for: Business Analyst, Supply Chain Analyst, Operations Analyst, Data Analyst
 Dataset: 24,392 rows, 36 columns | Tasks: 42 | Time: about 15 to 25 hours
 
-Track 470 China import POs across six messy files: containers on water, overdue documents, pending payments and the cash plan, as of your own report date.
+In short: A supply chain project on 470 China import purchase orders across six messy files: 24,392 rows. The head of supply chain needs to know where every container is, which documents and payments are overdue and how much cash is needed. You rebuild the picture as of your own report date and deliver a tracker, chase lists and a cash plan.
+
+What is messy in the data:
+- Purchase orders revised as 260411, 260411.R, 260411.R.1; only the latest counts
+- Up to seven spellings per supplier factory; ports written four ways
+- Money in USD and INR text in six formats; five date formats including Excel serials
+- Contact name, email and phone crammed into one cell in four layouts
+- Product code blank on about 6% and line value blank on about 7% of rows
 
 Project ideas it covers: Import shipment tracking; Supplier delay analysis; Documents and payments chase list; Cash flow planning for imports; As-of-date reporting.
 Interview questions it prepares you for: How do you build a report as it looked on a past date? How would you rank suppliers on delivery reliability? What would you put on a procurement control tower?
@@ -31,7 +45,15 @@ URL: https://www.kojohhi.com/projects/kirana-store-sales-free
 Track: Data Analyst | Level: beginner | Price: free | Tools: Python, SQL, Excel, Power BI | Good for: Data Analyst, Business Analyst
 Dataset: 9,629 rows, 11 columns | Tasks: 18 | Time: about 6 to 10 hours
 
-A free first project: a year of real-looking bills from a Lucknow kirana store. Clean it, find what makes money and how much is stuck in udhaar.
+In short: A free beginner project on a year of bills from a Lucknow kirana store: 9,629 rows across three files. The owner wants to know which items really make money, when the shop is busiest and how much is stuck in customer credit (udhaar). You clean the bills in Python, answer the questions in SQL and build a two page dashboard.
+
+What is messy in the data:
+- Item names typed by hand in several spellings each (case, spacing and short forms), matched to an item master
+- Loose items sold in mixed units: 0.5 kg, 500 gm, 2 pcs
+- Prices as text: 54, ₹54, Rs.54, 54.00
+- Three date formats and two time formats (24-hour and AM/PM)
+- About 2% of rows are exact duplicates (double-printed bills); returns carry negative quantities
+- Amount blank on about 5% of rows; customer names like Gupta ji and first names only
 
 Project ideas it covers: Retail sales analysis for a small shop; Profit vs revenue by product; Customer credit (udhaar) tracking; Busiest hours and staffing analysis; Festival (Diwali) sales impact.
 Interview questions it prepares you for: Which products sell a lot but make little profit, and how did you find them? How did you deal with item names typed in many different ways? How would you decide when a shop needs a second cashier?
@@ -43,7 +65,15 @@ URL: https://www.kojohhi.com/projects/the-quiet-quitters-ott-churn
 Track: Data Scientist | Level: hard | Price: Rs 249 | Tools: Python, SQL, Machine Learning, Power BI | Good for: Data Scientist, Data Analyst
 Dataset: 223,838 rows, 26 columns | Tasks: 42 | Time: about 15 to 25 hours
 
-Predict who leaves a streaming app in the next 90 days from four messy exports, without falling for the leaky columns, and turn it into a call list worth rupees.
+In short: A data science project on four messy exports from an Indian streaming app: 223,838 rows. The business wants to know who will cancel and which saves are worth paying for. You build an honest churn label, leak-free features and a model tested on a later time window, then turn the scores into a call list worth rupees.
+
+What is messy in the data:
+- Customer IDs as CP100123, cp100123, CP-100123 and with leading spaces
+- Five date formats including Excel serials; ages like 24 yrs, 999 or blank
+- Plans under about 12 spellings and billing cycles under about 11
+- Watch time as 12.5, 12.5 hrs or 750 min
+- Ticket categories under about 22 spellings; satisfaction score only 35% filled
+- Columns that describe what happened after the prediction date (leakage)
 
 Project ideas it covers: Customer churn prediction; Leak-free feature engineering; Voluntary vs involuntary churn; Time-based model validation; Turning model scores into a business call list.
 Interview questions it prepares you for: How do you make sure a churn model has no data leakage? Why use a time-based split instead of a random split? How would you turn churn scores into a decision with a rupee value?
@@ -55,7 +85,15 @@ URL: https://www.kojohhi.com/projects/diwali-discount-trap-fy2526
 Track: Data Analyst | Level: hard | Price: Rs 249 | Tools: Python, SQL, Excel, Power BI | Good for: Data Analyst
 Dataset: 14,891 rows, 41 columns | Tasks: 42 | Time: about 15 to 25 hours
 
-A year of messy order exports from a fictional Indian appliance brand selling on Amazon, Flipkart, Meesho and its own site: 14,701 order lines, 41 columns, 20 listing managers, 40 SKUs. Clean it, then settle the argument management can't: why the biggest sales month lost money, which discount depth stops paying, and why the customers who paid full price were worth several times more than the ones who came in on sale.
+In short: An e-commerce analytics project on a year of marketplace orders from an Indian appliance brand: 14,891 rows and 41 columns. The biggest sales month lost money and nobody can say why. You clean the orders, compute contribution margin and find the discount level where extra sales stop paying.
+
+What is messy in the data:
+- About 190 orders pasted in twice with the same Order ID
+- Ten money columns in several text formats and five date formats including Excel serials
+- The month label blank on about 40% of rows
+- Each of 20 listing managers under about 8 name spellings; employee code blank on about 5%
+- Marketplaces and categories under about 5 spellings each; discount as 40%, 0.4000, 40.0 %
+- Order status under about 25 spellings
 
 Project ideas it covers: E-commerce discount and profitability analysis; Contribution margin by month and category; Returns, RTO and COD leakage; Marketing channel ROAS; Listing manager performance ranking.
 Interview questions it prepares you for: Why can the biggest revenue month lose money? How would you find the discount level where extra sales stop paying? How do you rank sales staff fairly: by revenue or by contribution?
@@ -67,7 +105,14 @@ URL: https://www.kojohhi.com/projects/tata-delhi-sales-fy2526
 Track: Data Analyst | Level: hard | Price: Rs 449 | Tools: Python, SQL | Good for: Data Analyst
 Dataset: 14,735 rows, 41 columns | Tasks: 41 | Time: about 15 to 25 hours
 
-A year of hand-typed ERP entries from an 8-branch car dealer group in Delhi. Clean it, then settle the argument management can't: who really performed, what December's record month actually cost, and why the customers who refused last year's stock were the most profitable buyers of the year.
+In short: A sales analytics project on a year of hand-typed ERP entries from an 8-branch car dealer group in Delhi: 14,735 rows and 41 columns. Management cannot agree who really performed or what the record month cost. You clean the entries, rank salespeople fairly and write the recommendation that settles the bonus argument.
+
+What is messy in the data:
+- About 190 deals entered twice with the same Deal ID
+- Booking dates in five formats including Excel serials and month names only
+- Each of 56 salespeople under about 8 name spellings
+- Employee codes blank on about 5%, some lower case, some mistyped (EMP01023)
+- Money stored as text in several formats
 
 Project ideas it covers: Sales performance and incentive analysis; Discounts and margin by month; Salesperson identity cleaning; Branch and model performance; Old stock vs new stock buyers.
 Interview questions it prepares you for: How do you clean salesperson names typed eight different ways? Why can a record sales month be a bad month? How would you rank salespeople for a bonus?
@@ -79,7 +124,13 @@ URL: https://www.kojohhi.com/projects/stockout-saturdays-quick-commerce
 Track: Data Scientist | Level: hard | Price: Rs 249 | Tools: Python, SQL, Machine Learning, Power BI | Good for: Data Scientist, Supply Chain Analyst, Data Analyst
 Dataset: 93,370 rows, 10 columns | Tasks: 42 | Time: about 15 to 25 hours
 
-Forecast demand for a ten minute grocery app when sales hide demand: 92,000 days of store x SKU data where Saturday looks slow only because the shelves are empty.
+In short: A data science project on 93,370 store-SKU days from a quick commerce (10-minute grocery) app. Sales are capped on days the shelves run empty, so the busiest days can look slow. You estimate the real demand, build a forecast that beats a simple baseline and show what it changes for the stores.
+
+What is messy in the data:
+- Units sold capped on stockout days, so sales are not demand
+- Three date formats; store codes as BLR-KOR and BLR_KOR
+- Units as 12 or 12.0; promo flags as Y, Yes, N or blank
+- Closing stock blank on about 7% and hours in stock blank on about 10% of rows
 
 Project ideas it covers: Demand forecasting with stockouts; Censored demand estimation; Festival, promo and event effects; Forecast accuracy (WAPE) vs a baseline; Inventory planning recommendations.
 Interview questions it prepares you for: Why is sales data not the same as demand, and how did you adjust for it? How do you evaluate a forecast fairly? What features would you use for daily store-level demand?
@@ -91,7 +142,15 @@ URL: https://www.kojohhi.com/projects/approved-only-nbfc-credit-risk
 Track: Data Scientist | Level: hard | Price: Rs 449 | Tools: Python, SQL, Machine Learning, Statistics | Good for: Data Scientist, Data Analyst
 Dataset: 180,467 rows, 18 columns | Tasks: 42 | Time: about 15 to 25 hours
 
-Build a credit scoring model for an Indian NBFC where only approved loans have outcomes, recent loans have not had time to default and the loan file leaks the answer.
+In short: A data science project on 180,467 rows from an Indian NBFC's personal loan book. Only approved loans have outcomes, recent loans have not had time to go bad and some columns leak the answer. You build a credit scoring model the honest way, calibrate it and choose an approval cut-off with real profit numbers.
+
+What is messy in the data:
+- Income in monthly and annual forms: 45k, 5.4 L p.a., Rs 45,000/month, 5,40,000 annual
+- Bureau score NH, -1, 000 or blank all mean no credit history
+- Employment type under about 20 spellings
+- Resubmitted applications (IDs ending in R) and five date formats
+- Columns known only after the decision, which leak the answer
+- Outcomes only for approved loans (selection bias)
 
 Project ideas it covers: Credit scoring and default prediction; Selection bias and reject inference; Vintage analysis; Model calibration; Approval cut-off with profit economics.
 Interview questions it prepares you for: What is selection bias in credit data and how does it affect your model? How do you choose an approval cut-off? How do you check whether model scores are calibrated?
@@ -103,7 +162,14 @@ URL: https://www.kojohhi.com/projects/the-funnel-that-leaked-free
 Track: Product Analyst | Level: beginner | Price: free | Tools: Python, SQL, Statistics | Good for: Product Analyst, Data Analyst
 Dataset: 41,268 rows, 11 columns | Tasks: 19 | Time: about 6 to 10 hours
 
-A free product analytics project: an onboarding funnel and an A/B test where the dashboard says the new screen lost. Find out what really happened.
+In short: A free product analytics project on 41,268 raw app events from a savings app's six-step onboarding funnel and an A/B test. The dashboard says the new screen lost, and you find out what really happened. You clean the events in Python, rebuild the funnel and the test in SQL, and write an experiment readout.
+
+What is messy in the data:
+- Six funnel steps written under about 12 event-name spellings
+- Two timestamp styles: Android in UTC with Z, iOS in India time with no zone
+- About 1,556 retried duplicate events sent seconds after the original
+- Internal test accounts (test_qa...) mixed in with real users
+- Variants written as A/B and as control/treatment
 
 Project ideas it covers: Onboarding funnel analysis; A/B test analysis with real pitfalls; Event data cleaning; Conversion by platform and source; Experiment readout for a product manager.
 Interview questions it prepares you for: What would you check before trusting an A/B test result? How do you build a funnel from raw event logs? Explain Simpson's paradox with an example you found.
@@ -115,7 +181,14 @@ URL: https://www.kojohhi.com/projects/spares-never-arrive-fy2526
 Track: Business / Ops | Level: hard | Price: Rs 249 | Tools: Python, SQL, Excel, Power BI | Good for: Operations Analyst, Business Analyst, Data Analyst
 Dataset: 26,746 rows, 17 columns | Tasks: 40 | Time: about 15 to 25 hours
 
-Rebuild the true turnaround time for 17,000 appliance service tickets and find whether the days go to the warehouse, the courier or the service centre.
+In short: An operations analytics project on about 17,000 appliance service tickets and the spare part orders behind them: 26,746 rows. Reported repair times look fine, but customers say otherwise. You rebuild the true turnaround time and find whether delays come from the warehouse, the courier or the service centre.
+
+What is messy in the data:
+- About 1.5% of service tickets are duplicates
+- Five date formats including Excel serials
+- Customer names in about eight spellings each; products like MIXER GRINDER, MixerGrinder, Mixer
+- Ticket status under about 12 spellings; some centres close tickets before the repair
+- Repeat complaints only mentioned in free-text remarks; ticket IDs as SR-2500001 and SR2500001
 
 Project ideas it covers: Service turnaround time (TAT) analysis; Spare parts delay root cause; Service centre performance ranking; Repeat complaint detection; Customer rating vs delay.
 Interview questions it prepares you for: How would you measure turnaround time honestly when tickets are closed early? How do you rank service centres fairly? How did you find repeat complaints in free text?
@@ -127,7 +200,14 @@ URL: https://www.kojohhi.com/projects/where-did-my-salary-go-fy2526
 Track: Data Analyst | Level: beginner | Price: Rs 99 | Tools: Python, SQL, Excel, Power BI | Good for: Data Analyst, Business Analyst
 Dataset: 16,448 rows, 15 columns | Tasks: 42 | Time: about 6 to 10 hours
 
-Twelve months of real-looking bank statements from 24 first-jobbers across five banks. Find where the salary goes, the forgotten subscriptions and the double charges.
+In short: A beginner data analyst project on 12 months of bank and UPI statements from 24 first-jobbers across five banks: 16,448 rows. The question is where each person's salary goes, which subscriptions they forgot and which charges hit twice. You parse five bank formats, build trustworthy categories and show each person their money.
+
+What is messy in the data:
+- Five banks, five date formats and five narration layouts in one export
+- Debit and credit in separate columns for some banks, one signed amount with (Dr)/(Cr) for others
+- 544 duplicate rows from overlapping monthly downloads
+- The app's own category blank on about 22% of rows and wrong on about 1 in 10
+- Merchants hidden inside narrations and UPI IDs (swiggy@ybl)
 
 Project ideas it covers: Personal finance and spending analysis; Parsing bank statement narrations; Subscription and recurring payment detection; Double charge detection; Savings rate dashboard.
 Interview questions it prepares you for: How did you turn messy bank narrations into merchants and categories? How do you tell an export duplicate from a real double charge? What would you show a user to help them save more?
@@ -139,7 +219,15 @@ URL: https://www.kojohhi.com/projects/aai-tiffin-service-free
 Track: Business / Ops | Level: beginner | Price: free | Tools: Excel, Power BI | Good for: Business Analyst, Data Analyst, Operations Analyst
 Dataset: 25,775 rows, 24 columns | Tasks: 18 | Time: about 6 to 10 hours
 
-A free Excel and Power BI project: a year of a Pune home tiffin service's order sheet, typed by three people. Clean it, find what makes money and chase the dues.
+In short: A free Excel and Power BI project on a year of orders from a Pune home tiffin service: 25,775 rows typed into one sheet by three people. The owner wants to know which plans and areas make money, whether a price rise drove customers away and who owes her. You clean the sheet with lookups, answer the questions with PivotTables and SUMIFS, and build a two page Power BI dashboard.
+
+What is messy in the data:
+- Four date styles plus Excel serial numbers like 45762
+- Plans written as Veg Basic, Basic, VB; areas like Hinjewadi, Hinjawadi, Hinjewadi Ph 1
+- About 2.5% of rows are double entries typed again with a new ID
+- Prices as 90, ₹90, Rs 90, 90/-, blank on about 3% of rows
+- Phones as 9876543210, +91 9876543210, 98765 43210 or blank
+- Old prices still typed for weeks after a price rise
 
 Project ideas it covers: Small business sales analysis in Excel; Customer dues and collections tracker; Price increase impact analysis; Area and plan profitability; Power BI dashboard for a small business.
 Interview questions it prepares you for: How did you clean dates typed in four different styles in Excel? How would you measure whether a price increase lost customers? Walk me through a SUMIFS you built and why.
@@ -151,7 +239,14 @@ URL: https://www.kojohhi.com/projects/migration-lost-students-free
 Track: Data Engineer | Level: beginner | Price: free | Tools: SQL, Data Quality, Data Engineering | Good for: Data Engineer, Quality Analyst, Data Analyst
 Dataset: 9,648 rows, 34 columns | Tasks: 18 | Time: about 6 to 10 hours
 
-A free SQL and data quality project: a coaching institute moved to a new app and the numbers stopped matching. Reconcile both systems, find every problem and write the checks.
+In short: A free SQL and data quality project on 9,648 rows from a Jaipur coaching institute that moved its students and fee receipts to a new app. Students went missing, some were created twice and the rupee totals stopped matching. You reconcile both systems in SQL, put a number on every problem and write the data quality checks that would have caught them.
+
+What is messy in the data:
+- The same student keyed as DJ/2025/0123 in one system and DJ-2025-123 in the other
+- The legacy roll number blank on about 6% of new-app records
+- Some students missing from the new app and some created twice
+- Money in rupees on one side and paise on the other, with one batch saved 100 times too small
+- Names in capitals on one side, title case (sometimes surname first) on the other
 
 Project ideas it covers: Data migration reconciliation; Writing data quality checks in SQL; Finding duplicates and missing records; Unit and format bugs in money data; Incident write-up for a data issue.
 Interview questions it prepares you for: How would you reconcile two systems that should hold the same data? Name five data quality checks you would run every night and why. How do you match records when the key was reformatted?
