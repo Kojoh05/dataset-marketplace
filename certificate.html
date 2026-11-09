@@ -12,7 +12,7 @@
 <script src="theme.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Pinyon+Script&family=Great+Vibes&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="pages.css">
 <link rel="stylesheet" href="nav.css">
@@ -21,30 +21,30 @@
 <style>
 .cert-wrap{max-width:62rem; margin:0 auto 4rem; padding:0 1.25rem;}
 .cert-tools{display:flex; gap:0.5rem; justify-content:flex-end; flex-wrap:wrap; margin:0 0 1rem;}
-.cert{--acc:#8DB89A; position:relative; aspect-ratio:297/210; width:100%; background:#F4F1EA center/cover no-repeat; color:#1C1A1E;
-  border-radius:6px; box-shadow:0 10px 40px rgba(0,0,0,0.12); overflow:hidden; container-type:inline-size;}
-.cert.lv-intermediate{--acc:#8BB3D9;} .cert.lv-hard{--acc:#D98B5F;} .cert.lv-project{--acc:#C9A44C;}
-.cert.plain::before{content:''; position:absolute; inset:3.4cqw; border:0.25cqw solid var(--acc); outline:0.12cqw solid #1C1A1E; outline-offset:0.7cqw; border-radius:0.4cqw; pointer-events:none;}
-.cert.plain::after{content:''; position:absolute; inset:0; background-image:linear-gradient(rgba(28,26,30,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(28,26,30,0.035) 1px, transparent 1px); background-size:3cqw 3cqw; pointer-events:none;}
-.cert-in{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; text-align:center; padding:7cqw 9cqw 0; z-index:1;}
-.c-brand{font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:4.2cqw; letter-spacing:0.5cqw;}
-.c-kind{font-size:1.25cqw; letter-spacing:0.45cqw; text-transform:uppercase; margin-top:0.6cqw;}
-.cert.has-art .c-brand, .cert.has-art .c-kind{visibility:hidden;}
-.c-pre{font-size:1.5cqw; color:#5d5a55; margin-top:5.2cqw;}
-.c-name{font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:5.2cqw; line-height:1.1; margin:1.2cqw 0 1.4cqw; border-bottom:0.15cqw solid var(--acc); padding:0 2cqw 1cqw;}
-.c-what{font-size:1.7cqw; line-height:1.5; max-width:62cqw;}
-.c-what b{font-weight:600;}
-.c-score{margin-top:2cqw; font-family:'Space Grotesk', sans-serif; font-size:2.4cqw; font-weight:700;}
-.c-score small{display:block; font-family:'IBM Plex Sans', sans-serif; font-size:1.1cqw; font-weight:500; color:#5d5a55; letter-spacing:0.15cqw; text-transform:uppercase;}
-.c-foot{position:absolute; left:8cqw; right:8cqw; bottom:6.5cqw; display:flex; justify-content:space-between; align-items:flex-end; z-index:1;}
-.c-meta{text-align:left; font-size:1.15cqw; line-height:1.7;}
-.c-meta b{display:block; font-size:0.95cqw; letter-spacing:0.12cqw; text-transform:uppercase; color:#5d5a55; font-weight:600;}
-.c-qr{width:9cqw; height:9cqw; background:#fff; padding:0.6cqw; border-radius:0.4cqw;}
+.cert{--acc:#C9A44C; --ink:#F4F1EA; --dim:rgba(244,241,234,0.62); position:relative; aspect-ratio:297/210; width:100%;
+  background:radial-gradient(120% 90% at 85% 15%, #1f1d24 0%, #0d0c10 60%); color:var(--ink); border-radius:10px;
+  box-shadow:0 14px 48px rgba(0,0,0,0.28); overflow:hidden; container-type:inline-size; font-family:'IBM Plex Sans', sans-serif;}
+.cert.lv-beginner{--acc:#8DB89A;} .cert.lv-intermediate{--acc:#8BB3D9;} .cert.lv-hard{--acc:#D98B5F;} .cert.lv-project{--acc:#C9A44C;}
+.c-waves{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; opacity:1;}
+.c-frame{position:absolute; inset:4.2cqw; border:0.1cqw solid color-mix(in srgb, var(--acc) 55%, transparent); border-radius:0.6cqw; pointer-events:none;}
+.c-frame::before{content:''; position:absolute; inset:-1.4cqw; border:0.08cqw solid rgba(244,241,234,0.12); border-radius:1cqw;}
+.c-no{position:absolute; top:2.3cqw; right:5.6cqw; font-size:0.85cqw; color:var(--dim); letter-spacing:0.05cqw;}
+.cert-in{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; text-align:center; padding:7.2cqw 10cqw 0; z-index:1;}
+.c-logo{height:6.2cqw; width:auto;}
+.c-kind{font-family:'Pinyon Script', 'Great Vibes', cursive; font-size:4.2cqw; line-height:1; margin-top:1.6cqw; color:var(--ink);}
+.c-title{font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:3.5cqw; line-height:1.15; margin-top:1.4cqw; max-width:74cqw;}
+.c-rule{width:46cqw; height:0.1cqw; background:linear-gradient(90deg, transparent, var(--acc), transparent); margin:2cqw 0 1.6cqw;}
+.c-pre{font-size:1.35cqw; color:var(--dim);}
+.c-name{font-family:'Great Vibes', 'Pinyon Script', cursive; font-size:6.4cqw; line-height:1.15; color:var(--acc); margin:0.6cqw 0 0.4cqw;}
+.c-what{font-size:1.4cqw; line-height:1.6; max-width:58cqw; color:var(--dim);}
+.c-what b{color:var(--ink); font-weight:600;}
+.c-row{display:flex; gap:9cqw; justify-content:center; margin-top:3.2cqw;}
+.c-cell{min-width:16cqw; border-top:0.1cqw solid rgba(244,241,234,0.25); padding-top:0.8cqw; font-size:1.25cqw;}
+.c-cell small{display:block; font-size:0.95cqw; color:var(--dim); letter-spacing:0.12cqw; text-transform:uppercase; margin-bottom:0.3cqw;}
+.c-sig{font-family:'Great Vibes', cursive; font-size:2.8cqw; line-height:1; color:var(--acc); margin-bottom:0.2cqw;}
+.c-verify{position:absolute; left:5.6cqw; bottom:2.1cqw; font-size:0.9cqw; color:var(--dim); z-index:1;}
+.c-qr{position:absolute; right:6.2cqw; bottom:6.4cqw; width:7.2cqw; height:7.2cqw; background:#F4F1EA; padding:0.45cqw; border-radius:0.4cqw; z-index:1;}
 .c-qr img, .c-qr canvas{width:100% !important; height:100% !important;}
-.c-sign{text-align:center; font-size:1.1cqw;}
-.c-seal{width:8cqw; height:8cqw; border-radius:50%; border:0.35cqw solid var(--acc); display:grid; place-items:center; margin:0 auto 0.8cqw; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:1.05cqw; letter-spacing:0.2cqw; color:var(--acc);}
-.cert.has-art .c-seal{visibility:hidden;}
-.c-sign span{display:block; border-top:0.12cqw solid #1C1A1E; padding-top:0.5cqw; min-width:16cqw;}
 .cert-note{font-size:0.875rem; color:var(--muted); text-align:center; margin-top:1rem;}
 @media print{
   @page{size:A4 landscape; margin:0;}
@@ -63,6 +63,15 @@
 <script src="config.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
+(function () {
+  // flowing line background, drawn once
+  var paths = '';
+  for (var i = 0; i < 26; i++) {
+    var y = 120 + i * 9, a = 60 + i * 3;
+    paths += '<path d="M -20 ' + (y + 140) + ' C 260 ' + (y - a) + ', 520 ' + (y + 240 - a) + ', 760 ' + (y + 40) + ' S 1100 ' + (y - 120) + ', 1220 ' + (y + 60) + '" fill="none" stroke="rgba(244,241,234,' + (0.07 + (i % 5) * 0.02).toFixed(3) + ')" stroke-width="1"/>';
+  }
+  window.KOJOH_WAVES = '<svg class="c-waves" viewBox="0 0 1188 840" preserveAspectRatio="none" aria-hidden="true">' + paths + '</svg>';
+})();
 (async function () {
   var app = document.getElementById('certApp'), esc = window.kojohEsc;
   var code = (new URLSearchParams(location.search).get('id') || '').trim().toUpperCase();
@@ -73,26 +82,29 @@
   var c = r.data, isProject = c.level === 'project', lvName = { beginner: 'Beginner', intermediate: 'Intermediate', hard: 'Hard', project: 'Portfolio project' }[c.level] || c.level;
   var role = c.role_title || c.role.replace(/-/g, ' ').replace(/\b\w/g, function (x) { return x.toUpperCase(); });
   var url = 'https://www.kojohhi.com/certificate?id=' + c.code;
-  document.title = 'KOJOH | ' + c.name + ', ' + role + (isProject ? '' : ' ' + lvName);
+  var issued = new Date(c.issued_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  var title = isProject ? role : role + ' Practice, ' + lvName + ' Level';
+  var what = isProject
+    ? 'has successfully completed the KOJOH portfolio project: cleaning the raw data, answering the business questions, building the dashboard and writing the recommendation, with the work <b>reviewed by the KOJOH team</b>.'
+    : (c.skipped ? 'has unlocked the <b>' + esc(lvName) + ' level</b> of KOJOH Practice for <b>' + esc(role) + '</b>.'
+                 : 'has successfully completed the <b>' + esc(lvName) + ' level</b> of KOJOH Practice for <b>' + esc(role) + '</b>, solving real business questions on a full case project with a final score of <b>' + c.score + '%</b>.');
+  document.title = 'KOJOH | ' + c.name + ', ' + title;
   app.innerHTML = '<div class="cert-tools"><button class="k-btn" type="button" id="cCopy">Copy link</button>'
     + '<a class="k-btn" target="_blank" rel="noopener" href="https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=' + encodeURIComponent(isProject ? 'KOJOH Portfolio Project: ' + role : 'KOJOH Practice: ' + role + ', ' + lvName) + '&organizationName=KOJOH&issueYear=' + new Date(c.issued_at).getFullYear() + '&issueMonth=' + (new Date(c.issued_at).getMonth() + 1) + '&certUrl=' + encodeURIComponent(url) + '&certId=' + c.code + '">Add to LinkedIn</a>'
     + '<button class="k-btn k-btn-brand" type="button" onclick="window.print()">Download PDF</button></div>'
-    + '<div class="cert plain lv-' + esc(c.level) + '" id="cert"><div class="cert-in">'
-    + '<div class="c-brand">KOJOH</div><div class="c-kind">Certificate of completion</div>'
-    + '<div class="c-pre">This certifies that</div><div class="c-name">' + esc(c.name) + '</div>'
-    + (isProject
-      ? '<div class="c-what">has completed the KOJOH portfolio project <b>' + esc(role) + '</b>, with the work reviewed by the KOJOH team.</div><div class="c-score"><small>Reviewed project</small></div>'
-      : '<div class="c-what">' + (c.skipped ? 'has unlocked the' : 'has completed the') + ' <b>' + esc(lvName) + ' level</b> of KOJOH Practice for <b>' + esc(role) + '</b>'
-        + (c.skipped ? '.' : ', solving real business questions on a full case project.') + '</div>'
-        + (c.skipped ? '<div class="c-score"><small>Level unlocked</small></div>' : '<div class="c-score">' + c.score + '%<small>Final score</small></div>'))
-    + '</div><div class="c-foot"><div class="c-meta"><b>Issued</b>' + new Date(c.issued_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
-    + '<b style="margin-top:0.6cqw">Certificate ID</b>' + esc(c.code) + '<br>kojohhi.com/certificate</div>'
-    + '<div class="c-qr" id="cQr"></div><div class="c-sign"><div class="c-seal">VERIFIED</div><span>Founder, KOJOH</span></div></div></div>'
+    + '<div class="cert lv-' + esc(c.level) + '" id="cert">' + window.KOJOH_WAVES + '<div class="c-frame"></div>'
+    + '<div class="c-no">Certificate No: ' + esc(c.code) + '</div>'
+    + '<div class="cert-in"><img class="c-logo" src="/assets/cert/kojoh-wordmark-light.png" alt="KOJOH">'
+    + '<div class="c-kind">Certificate of Completion</div>'
+    + '<div class="c-title">' + esc(title) + '</div><div class="c-rule"></div>'
+    + '<div class="c-pre">This certificate acknowledges that</div><div class="c-name">' + esc(c.name) + '</div>'
+    + '<div class="c-what">' + what + '</div>'
+    + '<div class="c-row"><div class="c-cell"><small>Issue date</small>' + issued + '</div>'
+    + '<div class="c-cell"><div class="c-sig">Danzai</div><small style="margin:0">Founder, KOJOH</small></div></div></div>'
+    + '<div class="c-qr" id="cQr"></div>'
+    + '<div class="c-verify">Verify at kojohhi.com/certificate?id=' + esc(c.code) + '</div></div>'
     + '<p class="cert-note">Anyone can verify this certificate at ' + esc(url) + '</p>';
-  try { new QRCode(document.getElementById('cQr'), { text: url, width: 256, height: 256, correctLevel: QRCode.CorrectLevel.M }); } catch (e) {}
-  var art = new Image();
-  art.onload = function () { var el = document.getElementById('cert'); el.style.backgroundImage = 'url(' + art.src + ')'; el.classList.remove('plain'); el.classList.add('has-art'); };
-  art.src = '/assets/cert/' + c.level + '.png';
+  try { new QRCode(document.getElementById('cQr'), { text: url, width: 256, height: 256, colorDark: '#0d0c10', colorLight: '#F4F1EA', correctLevel: QRCode.CorrectLevel.M }); } catch (e) {}
   document.getElementById('cCopy').onclick = function () { try { navigator.clipboard.writeText(url); this.textContent = 'Copied'; } catch (e) {} };
 })();
 </script>
