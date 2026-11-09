@@ -1,4 +1,4 @@
-const CACHE = 'kojoh-v57';
+const CACHE = 'kojoh-v58';
 const ASSETS = [
   '/',
   '/manifest.json',
@@ -23,16 +23,28 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  if(e.request.method !== 'GET') return;
-  e.respondWith(
-    caches.match(e.request).then(cached => {
-      const network = fetch(e.request).then(res => {
-        if(res && res.status === 200 && !res.redirected){
-          const clone = res.clone();
-          caches.open(CACHE).then(c => c.put(e.request, clone));
-        }
+  const req = e.request;
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  if (url.origin !== location.origin) return;               // Supabase, fonts, CDNs: straight to the network
+  const fresh = req.mode === 'navigate' || /\.(html|js|css|json)$/.test(url.pathname) || !/\.[a-z0-9]+$/i.test(url.pathname);
+  if (fresh) {
+    // Pages, scripts and styles: always try the network first so a deploy shows up on the next load.
+    e.respondWith(
+      fetch(req).then(res => {
+        if (res && res.status === 200 && !res.redirected) { const c = res.clone(); caches.open(CACHE).then(x => x.put(req, c)); }
         return res;
-      });
+      }).catch(() => caches.match(req).then(r => r || caches.match('/')))
+    );
+    return;
+  }
+  // Images and fonts: cache first, refresh in the background.
+  e.respondWith(
+    caches.match(req).then(cached => {
+      const network = fetch(req).then(res => {
+        if (res && res.status === 200 && !res.redirected) { const c = res.clone(); caches.open(CACHE).then(x => x.put(req, c)); }
+        return res;
+      }).catch(() => cached);
       return cached || network;
     })
   );
