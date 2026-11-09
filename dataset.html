@@ -842,8 +842,6 @@
   // ---------------------------------------------------------------- the AI prompt
   function buildPrompt(){
     var ds = STATE.ds;
-    if (ds.ai_prompt && ds.ai_prompt.trim()) return ds.ai_prompt.trim();
-
     var preview = ds.preview_rows || {};
     var L = [];
     L.push('I am working through a hands on data project called "' + ds.title + '".');
@@ -852,8 +850,8 @@
     L.push(String(ds.long_description || ds.short_description || '').replace(/\n{2,}/g, '\n'));
     L.push('');
     L.push('THE DATA');
-    L.push('One CSV file, ' + (preview.total_rows ? nf(preview.total_rows) + ' rows' : 'several thousand rows')
-      + ' and ' + (STATE.schema.length || (preview.columns || []).length) + ' columns. It is a raw export, so expect '
+    L.push('Raw exports with ' + (preview.total_rows ? nf(preview.total_rows) + ' rows' : 'several thousand rows')
+      + ' and ' + (STATE.schema.length || (preview.columns || []).length) + ' columns in all. They are raw, so expect '
       + 'inconsistent dates, prices stored as text, duplicated names and blank cells.');
     if (STATE.schema.length) {
       L.push('');
@@ -861,6 +859,13 @@
       STATE.schema.forEach(function(c){
         L.push('- ' + c.column_name + (c.description ? ': ' + c.description : ''));
       });
+    }
+
+    // Project-specific coaching notes written in the admin (what a mentor watches for). They add to the prompt, never replace it.
+    if (ds.ai_prompt && ds.ai_prompt.trim()) {
+      L.push('');
+      L.push('WHAT TO WATCH FOR ON THIS PROJECT');
+      L.push(ds.ai_prompt.trim());
     }
 
     var pack = (STATE.lic && STATE.lic.task_pack) || {};

@@ -468,7 +468,7 @@
     f.id = 'kLegalFoot';
     f.className = 'k-legal-foot';
     f.innerHTML = '<span class="c">&copy; ' + new Date().getFullYear() + ' KOJOH</span>'
-      + '<a href="/projects">Projects</a><a href="/pricing">Pricing</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a>'
+      + '<a href="/projects">Projects</a><a href="/data-analyst-project-ideas">Project ideas</a><a href="/pricing">Pricing</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a>'
       + '<a href="/refund">Refunds</a><a href="/shipping">Delivery</a><a href="/contact">Contact</a>';
     document.body.appendChild(f);
   }

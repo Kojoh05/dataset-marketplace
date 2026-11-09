@@ -1,0 +1,160 @@
+# KOJOH: every project in detail
+
+Source: https://www.kojohhi.com/projects. All datasets are synthetic. Prices in Indian rupees.
+
+## Late Again: Last-Mile Delivery in Tier-2 India
+URL: https://www.kojohhi.com/projects/late-again-last-mile-fy2526
+Track: Business / Ops | Level: hard | Price: Rs 249 | Tools: Python, SQL, Excel | Good for: Data Analyst, Operations Analyst
+Dataset: 14,750 rows, 41 columns | Tasks: 42 | Time: about 15 to 25 hours
+
+A year of messy dispatch exports from a fictional regional courier serving the small cities of UP, Bihar, Jharkhand and MP: 14,560 shipments, 41 columns, 48 riders, 12 hubs, 6 shippers. Clean it, then settle the argument operations can't: why the on-time number is wrong, why a rider with perfect first attempts is the network's biggest problem, and which hub, which day and which parcel size are quietly costing the business its largest client.
+
+Project ideas it covers: Last-mile delivery performance; Measuring on-time delivery correctly; Rider and hub performance; COD vs prepaid failures and RTO; Profitability by weight, zone and service.
+Interview questions it prepares you for: How should on-time delivery be measured, and how can it be gamed? How would you find a rider whose good numbers hide a problem? Which shipments lose money and how did you find them?
+
+Phases: Phase 1, Python: Clean the Data | Phase 2, SQL: Answer the Business Questions | Phase 3a, Dashboard Page 1: Shipment Lookup | Phase 3b, Dashboard Page 2: Analytics | Phase 4, Documentation
+
+## Slow Boat from Ningbo: China Import Procurement Tracker
+URL: https://www.kojohhi.com/projects/slow-boat-from-ningbo-fy2526
+Track: Business / Ops | Level: hard | Price: Rs 449 | Tools: Python, SQL, Excel, Power BI | Good for: Business Analyst, Supply Chain Analyst, Operations Analyst, Data Analyst
+Dataset: 24,392 rows, 36 columns | Tasks: 42 | Time: about 15 to 25 hours
+
+Track 470 China import POs across six messy files: containers on water, overdue documents, pending payments and the cash plan, as of your own report date.
+
+Project ideas it covers: Import shipment tracking; Supplier delay analysis; Documents and payments chase list; Cash flow planning for imports; As-of-date reporting.
+Interview questions it prepares you for: How do you build a report as it looked on a past date? How would you rank suppliers on delivery reliability? What would you put on a procurement control tower?
+
+Phases: Phase 1, Python: Clean and Join the Data | Phase 2, SQL: Answer the Business Questions | Phase 3a, Dashboard Page 1: PO and Container Lookup | Phase 3b, Dashboard Page 2: Control Tower | Phase 4, Documentation
+
+## Kirana Store Sales: A Lucknow General Store's Year of Bills
+URL: https://www.kojohhi.com/projects/kirana-store-sales-free
+Track: Data Analyst | Level: beginner | Price: free | Tools: Python, SQL, Excel, Power BI | Good for: Data Analyst, Business Analyst
+Dataset: 9,629 rows, 11 columns | Tasks: 18 | Time: about 6 to 10 hours
+
+A free first project: a year of real-looking bills from a Lucknow kirana store. Clean it, find what makes money and how much is stuck in udhaar.
+
+Project ideas it covers: Retail sales analysis for a small shop; Profit vs revenue by product; Customer credit (udhaar) tracking; Busiest hours and staffing analysis; Festival (Diwali) sales impact.
+Interview questions it prepares you for: Which products sell a lot but make little profit, and how did you find them? How did you deal with item names typed in many different ways? How would you decide when a shop needs a second cashier?
+
+Phases: Phase 1, Python: Clean the Billing Data | Phase 2, SQL: Answer Sharma ji's Questions | Phase 3a, Dashboard: The Shop | Phase 3b, Dashboard: The Udhaar Book | Phase 4, Documentation
+
+## The Quiet Quitters: Streaming App Churn Prediction, India
+URL: https://www.kojohhi.com/projects/the-quiet-quitters-ott-churn
+Track: Data Scientist | Level: hard | Price: Rs 249 | Tools: Python, SQL, Machine Learning, Power BI | Good for: Data Scientist, Data Analyst
+Dataset: 223,838 rows, 26 columns | Tasks: 42 | Time: about 15 to 25 hours
+
+Predict who leaves a streaming app in the next 90 days from four messy exports, without falling for the leaky columns, and turn it into a call list worth rupees.
+
+Project ideas it covers: Customer churn prediction; Leak-free feature engineering; Voluntary vs involuntary churn; Time-based model validation; Turning model scores into a business call list.
+Interview questions it prepares you for: How do you make sure a churn model has no data leakage? Why use a time-based split instead of a random split? How would you turn churn scores into a decision with a rupee value?
+
+Phases: Phase 1, Python: Clean, Label and Build Features | Phase 2, SQL and Modelling: Understand and Predict the Churn | Phase 3a, Dashboard Page 1: Subscriber and Call List | Phase 3b, Dashboard Page 2: Model and Money | Phase 4, Documentation
+
+## The Diwali Discount Trap: E-commerce Appliance Orders, India
+URL: https://www.kojohhi.com/projects/diwali-discount-trap-fy2526
+Track: Data Analyst | Level: hard | Price: Rs 249 | Tools: Python, SQL, Excel, Power BI | Good for: Data Analyst
+Dataset: 14,891 rows, 41 columns | Tasks: 42 | Time: about 15 to 25 hours
+
+A year of messy order exports from a fictional Indian appliance brand selling on Amazon, Flipkart, Meesho and its own site: 14,701 order lines, 41 columns, 20 listing managers, 40 SKUs. Clean it, then settle the argument management can't: why the biggest sales month lost money, which discount depth stops paying, and why the customers who paid full price were worth several times more than the ones who came in on sale.
+
+Project ideas it covers: E-commerce discount and profitability analysis; Contribution margin by month and category; Returns, RTO and COD leakage; Marketing channel ROAS; Listing manager performance ranking.
+Interview questions it prepares you for: Why can the biggest revenue month lose money? How would you find the discount level where extra sales stop paying? How do you rank sales staff fairly: by revenue or by contribution?
+
+Phases: Phase 1, Python: Clean the Data | Phase 2, SQL: Answer the Business Questions | Phase 3a, Dashboard Page 1: Order Lookup | Phase 3b, Dashboard Page 2: Analytics | Phase 4, Documentation
+
+## The ₹176 Lakh Question: Tata Dealership Sales, Delhi
+URL: https://www.kojohhi.com/projects/tata-delhi-sales-fy2526
+Track: Data Analyst | Level: hard | Price: Rs 449 | Tools: Python, SQL | Good for: Data Analyst
+Dataset: 14,735 rows, 41 columns | Tasks: 41 | Time: about 15 to 25 hours
+
+A year of hand-typed ERP entries from an 8-branch car dealer group in Delhi. Clean it, then settle the argument management can't: who really performed, what December's record month actually cost, and why the customers who refused last year's stock were the most profitable buyers of the year.
+
+Project ideas it covers: Sales performance and incentive analysis; Discounts and margin by month; Salesperson identity cleaning; Branch and model performance; Old stock vs new stock buyers.
+Interview questions it prepares you for: How do you clean salesperson names typed eight different ways? Why can a record sales month be a bad month? How would you rank salespeople for a bonus?
+
+Phases: Phase 1, Python: Clean the Data | Phase 2, SQL: Answer the Business Questions | Phase 3a, Dashboard Page 1: Deal Lookup | Phase 3b, Dashboard Page 2: Analytics | Phase 4, Documentation
+
+## Stockout Saturdays: Quick Commerce Demand Forecasting, India
+URL: https://www.kojohhi.com/projects/stockout-saturdays-quick-commerce
+Track: Data Scientist | Level: hard | Price: Rs 249 | Tools: Python, SQL, Machine Learning, Power BI | Good for: Data Scientist, Supply Chain Analyst, Data Analyst
+Dataset: 93,370 rows, 10 columns | Tasks: 42 | Time: about 15 to 25 hours
+
+Forecast demand for a ten minute grocery app when sales hide demand: 92,000 days of store x SKU data where Saturday looks slow only because the shelves are empty.
+
+Project ideas it covers: Demand forecasting with stockouts; Censored demand estimation; Festival, promo and event effects; Forecast accuracy (WAPE) vs a baseline; Inventory planning recommendations.
+Interview questions it prepares you for: Why is sales data not the same as demand, and how did you adjust for it? How do you evaluate a forecast fairly? What features would you use for daily store-level demand?
+
+Phases: Phase 1, Python: Clean, Uncensor and Build Features | Phase 2, SQL and Modelling: Understand and Forecast | Phase 3a, Dashboard Page 1: Store and SKU Explorer | Phase 3b, Dashboard Page 2: Supply Control Room | Phase 4, Documentation
+
+## Approved Only: NBFC Personal Loan Credit Scoring, India
+URL: https://www.kojohhi.com/projects/approved-only-nbfc-credit-risk
+Track: Data Scientist | Level: hard | Price: Rs 449 | Tools: Python, SQL, Machine Learning, Statistics | Good for: Data Scientist, Data Analyst
+Dataset: 180,467 rows, 18 columns | Tasks: 42 | Time: about 15 to 25 hours
+
+Build a credit scoring model for an Indian NBFC where only approved loans have outcomes, recent loans have not had time to default and the loan file leaks the answer.
+
+Project ideas it covers: Credit scoring and default prediction; Selection bias and reject inference; Vintage analysis; Model calibration; Approval cut-off with profit economics.
+Interview questions it prepares you for: What is selection bias in credit data and how does it affect your model? How do you choose an approval cut-off? How do you check whether model scores are calibrated?
+
+Phases: Phase 1, Python: Clean, Label and Build Features | Phase 2, SQL and Modelling: Understand and Score the Risk | Phase 3a, Dashboard Page 1: Application Scorer | Phase 3b, Dashboard Page 2: Portfolio and Model | Phase 4, Documentation
+
+## The Funnel That Leaked: App Onboarding and an A/B Test
+URL: https://www.kojohhi.com/projects/the-funnel-that-leaked-free
+Track: Product Analyst | Level: beginner | Price: free | Tools: Python, SQL, Statistics | Good for: Product Analyst, Data Analyst
+Dataset: 41,268 rows, 11 columns | Tasks: 19 | Time: about 6 to 10 hours
+
+A free product analytics project: an onboarding funnel and an A/B test where the dashboard says the new screen lost. Find out what really happened.
+
+Project ideas it covers: Onboarding funnel analysis; A/B test analysis with real pitfalls; Event data cleaning; Conversion by platform and source; Experiment readout for a product manager.
+Interview questions it prepares you for: What would you check before trusting an A/B test result? How do you build a funnel from raw event logs? Explain Simpson's paradox with an example you found.
+
+Phases: Phase 1, Python: Clean the Event Stream | Phase 2, SQL: Read the Funnel and the Test | Phase 3a, Dashboard: The Funnel | Phase 3b, Dashboard: The Experiment | Phase 4, Documentation
+
+## Spares Never Arrive: Appliance Service and Spare Parts TAT, India
+URL: https://www.kojohhi.com/projects/spares-never-arrive-fy2526
+Track: Business / Ops | Level: hard | Price: Rs 249 | Tools: Python, SQL, Excel, Power BI | Good for: Operations Analyst, Business Analyst, Data Analyst
+Dataset: 26,746 rows, 17 columns | Tasks: 40 | Time: about 15 to 25 hours
+
+Rebuild the true turnaround time for 17,000 appliance service tickets and find whether the days go to the warehouse, the courier or the service centre.
+
+Project ideas it covers: Service turnaround time (TAT) analysis; Spare parts delay root cause; Service centre performance ranking; Repeat complaint detection; Customer rating vs delay.
+Interview questions it prepares you for: How would you measure turnaround time honestly when tickets are closed early? How do you rank service centres fairly? How did you find repeat complaints in free text?
+
+Phases: Phase 1, Python: Clean and Link the Cases | Phase 2, SQL: Find Where the Days Go | Phase 3a, Dashboard Page 1: Case Lookup | Phase 3b, Dashboard Page 2: Service Control Room | Phase 4, Documentation
+
+## Where Did My Salary Go: UPI and Bank Statements of 24 First-Jobbers
+URL: https://www.kojohhi.com/projects/where-did-my-salary-go-fy2526
+Track: Data Analyst | Level: beginner | Price: Rs 99 | Tools: Python, SQL, Excel, Power BI | Good for: Data Analyst, Business Analyst
+Dataset: 16,448 rows, 15 columns | Tasks: 42 | Time: about 6 to 10 hours
+
+Twelve months of real-looking bank statements from 24 first-jobbers across five banks. Find where the salary goes, the forgotten subscriptions and the double charges.
+
+Project ideas it covers: Personal finance and spending analysis; Parsing bank statement narrations; Subscription and recurring payment detection; Double charge detection; Savings rate dashboard.
+Interview questions it prepares you for: How did you turn messy bank narrations into merchants and categories? How do you tell an export duplicate from a real double charge? What would you show a user to help them save more?
+
+Phases: Phase 1, Python: Clean the Statements | Phase 2, SQL: Answer the Money Questions | Phase 3a, Dashboard Page 1: Person View | Phase 3b, Dashboard Page 2: Cohort View | Phase 4, Documentation
+
+## Aai's Tiffin Service: A Pune Home Kitchen's Order Sheet
+URL: https://www.kojohhi.com/projects/aai-tiffin-service-free
+Track: Business / Ops | Level: beginner | Price: free | Tools: Excel, Power BI | Good for: Business Analyst, Data Analyst, Operations Analyst
+Dataset: 25,775 rows, 24 columns | Tasks: 18 | Time: about 6 to 10 hours
+
+A free Excel and Power BI project: a year of a Pune home tiffin service's order sheet, typed by three people. Clean it, find what makes money and chase the dues.
+
+Project ideas it covers: Small business sales analysis in Excel; Customer dues and collections tracker; Price increase impact analysis; Area and plan profitability; Power BI dashboard for a small business.
+Interview questions it prepares you for: How did you clean dates typed in four different styles in Excel? How would you measure whether a price increase lost customers? Walk me through a SUMIFS you built and why.
+
+Phases: Phase 1, Excel: Clean the Order Sheet | Phase 2, Excel: Formulas and PivotTables | Phase 3a, Power BI: The Business | Phase 3b, Power BI: The Dues Tracker | Phase 4, Documentation
+
+## The Migration That Lost Students: Reconcile Two Systems with SQL
+URL: https://www.kojohhi.com/projects/migration-lost-students-free
+Track: Data Engineer | Level: beginner | Price: free | Tools: SQL, Data Quality, Data Engineering | Good for: Data Engineer, Quality Analyst, Data Analyst
+Dataset: 9,648 rows, 34 columns | Tasks: 18 | Time: about 6 to 10 hours
+
+A free SQL and data quality project: a coaching institute moved to a new app and the numbers stopped matching. Reconcile both systems, find every problem and write the checks.
+
+Project ideas it covers: Data migration reconciliation; Writing data quality checks in SQL; Finding duplicates and missing records; Unit and format bugs in money data; Incident write-up for a data issue.
+Interview questions it prepares you for: How would you reconcile two systems that should hold the same data? Name five data quality checks you would run every night and why. How do you match records when the key was reformatted?
+
+Phases: Phase 1, SQL: Load, Profile and Match | Phase 2, SQL: Reconcile and Test | Phase 3a, Dashboard: Reconciliation | Phase 3b, Dashboard: Data Quality Board | Phase 4, Documentation
+

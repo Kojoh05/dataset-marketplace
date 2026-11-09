@@ -40,3 +40,10 @@
 .pj-card-tools{margin-top:auto; padding-top:0.3rem;}
 .pj a:not(.k-btn):not(.pj-card){color:var(--text); text-decoration:underline; text-decoration-color:var(--line); text-underline-offset:3px;}
 .pj a:not(.k-btn):not(.pj-card):hover{text-decoration-color:var(--text);}
+.pj-facts{display:grid; grid-template-columns:max-content 1fr; gap:0.4rem 1.25rem; margin:0; background:var(--card, #fff); border:1px solid var(--line); border-radius:14px; padding:1rem 1.2rem; font-size:0.9rem;}
+.pj-facts dt{color:var(--muted); font-weight:600;}
+.pj-facts dd{margin:0;}
+@media (max-width:30rem){ .pj-facts{grid-template-columns:1fr;} .pj-facts dd{margin-bottom:0.35rem;} }
+.pj-list{margin:0; padding-left:1.2rem; line-height:1.8;}
+.pj-idea h2{font-size:1.15rem;}
+.pj-idea-meta{color:var(--muted); font-size:0.85rem; font-weight:600; margin:-0.3rem 0 0.5rem !important;}
