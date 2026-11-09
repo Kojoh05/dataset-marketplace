@@ -49,3 +49,5 @@
 .pj-idea-meta{color:var(--muted); font-size:0.85rem; font-weight:600; margin:-0.3rem 0 0.5rem !important;}
 .pj-readme{white-space:pre-wrap; word-break:break-word; background:var(--card, #fff); border:1px solid var(--line); border-radius:12px; padding:0.8rem 1rem; font-size:0.85rem; margin:0 0 0.6rem;}
 .pj-readme code{background:none; border:0; padding:0;}
+.pj-arts{display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap:0.9rem; margin:0 0 1.5rem;}
+.pj-arts .pj-art{margin:0;}
