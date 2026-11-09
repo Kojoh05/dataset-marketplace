@@ -86,7 +86,7 @@
           + ' &nbsp; <a href="/leaderboard">See the leaderboard</a></p>';
         if (submission._cert) h += '<p class="chal-frozen-row"><a class="k-btn k-btn-brand" href="/certificate?id=' + encodeURIComponent(submission._cert) + '">View your certificate &rarr;</a></p>';
       } else {
-        h += '<p class="chal-frozen-row k-sub" style="margin:0.5rem 0 0;">Our team checks your repo and post and awards points from here. Once it is reviewed you also get a verified certificate. '
+        h += '<p class="chal-frozen-row k-sub" style="margin:0.5rem 0 0;">Our team checks your repo and post and awards points from here. ' + (window.kojohGivesCert && window.kojohGivesCert(window.__KOJOH_DS) ? 'Once it is reviewed you also get a verified certificate. ' : 'Certificates come with paid projects and the free Returns project; this one earns leaderboard points. ')
           + 'This page is now locked to how it was when you submitted.</p>';
       }
       h += '</div></div>';
@@ -134,9 +134,9 @@
     var session = sessRes.data && sessRes.data.session;
     if (!session) { empty(kIcon('lock'), 'Sign in required', 'Please <a href="/auth">log in</a> to see your challenge.'); return; }
 
-    var dsRes = await SUPA.from('datasets').select('id, title, slug').eq('slug', slug).maybeSingle();
+    var dsRes = await SUPA.from('datasets').select('id, title, slug, is_free').eq('slug', slug).maybeSingle();
     if (dsRes.error || !dsRes.data) { empty(kIcon('search'), 'Not found', 'This dataset doesn\'t exist.'); return; }
-    var ds = dsRes.data;
+    var ds = dsRes.data; window.__KOJOH_DS = ds;
 
     var licRes = await SUPA.from('dataset_licenses').select('id, license_code, tier, task_pack')
       .eq('dataset_id', ds.id).eq('claimed_by', session.user.id).maybeSingle();

@@ -116,6 +116,8 @@
       if (diff) h += '<span class="k-chip">' + esc(diff) + '</span>';
       if (pv.total_rows) h += '<span class="k-chip">' + Number(pv.total_rows).toLocaleString('en-IN') + ' rows</span>';
       if (lp.total_tasks) h += '<span class="k-chip">' + lp.total_tasks + ' tasks</span>';
+      var cert = window.kojohGivesCert && window.kojohGivesCert({ is_free: true, slug: d.slug });
+      if (cert) h += '<span class="k-chip k-chip-brand">Certificate</span>';
       h += '</div><h2 class="fr-title">' + esc(cleanTitle(d.title)) + '</h2><div class="k-rate" data-rate="' + esc(d.id) + '">' + (window.kojohRateHtml ? window.kojohRateHtml(d.id) : '') + '</div><p class="fr-desc">' + esc(d.short_description || '') + '</p>';
       var ph = (lp.phases || []).map(phase);
       if (ph.length) {
@@ -125,7 +127,7 @@
       }
       if (tools.length) h += '<div class="fr-chips">' + tools.map(function(x){ return '<span class="k-chip">' + esc(x) + '</span>'; }).join('') + '</div>';
       if ((jobs[d.id] || []).length) h += '<div class="fr-roles">Good practice for <b>' + esc(jobs[d.id].join(', ')) + '</b></div>';
-      h += '<div class="fr-foot"><small>Free, just sign in</small><span class="k-btn k-btn-brand">Start this project &rarr;</span></div></div></a>';
+      h += '<div class="fr-foot"><small>Free, just sign in' + (cert ? ' &middot; certificate included' : '') + '</small><span class="k-btn k-btn-brand">Start this project &rarr;</span></div></div></a>';
       return h;
     }).join('');
   }

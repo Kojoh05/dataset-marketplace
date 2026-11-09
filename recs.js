@@ -79,7 +79,7 @@
     return '<div class="krec-card krec-cert"><div class="krec-cert-paper" aria-hidden="true"><b>KOJOH</b><i>Certificate of completion</i>'
       + '<em>Your name here</em><small>has completed a reviewed KOJOH portfolio project, solving a real business question.</small></div>'
       + '<div class="krec-cert-over"><div><b>Earn a verified certificate</b>'
-      + '<span>Finish a paid project and submit it. We review it and you get a certificate with a public link.</span></div>'
+      + '<span>Finish a paid project, or the free Returns project, and submit it. We review it and you get a certificate with a public link.</span></div>'
       + '<a class="k-btn k-btn-brand" href="' + (href || '/recommendations') + '">See projects</a></div></div>';
   };
 

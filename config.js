@@ -541,3 +541,7 @@ window.kojohFriendly = function(msg){
   } catch (e) {}
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ window.kojohRatings(); }); else window.kojohRatings();
 })();
+
+// Certificates: every paid project, and only these free ones. Keep in sync with supabase/schema-cert-rules.sql.
+window.KOJOH_CERT_FREE = ['returns-eating-profit-free'];
+window.kojohGivesCert = function (d) { return !!d && (!d.is_free || window.KOJOH_CERT_FREE.indexOf(d.slug) > -1); };
