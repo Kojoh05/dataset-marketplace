@@ -46,19 +46,7 @@ function chips(kws, cls, style) {
 }
 
 function projectPage(html, kws, primary) {
-  // 1. Google title: primary keyword first
-  if (primary) {
-    html = html.replace(/<title>([^<]*)<\/title>/, (m, t) => {
-      const plain = t.replace(/&amp;/g, '&').replace(/&#x27;/g, "'");
-      const i = plain.indexOf(': ');
-      const rest = i > 0 ? plain.slice(i + 2) : 'Data Project | KOJOH';
-      let nt = `${cap(primary)}: ${rest}`;
-      if (nt.length > 65) nt = `${cap(primary)} | KOJOH`;
-      return `<title>${esc(nt)}</title>`;
-    });
-    const nt = (html.match(/<title>([^<]*)<\/title>/) || [])[1];
-    if (nt) html = html.replace(/(<meta property="og:title" content=")[^"]*(")/, `$1${nt}$2`);
-  }
+  // 1. Title: the page <title> is the dataset name (set in the page). Keywords no longer rewrite it.
   // 2. meta keywords + Dataset schema keywords
   html = setMetaKeywords(html, kws);
   html = editLd(html, o => { if (o && o['@type'] === 'Dataset') o.keywords = uniq([...kws, ...(o.keywords || [])]); });
