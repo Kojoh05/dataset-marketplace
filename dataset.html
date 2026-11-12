@@ -865,7 +865,8 @@
     L.push('Raw exports with ' + (preview.total_rows ? nf(preview.total_rows) + ' rows' : 'several thousand rows')
       + ' and ' + (STATE.schema.length || (preview.columns || []).length) + ' columns in all. They are raw, so expect '
       + 'inconsistent dates, prices stored as text, duplicated names and blank cells.');
-    if (STATE.schema.length) {
+    var ctx = STATE.ctx || {};
+    if (STATE.schema.length && !ctx.dict) {
       L.push('');
       L.push('The columns are:');
       STATE.schema.forEach(function(c){
@@ -880,6 +881,21 @@
       L.push('THE FILES I HAVE');
       STATE.files.forEach(function(f){
         L.push('- ' + f.name + ' (' + fmtSize(f.bytes) + '): ' + (f.main ? 'MAIN TABLE, ' : '') + (role[f.group] || 'extra file'));
+      });
+    }
+
+    if (ctx.dict) {
+      L.push('');
+      L.push('FULL DATA DICTIONARY (from my project files: every file, its rows, every column and how it is messy)');
+      L.push(ctx.dict);
+    }
+    if (ctx.samples && ctx.samples.length) {
+      L.push('');
+      L.push('FIRST ROWS OF EACH CSV (exactly as they appear in the raw files)');
+      ctx.samples.forEach(function(x){
+        L.push('');
+        L.push(x.name + ':');
+        x.lines.forEach(function(l){ L.push(l); });
       });
     }
 
@@ -915,6 +931,7 @@
     L.push('');
     L.push('HOW I WANT YOU TO HELP');
     L.push('Do not write the finished solution for me. I am doing this to learn, so:');
+    L.push('0. Use the data dictionary and the sample rows above as the truth about my data. Refer to real file and column names, and never invent columns.');
     L.push('1. Ask me which task I am on and what I have already tried before you answer.');
     L.push('   Whenever I start a task, tell me exactly which of my files I need for it, which column to join them on, and warn me if I pick the wrong file.');
     L.push('2. Point me at the right approach and the specific trap in that step, rather than pasting code.');
@@ -946,7 +963,7 @@
     var f = document.getElementById('dsFilesBtn');
     if (f) f.addEventListener('click', onDownload);
     var c = document.getElementById('dsCopyPrompt');
-    if (c) { c.addEventListener('click', copyPrompt); loadFiles().catch(function(){}); }
+    if (c) { c.addEventListener('click', copyPrompt); loadFiles().then(function(){ return loadContext(); }).catch(function(){}); }
 
     var pr = document.getElementById('dsPrintChal');
     if (pr) pr.addEventListener('click', function(){ window.print(); });
@@ -1174,7 +1191,7 @@
   // ---------------------------------------------------------------- copy prompt
   async function copyPrompt(){
     var btns = ['dsCopyPrompt', 'dsFilesCopy'].map(function(i){ return document.getElementById(i); }).filter(Boolean);
-    try { await loadFiles(); } catch (e) {}
+    try { await loadFiles(); await loadContext(); } catch (e) {}
     var text = buildPrompt();
     var msg = document.getElementById('filesCopyMsg');
     var done = function(ok){
@@ -1449,6 +1466,35 @@
     if (raws.length > 1) raws[0].main = true;
     STATE.files = files;
     return files;
+  }
+
+  // Reads the project's own data dictionary and the first rows of every CSV, so the AI prompt
+  // carries the full context of the data. Only works for people who own the project (signed URLs).
+  async function loadContext(){
+    if (STATE.ctx) return STATE.ctx;
+    var ctx = { dict: '', samples: [] };
+    if (!SUPA || !STATE.lic) return ctx;
+    var files = await loadFiles();
+    async function signed(f){ var r = await SUPA.storage.from('datasets').createSignedUrl(f.path, 600); return r.error ? null : r.data.signedUrl; }
+    var dict = files.find(function(f){ return f.group === 'dict' && /\.(md|txt)$/i.test(f.name); });
+    if (dict) {
+      try { var u = await signed(dict); if (u) { var t = await (await fetch(u)).text(); ctx.dict = t.slice(0, 24000).trim(); } } catch (e) {}
+    }
+    var csvs = files.filter(function(f){ return (f.group === 'raw' || f.group === 'ref') && /\.csv$/i.test(f.name); })
+      .sort(function(a, b){ return (b.main ? 1 : 0) - (a.main ? 1 : 0) || (a.group === 'raw' ? -1 : 1); }).slice(0, 10);
+    var got = await Promise.all(csvs.map(async function(f){
+      try {
+        var u = await signed(f); if (!u) return null;
+        var r = await fetch(u, { headers: { Range: 'bytes=0-8191' } });
+        var lines = (await r.text()).replace(/^\uFEFF/, '').split(/\r?\n/);
+        if (lines.length > 1 && (r.status === 206 || lines.length > 5)) lines.pop();
+        lines = lines.filter(function(l){ return l.trim(); }).slice(0, 4).map(function(l){ return l.length > 400 ? l.slice(0, 400) + '...' : l; });
+        return lines.length ? { name: f.name, lines: lines } : null;
+      } catch (e) { return null; }
+    }));
+    ctx.samples = got.filter(Boolean);
+    STATE.ctx = ctx;
+    return ctx;
   }
 
   async function onDownload(){
