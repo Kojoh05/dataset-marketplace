@@ -104,4 +104,21 @@ async function main() {
   console.log(`[keywords] ${n} project pages, ${site.length} site keywords`);
 }
 
-main().catch(e => console.log('[keywords] skipped, pages unchanged:', e.message)).finally(() => process.exit(0));
+// IndexNow: on each production deploy, tell Bing (which ChatGPT search uses), Yandex and others
+// about every page in the sitemap, so new and changed pages are picked up within days.
+async function indexNow() {
+  if (process.env.VERCEL_ENV !== 'production') return;
+  const keyFile = fs.readdirSync(ROOT).find(f => /^[0-9a-f]{32}\.txt$/.test(f));
+  if (!keyFile) return;
+  const key = keyFile.slice(0, -4);
+  const urls = [...fs.readFileSync(path.join(ROOT, 'sitemap.xml'), 'utf8').matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1]);
+  const r = await fetch('https://api.indexnow.org/indexnow', {
+    method: 'POST', headers: { 'Content-Type': 'application/json; charset=utf-8' },
+    body: JSON.stringify({ host: 'www.kojohhi.com', key, keyLocation: `https://www.kojohhi.com/${keyFile}`, urlList: urls })
+  });
+  console.log(`[indexnow] ${urls.length} urls, status ${r.status}`);
+}
+
+main().catch(e => console.log('[keywords] skipped, pages unchanged:', e.message))
+  .then(() => indexNow()).catch(e => console.log('[indexnow] skipped:', e.message))
+  .finally(() => process.exit(0));
