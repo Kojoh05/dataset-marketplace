@@ -1,5 +1,5 @@
 {
-  "buildCommand": "node scripts/apply-keywords.mjs",
+  "buildCommand": "node scripts/build-blog.mjs && node scripts/apply-keywords.mjs",
   "outputDirectory": ".",
   "cleanUrls": true,
   "trailingSlash": false,
