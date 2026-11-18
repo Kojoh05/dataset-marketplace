@@ -36,7 +36,7 @@
 .bl-grid-main{margin-top:1.5rem;}
 .bl-card{display:flex; flex-direction:column; border:1px solid var(--line); border-radius:14px; overflow:hidden; color:inherit; text-decoration:none; background:var(--card, #fff); transition:transform .15s ease, border-color .15s ease;}
 .bl-card:hover{transform:translateY(-2px); border-color:currentColor;}
-.bl-card img, .bl-card-noimg{display:block; width:100%; aspect-ratio:1200/630; object-fit:cover; border-bottom:1px solid var(--line);}
+.bl-card img, .bl-card-noimg{display:block; width:100%; height:auto; aspect-ratio:1200/630; object-fit:cover; border-bottom:1px solid var(--line);}
 .bl-card-noimg{background:repeating-linear-gradient(45deg, var(--line) 0 2px, transparent 2px 12px);}
 .bl-card-body{display:flex; flex-direction:column; gap:0.35rem; padding:0.85rem 1rem 1rem;}
 .bl-card-body b{font-family:'Space Grotesk', sans-serif; font-size:1.02rem; line-height:1.3;}

@@ -445,3 +445,19 @@ function handleLogin(){
     });
   }
 }
+
+// ---------- Already signed in? Don't show the login form ----------
+// Someone who is logged in and lands here (an old link, a profile tap that
+// raced the page load) goes straight back into the site with their account.
+(function skipIfSignedIn(){
+  if (!LIVE) return;
+  var q = window.location.search + window.location.hash;
+  if (/google=1|type=recovery|access_token=|refresh_token=|[?&]code=|tab=signup/.test(q)) return;
+  SUPA.auth.getSession().then(function(res){
+    var user = res && res.data && res.data.session && res.data.session.user;
+    if (!user) return;
+    SUPA.from('profiles').select('id').eq('id', user.id).maybeSingle().then(function(pr){
+      if (pr && pr.data) window.location.replace(kojohAfterAuth());
+    });
+  }).catch(function(){});
+})();

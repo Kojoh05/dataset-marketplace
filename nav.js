@@ -90,7 +90,9 @@
       });
     });
     html += '</nav>';
-    html += '<a class="ksb-me" id="ksbMe" data-ksb-link href="/auth" title="Log in">' + meInner(readMe()) + '</a>';
+    // Start with the right link: a signed-in visitor must never be sent to the login page.
+    var meNow = readMe();
+    html += '<a class="ksb-me" id="ksbMe" data-ksb-link href="' + (meNow ? '/settings#profile' : '/auth') + '" title="' + escHtml(meNow ? meNow.name : 'Log in') + '">' + meInner(meNow) + '</a>';
     return html;
   }
 
