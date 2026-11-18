@@ -86,7 +86,7 @@ const foot = `
 </html>
 `;
 
-const ORG = { '@type': 'Organization', name: 'KOJOH', url: SITE + '/', logo: { '@type': 'ImageObject', url: SITE + '/icons/icon-512.png' } };
+const ORG = { '@type': 'Organization', name: 'KOJOH', url: SITE + '/', logo: { '@type': 'ImageObject', url: SITE + '/assets/brand/kojoh-logo-square.png', width: 600, height: 600 } };
 
 function card(p) {
   const r = MD.render(p.body_md);
