@@ -1,4 +1,4 @@
-const CACHE = 'kojoh-v65';
+const CACHE = 'kojoh-v66';
 const ASSETS = [
   '/',
   '/manifest.json',

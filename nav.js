@@ -458,6 +458,9 @@
 
   window.kReady(ensureSidebar);
 
+  // Floating Instagram and LinkedIn buttons (bottom right).
+  if (!document.getElementById('kSocialJs')) { var sj = document.createElement('script'); sj.id = 'kSocialJs'; sj.src = '/social-float.js'; sj.defer = true; document.head.appendChild(sj); }
+
   // ---------- Legal footer on every page (payment gateways look for these links) ----------
   function ensureLegalFooter() {
     if (document.getElementById('kLegalFoot')) return;
